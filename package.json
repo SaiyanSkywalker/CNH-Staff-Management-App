@@ -1,0 +1,17 @@
+{
+  "private": "true",
+  "name": "cnh-staff-managemet-app",
+  "version": "1.0.0",
+  "workspaces": [
+    "packages/*"
+  ],
+  "dependencies": {
+    "express": "^4.18.2",
+    "expo": "~49.0.15",
+    "expo-status-bar": "~1.6.0",
+    "react": "^18",
+    "react-native": "0.72.6",
+    "react-dom": "^18",
+    "next": "14.0.4"
+  }
+}

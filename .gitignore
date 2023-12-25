@@ -1,0 +1,27 @@
+# Dependency directories
+node_modules/
+
+# OS or editor-specific files
+.DS_Store
+Thumbs.db
+
+# Logs
+logs
+*.log
+npm-debug.log*
+
+# Environment variables
+.env
+
+# Build directories
+build/
+dist/
+out/
+coverage/
+
+# IDE-specific files (optional)
+.idea/
+.vscode/
+
+# OS generated files (e.g., macOS .DS_Store)
+# Add other OS-specific files to ignore as needed
