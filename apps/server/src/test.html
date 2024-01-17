@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <h1>Testing file upload</h1>
+    <input id="fileInput" type="file" accept=".csv" />
+    <div>
+      <button id="uploadBtn">Submit</button>
+    </div>
+    <p><em>Only CSV files can be uploaded</em></p>
+  </body>
+  <script>
+    const uploadFile = async () => {
+      const uploadBtn = document.querySelector("#uploadBtn");
+      const fileInput = document.querySelector("#fileInput");
+      const serverUrl = "http://localhost:3000";
+      try {
+        const file = fileInput.files[0];
+        const formData = new FormData();
+        formData.append("schedule", file);
+
+        const response = await fetch(`${serverUrl}/upload`, {
+          method: "POST",
+          body: formData,
+        });
+        response.json().then((data) => console.log(data.success));
+      } catch (err) {
+        console.log(err);
+      }
+    };
+
+    uploadBtn.addEventListener("click", uploadFile);
+  </script>
+</html>
