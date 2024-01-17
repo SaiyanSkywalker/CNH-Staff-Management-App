@@ -12,22 +12,25 @@
       <button id="uploadBtn">Submit</button>
     </div>
     <p><em>Only CSV files can be uploaded</em></p>
+    <p><em>File should be deleted before branch merge</em></p>
   </body>
   <script>
     const uploadFile = async () => {
       const uploadBtn = document.querySelector("#uploadBtn");
       const fileInput = document.querySelector("#fileInput");
-      const serverUrl = "http://localhost:3000";
+      const port = 3212;
+      const serverUrl = `http://localhost:${port}`;
       try {
         const file = fileInput.files[0];
         const formData = new FormData();
-        formData.append("schedule", file);
+        formData.append("csvFile", file);
 
         const response = await fetch(`${serverUrl}/upload`, {
           method: "POST",
           body: formData,
         });
-        response.json().then((data) => console.log(data.success));
+        const json = await response.json();
+        console.log(json);
       } catch (err) {
         console.log(err);
       }

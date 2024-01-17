@@ -1,25 +1,12 @@
-import { Express, Request, Response } from "express";
+import { Application } from "express";
+import configureServer from "./loaders/expressLoader";
+import config from "./config";
+import routes from "./api/routes";
 
-const express = require("express");
-const dotenv = require("dotenv");
-const cors = require("cors");
-const app: Express = express();
+const app: Application = configureServer();
 
-const upload = require("./controllers/upload");
+app.use("/", routes);
 
-dotenv.config();
-app.use(express.urlencoded({ extended: true }));
-app.use(express.json());
-app.use(cors());
-
-app.use("/upload", upload);
-
-const port = process.env.PORT || 3000;
-
-app.get("/", (req: Request, res: Response): void => {
-  res.send("Hello World!");
-});
-
-app.listen(port, (): void => {
-  console.log(`Example app listening on port ${port}`);
+app.listen(config.port, () => {
+  console.log(`Listening to server on port ${config.port}`);
 });
