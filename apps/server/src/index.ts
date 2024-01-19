@@ -1,12 +1,14 @@
-import { Application } from "express";
-import configureServer from "./loaders/expressLoader";
+import express from "express";
 import config from "./config";
-import routes from "./api/routes";
+import loaders from "./loaders";
+const app = express();
 
-const app: Application = configureServer();
+const startServer = async () => {
+  await loaders(app, config);
 
-app.use("/", routes);
+  app.listen(config.port, () => {
+    console.log(`Listening to server on port ${config.port}`);
+  });
+};
 
-app.listen(config.port, () => {
-  console.log(`Listening to server on port ${config.port}`);
-});
+startServer();
