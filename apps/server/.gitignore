@@ -13,6 +13,7 @@ npm-debug.log*
 # Environment variables
 .env
 
+
 # Build directories
 build/
 dist/
@@ -25,3 +26,4 @@ coverage/
 
 # OS generated files (e.g., macOS .DS_Store)
 # Add other OS-specific files to ignore as needed
+keys

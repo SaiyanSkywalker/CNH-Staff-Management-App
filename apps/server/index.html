@@ -26,8 +26,7 @@
         formData.append("csvFile", file);
 
         const response = await fetch(`${serverUrl}/upload`, {
-          method: "POST",
-          body: formData,
+          method: "GET",
         });
         const json = await response.json();
         console.log(json);
