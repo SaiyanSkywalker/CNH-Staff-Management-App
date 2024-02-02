@@ -1,8 +1,9 @@
-/*
 import { DataTypes, Sequelize } from "sequelize";
+import UserInformation from "./UserInformation";
+import Unit from "./Unit";
 
 const ShiftHistory = (sequelize: Sequelize) => {
-  return sequelize.define(
+  let sh = sequelize.define(
     "ShiftHistory",
     {
       id: {
@@ -10,8 +11,6 @@ const ShiftHistory = (sequelize: Sequelize) => {
         autoIncrement: true,
         primaryKey: true,
       },
-      userId: 
-      unitId:
       shiftTime: DataTypes.STRING,
       name: DataTypes.STRING,
     },
@@ -20,9 +19,22 @@ const ShiftHistory = (sequelize: Sequelize) => {
       tableName: "ShiftHistory",
     }
   );
+  sh.belongsTo(UserInformation(sequelize), {
+    foreignKey: {
+      name: "userId",
+      allowNull: false,
+    },
+    onUpdate: "CASCADE",
+  });
+  sh.belongsTo(Unit(sequelize), {
+    foreignKey: {
+      name: "unitId",
+      allowNull: false,
+    },
+    onUpdate: "CASCADE",
+  });
+  return sh;
 };
 export default ShiftHistory;
 
-//foreign key reference to User information, Unit
-
-*/
+// foreign key reference to User information, Unit

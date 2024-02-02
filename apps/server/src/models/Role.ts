@@ -9,7 +9,10 @@ const Role = (sequelize: Sequelize) => {
         autoIncrement: true,
         primaryKey: true,
       },
-      name: DataTypes.STRING,
+      name: {
+        type: DataTypes.STRING,
+        allowNull: false,
+      },
     },
     {
       modelName: "Role",
@@ -18,4 +21,3 @@ const Role = (sequelize: Sequelize) => {
   );
 };
 export default Role;
-

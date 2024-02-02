@@ -1,12 +1,23 @@
 import { Sequelize } from "sequelize";
 import ScheduleEntry from "./ScheduleEntry";
-import UnitAndShiftCapacity from "./UnitAndShiftCapacity";
+import Announcement from "./Announcement";
+import ShiftHistory from "./ShiftHistory";
+import Role from "./Role";
+import ShiftCapacity from "./ShiftCapacity";
+import Unit from "./Unit";
+import UserInformation from "./UserInformation";
 
 const createModels = (sequelize: Sequelize) => {
-  
-  return {
-    ScheduleEntry: ScheduleEntry(sequelize)    
-  };
+  const models = [
+    ScheduleEntry,
+    Unit,
+    Role,
+    ShiftCapacity,
+    UserInformation,
+    ShiftHistory,
+    Announcement,
+  ];
+  models.forEach((m) => m(sequelize));
 };
 
 export default createModels;

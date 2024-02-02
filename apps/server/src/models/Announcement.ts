@@ -1,7 +1,9 @@
-import { DataTypes, INTEGER, Sequelize } from "sequelize";
+import { DataTypes, Sequelize } from "sequelize";
+import UserInformation from "./UserInformation";
+import Channel from "./Channel";
 
 const Announcement = (sequelize: Sequelize) => {
-  return sequelize.define(
+  let a = sequelize.define(
     "Announcement",
     {
       id: {
@@ -10,7 +12,7 @@ const Announcement = (sequelize: Sequelize) => {
         primaryKey: true,
       },
       body: DataTypes.STRING,
-      senderId: DataTypes.INTEGER, 
+      senderId: DataTypes.INTEGER,
       channelId: DataTypes.INTEGER,
     },
     {
@@ -18,7 +20,20 @@ const Announcement = (sequelize: Sequelize) => {
       tableName: "Announcement",
     }
   );
+  a.belongsTo(Channel(sequelize), {
+    foreignKey: {
+      name: "channelId",
+      allowNull: false,
+    },
+    onUpdate: "CASCADE",
+  });
+  a.belongsTo(UserInformation(sequelize), {
+    foreignKey: {
+      name: "userId",
+      allowNull: false,
+    },
+    onUpdate: "CASCADE",
+  });
+  return a;
 };
 export default Announcement;
-
-//foreign key references to User Information and Channel
