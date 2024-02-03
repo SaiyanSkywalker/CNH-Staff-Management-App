@@ -11,7 +11,10 @@ const UserInformation = (sequelize: Sequelize) => {
         autoIncrement: true,
         primaryKey: true,
       },
+      username: DataTypes.STRING,
       password: DataTypes.STRING,
+      roleId: DataTypes.INTEGER,
+      unitId: DataTypes.INTEGER,
     },
     {
       modelName: "UserInformation",

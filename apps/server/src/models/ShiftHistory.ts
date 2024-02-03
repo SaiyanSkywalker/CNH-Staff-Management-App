@@ -13,6 +13,8 @@ const ShiftHistory = (sequelize: Sequelize) => {
       },
       shiftTime: DataTypes.STRING,
       name: DataTypes.STRING,
+      userId: DataTypes.INTEGER,
+      unitId: DataTypes.INTEGER,
     },
     {
       modelName: "ShiftHistory",

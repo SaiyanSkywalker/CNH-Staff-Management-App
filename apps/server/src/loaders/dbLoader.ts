@@ -32,7 +32,7 @@ export default async (config: any) => {
     // Start the db and create initial models
     createModels(sequelize);
     await sequelize.authenticate();
-    await sequelize.sync();
+    await sequelize.sync({ alter: true });
     await createDefaultUnits(sequelize);
 
     console.log("Connection has been established successfully.");

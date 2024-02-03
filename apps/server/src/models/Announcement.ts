@@ -29,7 +29,7 @@ const Announcement = (sequelize: Sequelize) => {
   });
   a.belongsTo(UserInformation(sequelize), {
     foreignKey: {
-      name: "userId",
+      name: "senderId",
       allowNull: false,
     },
     onUpdate: "CASCADE",
