@@ -15,9 +15,10 @@ This is the monorepo for the Drexel University senior design project Staffing Fo
 
   
 
-1. Start the mobile app by running the following commands: -`cd apps/mobile`
+1. Start the mobile app by running the following commands:
 
-  
+
+- `cd apps/mobile`
 
 -  `npm run android` - to start the app on an Android emulator
 
