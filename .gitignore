@@ -28,3 +28,6 @@ coverage/
 .vs/CNH-Staff-Managemet-App/config/applicationhost.config
 .vs/CNH-Staff-Managemet-App/v16/.suo
 .vs/slnx.sqlite
+.vs/VSWorkspaceState.json
+.vs/ProjectSettings.json
+apps/server/env

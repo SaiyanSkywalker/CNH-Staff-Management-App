@@ -1,5 +1,4 @@
 "use client"
-import Image from 'next/image'
 import { useRef, useState } from 'react'
 
 export default function Home() {
@@ -27,20 +26,21 @@ export default function Home() {
 
     return (
         <main className="flex min-h-screen flex-col items-center justify-between p-24">
-            <div className="center-container">
+            <div>
                 <div className="login-container">
-                    <h2>Welcome!</h2>
+                    <h2 className="home-header">Welcome!</h2>
                     <form>
-                        <label htmlFor="username">
-                            Username:
+                        <div className="inputs-container">
+                            <label htmlFor="username">
+                                Username:
                             <input type="text" onChange={onUsernameChange} placeholder="username" required />
-                        </label>
+                            </label>
 
-                        <label htmlFor="password">
-                            Password:
+                            <label htmlFor="password">
+                                Password:
                             <input type="password" onChange={onPasswordChange} placeholder="password" required />
-                        </label>
-
+                            </label>
+                        </div>
                         <button type="button" onClick={submitForm}>Login</button>
                     </form>
                 </div>
