@@ -1,0 +1,27 @@
+.file-container {
+    border: 1px solid #ccc;
+    padding: 20px;
+    border-radius: 8px;
+    width: 500px;
+    height: 400px;
+    margin: 0 auto; /* Center horizontally */
+    background-color: #f8f8f8; /* Add a light background color */
+    margin: 10px;
+}
+
+.btn-upload {
+    background-color: #067496 !important;
+    color: white;
+    padding: 10px;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    opacity: 1;
+    width: 80%;
+    display: block;
+    margin: auto;
+}
+  
+  .btn-upload:hover {
+    opacity: 0.7;
+  }

@@ -1,8 +1,12 @@
+"use client"
 import { useState, ChangeEvent } from "react";
-import styles from "../styles/Login.module.css";
+import styles from "../../styles/Login.module.css";
+import { useRouter } from "next/navigation";
+
 export default function Login() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const router = useRouter();
 
   const onUsernameChange = (e: ChangeEvent<HTMLInputElement>) => {
     setUsername(e.target.value);
@@ -17,6 +21,7 @@ export default function Login() {
     if (username === "example" && password === "password") {
       alert("Login successful!");
       // Redirect or perform other actions after successful login
+      router.replace("/upload");
     } else {
       alert("Invalid username or password. Please try again.");
     }
