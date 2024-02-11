@@ -1,25 +1,28 @@
 // List of entries from schedule CSV
 // file provided by CNH/Oracle
+
+/* Headers
+// [
+  "Record Type",
+  "Personnum",
+  "Last Name",
+  "First Name",
+  "MI",
+  "Shift Date",
+  "Start Time",
+  "End Date",
+  "Duration",
+  "Shift Type",
+  "Null",
+  "Null",
+  "Processed Time",
+  "Job Code",
+  "q",
+  "Worked Costs Center",
+  "Facility ID",
+]
+*/
 export default [
-  [
-    "Record Type",
-    "Personnum",
-    "Last Name",
-    "First Name",
-    "MI",
-    "Shift Date",
-    "Start Time",
-    "End Date",
-    "Duration",
-    "Shift Type",
-    "Null",
-    "Null",
-    "Processed Time",
-    "Job Code",
-    "q",
-    "Worked Costs Center",
-    "Facility ID",
-  ],
   [
     "SCHEDIMPORT",
     "50000",

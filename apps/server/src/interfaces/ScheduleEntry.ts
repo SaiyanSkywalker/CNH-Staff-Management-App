@@ -1,4 +1,4 @@
-export interface ScheduleData {
+export interface ScheduleEntry {
   employeeId: number;
   lastName: string;
   firstName: string;
