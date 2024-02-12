@@ -1,42 +1,35 @@
-import { DataTypes, Sequelize } from "sequelize";
+import {
+  BelongsTo,
+  Column,
+  DataType,
+  Model,
+  Table,
+} from "sequelize-typescript";
 import UserInformation from "./UserInformation";
 import Unit from "./Unit";
+import ShiftHistoryAttributes from "@shared/src/interfaces/ShiftHistoryAttributes";
 
-const ShiftHistory = (sequelize: Sequelize) => {
-  let sh = sequelize.define(
-    "ShiftHistory",
-    {
-      id: {
-        type: DataTypes.INTEGER,
-        autoIncrement: true,
-        primaryKey: true,
-      },
-      shiftTime: DataTypes.STRING,
-      name: DataTypes.STRING,
-      userId: DataTypes.INTEGER,
-      unitId: DataTypes.INTEGER,
-    },
-    {
-      modelName: "ShiftHistory",
-      tableName: "ShiftHistory",
-    }
-  );
-  sh.belongsTo(UserInformation(sequelize), {
-    foreignKey: {
-      name: "userId",
-      allowNull: false,
-    },
-    onUpdate: "CASCADE",
-  });
-  sh.belongsTo(Unit(sequelize), {
-    foreignKey: {
-      name: "unitId",
-      allowNull: false,
-    },
-    onUpdate: "CASCADE",
-  });
-  return sh;
-};
+@Table
+class ShiftHistory extends Model<ShiftHistoryAttributes> {
+  @Column({
+    primaryKey: true,
+    type: DataType.INTEGER,
+    allowNull: false,
+    autoIncrement: true,
+  })
+  id!: number;
+
+  @Column(DataType.STRING)
+  shiftTime!: string;
+
+  @Column(DataType.STRING)
+  status!: string;
+
+  @BelongsTo(() => UserInformation, { targetKey: "id", foreignKey: "userId" })
+  user!: UserInformation;
+
+  @BelongsTo(() => Unit, { targetKey: "id", foreignKey: "unitId" })
+  unit!: Unit;
+}
+
 export default ShiftHistory;
-
-// foreign key reference to User information, Unit

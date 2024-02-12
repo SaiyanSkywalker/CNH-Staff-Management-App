@@ -1,4 +1,4 @@
-import { ScheduleEntry } from "../interfaces/ScheduleEntry";
+import ScheduleEntryAttributes from "@shared/src/interfaces/ScheduleEntryAttributes";
 
 // Converts CSV file to a 2D
 export const csvToArray = (content: string): string[][] => {
@@ -6,7 +6,9 @@ export const csvToArray = (content: string): string[][] => {
   return lines.map((l) => l.trim().split("\n"));
 };
 
-export const csvToScheduleData = (lines: string[][]): ScheduleEntry[] => {
+export const csvToScheduleData = (
+  lines: string[][]
+): ScheduleEntryAttributes[] => {
   return lines.map((l) => {
     return {
       employeeId: parseInt(l[1]),
@@ -19,7 +21,7 @@ export const csvToScheduleData = (lines: string[][]): ScheduleEntry[] => {
       duration: l[8],
       shiftType: l[9],
       jobCode: l[13],
-      costCenter: l[15],
+      costCenterId: parseInt(l[15]),
     };
   });
 };

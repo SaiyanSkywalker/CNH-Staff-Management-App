@@ -25,7 +25,7 @@ export default function Page() {
     for (const [key, value] of Object.entries(data)) {
       if ((x.includes(parseInt(key)) && key === unit) || unit === "all") {
         value.forEach((v: any) => {
-          const newKey = `${v["costCenter"]}-${v["shiftDate"]}-${v["startTime"]}-${v["endTime"]}`;
+          const newKey = `${v["costCenterId"]}-${v["shiftDate"]}-${v["startTime"]}-${v["endTime"]}`;
           if (!groupedShifts[newKey]) {
             groupedShifts[newKey] = [];
           }
@@ -37,6 +37,7 @@ export default function Page() {
     // Create array of events
     for (const property in groupedShifts) {
       const tokens = property.split("-");
+      console.log(tokens);
       const event = {
         title: `Cost Center: ${tokens[0]}, ${groupedShifts[property].length}/${groupedShifts[property].length}`,
         start: moment(`${tokens[1]} ${tokens[2]}`, "YYYYMMDD HH:mm").toDate(),
@@ -100,12 +101,11 @@ export default function Page() {
               Select Cost Center:
             </label>
             <select
-              multiple
               id="unit-select"
               name="units"
               defaultValue={"all"}
               onChange={handleSelectChange}
-              className={`w-[200px] p-4 text-md border border-nuetral-500 rounded cursor-pointer bg-slate-200`}
+              className={`w-[200px] p-4 text-md border border-nuetral-500 rounded cursor-pointer bg-transparent`}
             >
               <option value="all">All</option>
               {units.map((unit, idx) => (

@@ -1,21 +1,16 @@
-import { DataTypes, Sequelize } from "sequelize";
+import { Column, DataType, Model, Table } from "sequelize-typescript";
+import ChannelAttributes from "@shared/src/interfaces/ChannelAttributes";
 
-const Channel = (sequelize: Sequelize) => {
-  return sequelize.define(
-    "Channel",
-    {
-      id: {
-        type: DataTypes.INTEGER,
-        autoIncrement: true,
-        primaryKey: true,
-      },
-      name: DataTypes.STRING,
-    },
-    {
-      modelName: "Channel",
-      tableName: "Channel",
-    }
-  );
-};
+@Table
+class Channel extends Model<ChannelAttributes> {
+  @Column({
+    primaryKey: true,
+    type: DataType.INTEGER,
+    allowNull: false,
+    autoIncrement: true,
+  })
+  id!: number;
+  @Column
+  name!: string;
+}
 export default Channel;
-

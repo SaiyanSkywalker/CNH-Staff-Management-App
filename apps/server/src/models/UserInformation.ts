@@ -1,40 +1,33 @@
-import { DataTypes, Sequelize } from "sequelize";
-import Role from "./Role";
+import {
+  DataType,
+  Table,
+  Column,
+  BelongsTo,
+  Model,
+} from "sequelize-typescript";
 import Unit from "./Unit";
+import Role from "./Role";
+import UserInformationAttributes from "@shared/src/interfaces/UserInformationAttributes";
 
-const UserInformation = (sequelize: Sequelize) => {
-  let ui = sequelize.define(
-    "UserInformation",
-    {
-      id: {
-        type: DataTypes.INTEGER,
-        autoIncrement: true,
-        primaryKey: true,
-      },
-      username: DataTypes.STRING,
-      password: DataTypes.STRING,
-      roleId: DataTypes.INTEGER,
-      unitId: DataTypes.INTEGER,
-    },
-    {
-      modelName: "UserInformation",
-      tableName: "UserInformation",
-    }
-  );
-  ui.belongsTo(Role(sequelize), {
-    foreignKey: {
-      name: "roleId",
-      allowNull: false,
-    },
-    onUpdate: "CASCADE",
-  });
-  ui.belongsTo(Unit(sequelize), {
-    foreignKey: {
-      name: "unitId",
-      allowNull: false,
-    },
-    onUpdate: "CASCADE",
-  });
-  return ui;
-};
+@Table
+class UserInformation extends Model<UserInformationAttributes> {
+  @Column({
+    primaryKey: true,
+    type: DataType.INTEGER,
+    allowNull: false,
+    autoIncrement: true,
+  })
+  id!: number;
+
+  @Column({ type: DataType.STRING, allowNull: false })
+  username!: string;
+
+  @Column({ type: DataType.STRING, allowNull: false })
+  password!: string;
+
+  @BelongsTo(() => Unit, { foreignKey: "unitId", targetKey: "id" })
+  unit!: Unit;
+  @BelongsTo(() => Role, { foreignKey: "roleId", targetKey: "id" })
+  role!: Role;
+}
 export default UserInformation;
