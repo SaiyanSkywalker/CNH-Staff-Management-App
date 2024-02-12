@@ -1,7 +1,7 @@
 import { Column, DataType, Model, Table } from "sequelize-typescript";
 import ChannelAttributes from "@shared/src/interfaces/ChannelAttributes";
 
-@Table
+@Table({ tableName: "Channel" })
 class Channel extends Model<ChannelAttributes> {
   @Column({
     primaryKey: true,

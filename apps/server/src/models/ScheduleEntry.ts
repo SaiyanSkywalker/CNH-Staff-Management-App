@@ -1,6 +1,6 @@
 import { Column, DataType, Model, Table } from "sequelize-typescript";
 import ScheduleEntryAttributes from "@shared/src/interfaces/ScheduleEntryAttributes";
-@Table
+@Table({ tableName: "ScheduleEntry" })
 class ScheduleEntry extends Model<ScheduleEntryAttributes> {
   @Column({
     primaryKey: true,

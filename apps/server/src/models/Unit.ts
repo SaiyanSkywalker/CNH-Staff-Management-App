@@ -1,7 +1,7 @@
 import { Column, DataType, Model, Table } from "sequelize-typescript";
 import UnitAttributes from "@shared/src/interfaces/UnitAttributes";
 
-@Table
+@Table({ tableName: "Unit" })
 class Unit extends Model<UnitAttributes> {
   @Column({
     primaryKey: true,

@@ -9,7 +9,7 @@ import UserInformation from "./UserInformation";
 import Unit from "./Unit";
 import ShiftHistoryAttributes from "@shared/src/interfaces/ShiftHistoryAttributes";
 
-@Table
+@Table({ tableName: "ShiftHistory" })
 class ShiftHistory extends Model<ShiftHistoryAttributes> {
   @Column({
     primaryKey: true,

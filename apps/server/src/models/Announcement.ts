@@ -9,7 +9,7 @@ import AnnouncementAttributes from "@shared/src/interfaces/AnnouncementAttribute
 import UserInformation from "./UserInformation";
 import Channel from "./Channel";
 
-@Table
+@Table({ tableName: "Announcement" })
 class Announcement extends Model<AnnouncementAttributes> {
   @Column({
     primaryKey: true,

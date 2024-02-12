@@ -9,7 +9,7 @@ import Unit from "./Unit";
 import Role from "./Role";
 import UserInformationAttributes from "@shared/src/interfaces/UserInformationAttributes";
 
-@Table
+@Table({ tableName: "UserInformation" })
 class UserInformation extends Model<UserInformationAttributes> {
   @Column({
     primaryKey: true,

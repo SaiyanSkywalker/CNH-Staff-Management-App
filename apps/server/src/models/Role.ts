@@ -1,6 +1,6 @@
 import { Column, DataType, Model, Table } from "sequelize-typescript";
 import RoleAttributes from "@shared/src/interfaces/RoleAttributes";
-@Table
+@Table({tableName: "Role"})
 class Role extends Model<RoleAttributes> {
   @Column({
     primaryKey: true,
