@@ -2,7 +2,8 @@
   "compilerOptions": {
     "baseUrl": "./",
     "paths": {
-      "@shared/*": ["shared/*"]
+      "@shared/*": ["shared/*"],
+      "@/code": ["./web/src/*"]
     }
   },
   "include": ["server/**/*", "web/**/*", "mobile/**/*", "shared/**/*"]

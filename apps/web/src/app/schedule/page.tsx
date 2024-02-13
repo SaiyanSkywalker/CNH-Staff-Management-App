@@ -3,41 +3,35 @@ import { Calendar, momentLocalizer } from "react-big-calendar";
 import moment from "moment";
 import { ChangeEvent, useEffect, useMemo, useState } from "react";
 import axios from "axios";
+import UnitAttributes from "@shared/src/interfaces/UnitAttributes";
+import ScheduleEntryAttributes from "@shared/src/interfaces/ScheduleEntryAttributes";
+import config from "web/src/config";
 
-//TODO: Style the Calendar cells
-//TODO: Refactor component
-//TODO: Figure out what to do
 export default function Page() {
   const localizer = momentLocalizer(moment);
-  const [originalScheduleData, setOriginalScheduleData] = useState<any>({});
-  const [filteredScheduleData, setFilteredScheduleData] = useState<any>({});
-  const [selectedOption, setSelectedOption] = useState<string>("all");
-  const [units, setUnits] = useState<any[]>([]);
+  const [selectedOption, setSelectedOption] = useState<string>("");
+  const [units, setUnits] = useState<UnitAttributes[]>([]);
   const [events, setEvents] = useState<any[]>([]);
 
-  const buildEvents = (data: any, unit: string) => {
+  //TODO: handle case where event goes into the next day
+  const buildEvents = (data: { [key: string]: ScheduleEntryAttributes[] }) => {
     let results: any[] = [];
     let groupedShifts: any = {};
 
-    // TODO: Filter data for only allowed units
-    const x = units.map((x) => x.laborLevelEntryId);
     // Group shifts by shiftDate, startTime, and endTime
     for (const [key, value] of Object.entries(data)) {
-      if ((x.includes(parseInt(key)) && key === unit) || unit === "all") {
-        value.forEach((v: any) => {
-          const newKey = `${v["costCenterId"]}-${v["shiftDate"]}-${v["startTime"]}-${v["endTime"]}`;
-          if (!groupedShifts[newKey]) {
-            groupedShifts[newKey] = [];
-          }
-          groupedShifts[newKey].push(v);
-        });
-      }
+      value.forEach((v: any) => {
+        const newKey = `${v["costCenterId"]}-${v["shiftDate"]}-${v["startTime"]}-${v["endTime"]}`;
+        if (!groupedShifts[newKey]) {
+          groupedShifts[newKey] = [];
+        }
+        groupedShifts[newKey].push(v);
+      });
     }
 
     // Create array of events
     for (const property in groupedShifts) {
       const tokens = property.split("-");
-      console.log(tokens);
       const event = {
         title: `Cost Center: ${tokens[0]}, ${groupedShifts[property].length}/${groupedShifts[property].length}`,
         start: moment(`${tokens[1]} ${tokens[2]}`, "YYYYMMDD HH:mm").toDate(),
@@ -45,55 +39,53 @@ export default function Page() {
       };
       results.push(event);
     }
-    // Create array of events
-    debugger;
     return results;
   };
 
-  const handleSelectChange = (event: ChangeEvent<HTMLSelectElement>) => {
+  const handleSelectChange = async (event: ChangeEvent<HTMLSelectElement>) => {
     const selectedValue = event.target.value;
-    console.log(selectedValue);
     setSelectedOption(selectedValue);
+    await getSchedules();
+  };
+
+  const getSchedules = async () => {
+    try {
+      const response = await axios({
+        method: "GET",
+        url: `${config.apiUrl}/schedule?unit=${selectedOption}`,
+        responseType: "json",
+      });
+      const data = await response.data;
+      setEvents(buildEvents(data));
+    } catch (error) {
+      console.error(error);
+    }
+  };
+  const getUnits = async () => {
+    try {
+      const response = await axios({
+        method: "GET",
+        url: `${config.apiUrl}/unit`,
+        responseType: "json",
+      });
+      const data = await response.data;
+      setUnits(data);
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   useEffect(() => {
-    const getUnits = async () => {
-      try {
-        const response = await axios({
-          method: "GET",
-          url: "http://localhost:3003/unit",
-          responseType: "json",
-        });
-        const data = await response.data;
-        setUnits(data);
-      } catch (error) {
-        console.log(error);
-      }
-    };
     getUnits();
   }, []);
 
   useEffect(() => {
-    const getSchedules = async () => {
-      try {
-        const response = await axios({
-          method: "GET",
-          url: "http://localhost:3003/schedule",
-          responseType: "json",
-        });
-        const data = await response.data;
-        setOriginalScheduleData(data);
-        setEvents(buildEvents(data, selectedOption));
-      } catch (error) {
-        console.error(error);
-      }
-    };
     getSchedules();
   }, [units, selectedOption]);
   return (
     <>
       <h1 className="text-4xl  p-8 font-bold text-center">Schedule</h1>
-      {/* TODO: Allow for multiselect in dropdown */}
+
       <div className="w-100 pt-12 flex justify-center items-center">
         <div className="flex flex-col w-[65%]">
           <div className="self-end mb-8">
@@ -115,6 +107,9 @@ export default function Page() {
               ))}
             </select>
           </div>
+          {/* //TODO: Style the Calendar cells/events 
+          //TODO: Add in modal for when
+          you click "see more" on month view */}
           <Calendar
             className="h-[800px]"
             localizer={localizer}
