@@ -1,22 +1,35 @@
 "use client"
-import { useState, ChangeEvent } from "react";
+import React, { useState, ChangeEvent } from "react";
 import styles from "../../styles/Upload.module.css";
 
 export default function UploadPage() {
-  const [currentFile, setCurrentFile] = useState(null);
+  const [currentFile, setCurrentFile] = useState<File | null>(null);
+  const [uploadSuccess, setUploadSuccess] = useState<boolean>(false);
+  const [fileError, setFileError] = useState<boolean>(false);
 
-  const onFileChange = (e: any) => {
-    const file = e.target?.files[0];
-    setCurrentFile(file);
+  const onFileChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const files = e.target?.files;
+    if (files && files.length > 0) {
+      const file = files[0];
+      setCurrentFile(file);
+      setFileError(false);
+    }
   };
 
   const uploadCSV = async () => {
     if (!currentFile) {
+      setFileError(true);
+      setTimeout(() => {
+        setFileError(false);
+      }, 6000);
       return;
     }
 
-    const data = new FormData();
-    data.append('file', currentFile);
+    setUploadSuccess(true);
+
+    setTimeout(() => {
+      setUploadSuccess(false);
+    }, 3000);
   };
 
   return (
@@ -39,6 +52,20 @@ export default function UploadPage() {
         >
           Upload
         </button>
+
+        {/* Pop-up message for upload success */}
+        {uploadSuccess && (
+          <div className={styles.popup}>
+            <p>Upload successful</p>
+          </div>
+        )}
+
+        {/* Pop-up message for file selection error */}
+        {fileError && (
+          <div className={`${styles.popup} ${styles.error}`}>
+            <p>Please select a file to upload</p>
+          </div>
+        )}
       </div>
     </main>
   );

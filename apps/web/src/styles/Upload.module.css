@@ -25,3 +25,29 @@
   .btn-upload:hover {
     opacity: 0.7;
   }
+
+.popup {
+  display: block;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: #5cb85c;
+  padding: 20px;
+  border-radius: 5px;
+  z-index: 1000;
+  color: #050000;
+}
+
+.popup.error {
+  display: block;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: #fb7d7d;
+  padding: 20px;
+  border-radius: 5px;
+  z-index: 1000;
+  color: #050000;
+}
