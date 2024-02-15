@@ -3,7 +3,7 @@
     "baseUrl": "./",
     "paths": {
       "@shared/*": ["shared/*"],
-      "@/code": ["./web/src/*"]
+      "@webSrc/*": ["./web/src/*"]
     }
   },
   "include": ["server/**/*", "web/**/*", "mobile/**/*", "shared/**/*"]
