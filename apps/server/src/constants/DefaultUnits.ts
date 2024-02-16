@@ -44,6 +44,5 @@ const DefaultUnits = [
     name: "APU/CPU",
     description: "I/P Psychiatry (Adol Child)",
   },
-  { laborLevelEntryId: -1, name: "Unknown", description: "Unknown" },
 ];
 export default DefaultUnits;
