@@ -13,7 +13,7 @@ import UnitAttributes from "@shared/src/interfaces/UnitAttributes";
 import ScheduleEntryAttributes from "@shared/src/interfaces/ScheduleEntryAttributes";
 import config from "web/src/config";
 import { CNHEvent } from "@webSrc/interfaces/CNHEvent";
-
+import Modal from "./EventModal";
 //TODO: handle case where event goes into the next day (update: ask CNH what to do with these shifts,
 // might need "Night shift" toggle?)
 
@@ -24,6 +24,8 @@ const Schedule = () => {
   const [events, setEvents] = useState<any[]>([]);
   const [monthCapacities, setmonthCapacities] = useState<any>({});
   const [view, setView] = useState<any>(Views.DAY);
+  const [selectedEvent, setSelectedEvent] = useState<CNHEvent>({} as CNHEvent);
+  const [showModal, setShowModal] = useState(false);
   const defaultCapacity = 10; // Will change with actual capacity once shift capacity page is finished
 
   const { views, defaultView } = useMemo(() => {
@@ -33,24 +35,23 @@ const Schedule = () => {
     };
   }, []);
 
+  const handleEventSelect = (event: CNHEvent) => {
+    setSelectedEvent(event);
+    openModal();
+  };
+
+  const closeModal: () => void = () => {
+    setShowModal(false);
+  };
+  const openModal: () => void = () => {
+    setShowModal(true);
+  };
   const handleViewChange = useCallback(
     (newView: View) => {
       setView(newView);
     },
     [setView]
   );
-
-  /**
-   * Event handler for when the user clicks on one of the
-   * date selectors (calendar cells)
-   * @param slotInfo object containing date info
-   */
-  const handleSelectSlot = (slotInfo: SlotInfo) => {
-    if (view === Views.MONTH) {
-      alert(slotInfo.slots.map((x) => x.toString()).join("\n"));
-    }
-  };
-
   /**
    * Returns tailwind class for background color styling based on capacityRatio
    * @param capacityRatio ratio of current staff members to expected amount based on shift
@@ -225,7 +226,7 @@ const Schedule = () => {
             </select>
           </div>
           <Calendar
-            className="h-[800px] overflow-scroll border-4 border-gray-400 shadow-lg p-12"
+            className="h-[800px] overflow-scroll border-4 rounded-lg border-gray-400 shadow-lg p-12"
             localizer={localizer}
             events={events}
             views={views}
@@ -233,12 +234,12 @@ const Schedule = () => {
             eventPropGetter={customEventPropGetter}
             onView={handleViewChange}
             dayPropGetter={customDayPropGetter}
-            onSelectSlot={handleSelectSlot}
-            showAllEvents
+            onSelectEvent={handleEventSelect}
             selectable
           />
         </div>
       </div>
+      <Modal isOpen={showModal} closeModal={closeModal} event={selectedEvent} />
     </>
   );
 };
