@@ -15,7 +15,8 @@
     "next": "14.0.4",
     "react": "^18",
     "react-big-calendar": "^1.9.1",
-    "react-dom": "^18"
+    "react-dom": "^18",
+    "socket.io-client": "^4.7.4"
   },
   "devDependencies": {
     "@types/node": "^20",

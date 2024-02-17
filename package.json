@@ -7,5 +7,7 @@
     "apps/server",
     "apps/web"
   ],
-  "dependencies": {}
+  "dependencies": {
+    "socket.io": "^4.7.4"
+  }
 }
