@@ -1,36 +1,29 @@
-import { DataTypes, Sequelize } from "sequelize";
+import {
+  Model,
+  Column,
+  Table,
+  DataType,
+  BelongsTo,
+} from "sequelize-typescript";
+import ShiftCapacityAttributes from "@shared/src/interfaces/ShiftCapacityAttributes";
 import Unit from "./Unit";
 
-const ShiftCapacity = (sequelize: Sequelize) => {
-  let sc = sequelize.define(
-    "ShiftCapacity",
-    {
-      id: {
-        type: DataTypes.INTEGER,
-        autoIncrement: true,
-        primaryKey: true,
-      },
-      unitId: DataTypes.INTEGER,
-      shift: DataTypes.DATE,
-      capacity: DataTypes.INTEGER,
-    },
-    {
-      modelName: "ShiftCapacity",
-      tableName: "ShiftCapacity",
-    }
-  );
+@Table({ tableName: "ShiftCapcity" })
+class ShiftCapacity extends Model<ShiftCapacityAttributes> {
+  @Column({
+    primaryKey: true,
+    type: DataType.INTEGER,
+    allowNull: false,
+    autoIncrement: true,
+  })
+  id!: number;
 
-  //one to one relationsip,
-  // ShiftCapacity has exactly one Unit associated with it and Unit has exactly one ShiftCapacity
-  sc.belongsTo(Unit(sequelize), {
-    targetKey: "id", // referenced from ShiftCapacity
-    //creates foreign key in Unit
-    foreignKey: {
-      name: "unitId",
-      allowNull: false,
-    },
-    onUpdate: "CASCADE", //if shift capacity changes, then so should unit
-  });
-  return sc;
-};
+  @BelongsTo(() => Unit, { targetKey: "id", foreignKey: "unitId" })
+  unit!: Unit;
+
+  @Column(DataType.STRING)
+  shift!: string;
+  @Column(DataType.INTEGER)
+  capacity!: number;
+}
 export default ShiftCapacity;

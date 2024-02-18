@@ -1,4 +1,5 @@
-export interface ScheduleData {
+export default interface ScheduleEntryAttributes {
+  id?: number;
   employeeId: number;
   lastName: string;
   firstName: string;
@@ -9,5 +10,7 @@ export interface ScheduleData {
   duration: string;
   shiftType: string;
   jobCode: string;
-  costCenter: string;
+  costCenterId: number;
+  createdAt?: Date;
+  updatedAt?: Date;
 }

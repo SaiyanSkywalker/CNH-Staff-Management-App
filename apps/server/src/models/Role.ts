@@ -1,23 +1,16 @@
-import { DataTypes, Sequelize } from "sequelize";
+import { Column, DataType, Model, Table } from "sequelize-typescript";
+import RoleAttributes from "@shared/src/interfaces/RoleAttributes";
+@Table({tableName: "Role"})
+class Role extends Model<RoleAttributes> {
+  @Column({
+    primaryKey: true,
+    type: DataType.INTEGER,
+    allowNull: false,
+    autoIncrement: true,
+  })
+  id!: number;
 
-const Role = (sequelize: Sequelize) => {
-  return sequelize.define(
-    "Role",
-    {
-      id: {
-        type: DataTypes.INTEGER,
-        autoIncrement: true,
-        primaryKey: true,
-      },
-      name: {
-        type: DataTypes.STRING,
-        allowNull: false,
-      },
-    },
-    {
-      modelName: "Role",
-      tableName: "Role",
-    }
-  );
-};
+  @Column
+  name!: string;
+}
 export default Role;
