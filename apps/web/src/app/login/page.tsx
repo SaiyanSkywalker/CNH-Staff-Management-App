@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import { useState, ChangeEvent } from "react";
 import styles from "../../styles/Login.module.css";
 import { useRouter } from "next/navigation";
@@ -28,41 +28,39 @@ export default function Login() {
   };
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24">
-      <div className={styles["center-container"]}>
-        <div className={`${styles["login-container"]}`}>
-          <h2 className={`font-semibold text-center text-3xl p-3`}>Welcome!</h2>
-          <form>
-            <div className={styles["inputs-container"]}>
-              <label htmlFor="username">Username:</label>
-              <input
-                type="text"
-                onChange={onUsernameChange}
-                name="username"
-                placeholder="username"
-                required
-              />
+    <div className={styles["center-container"]}>
+      <div className={`${styles["login-container"]}`}>
+        <h2 className={`font-semibold text-center text-3xl p-3`}>Welcome!</h2>
+        <form>
+          <div className={styles["inputs-container"]}>
+            <label htmlFor="username">Username:</label>
+            <input
+              type="text"
+              onChange={onUsernameChange}
+              name="username"
+              placeholder="username"
+              required
+            />
 
-              <label htmlFor="password">Password:</label>
-              <input
-                type="password"
-                onChange={onPasswordChange}
-                name="password"
-                placeholder="password"
-                required
-              />
-            </div>
+            <label htmlFor="password">Password:</label>
+            <input
+              type="password"
+              onChange={onPasswordChange}
+              name="password"
+              placeholder="password"
+              required
+            />
+          </div>
 
-            <button
-              className={styles["btn-login"]}
-              type="button"
-              onClick={submitForm}
-            >
-              Login
-            </button>
-          </form>
-        </div>
+          <button
+            className={styles["btn-login"]}
+            type="button"
+            onClick={submitForm}
+          >
+            Login
+          </button>
+        </form>
       </div>
-    </main>
+    </div>
   );
 }
