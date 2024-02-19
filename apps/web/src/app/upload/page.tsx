@@ -1,29 +1,66 @@
 "use client";
 
-import React, { useState, ChangeEvent, useEffect, useContext } from "react";
+import React, {
+  useState,
+  ChangeEvent,
+  useContext,
+  DragEvent,
+  MouseEvent,
+  useRef,
+} from "react";
 import styles from "../../styles/Upload.module.css";
-import {
-  BannerContext,
-  BannerContextProps,
-} from "@webSrc/contexts/BannerContext";
+import { BannerContext } from "@webSrc/contexts/BannerContext";
+import { BannerContextProps } from "@webSrc/interfaces/BannerContextProps";
 
 export default function UploadPage() {
   const [currentFile, setCurrentFile] = useState<File | null>(null);
   const [uploadSuccess, setUploadSuccess] = useState<boolean>(false);
   const [fileError, setFileError] = useState<boolean>(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+
   const props: BannerContextProps | undefined = useContext(BannerContext);
 
-  const onFileChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const files = e.target?.files;
-    if (files && files.length > 0) {
-      const file = files[0];
-      setCurrentFile(file);
-      setFileError(false);
+  const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const inputElement: HTMLInputElement | null = fileInputRef.current;
+    const containerElement: HTMLDivElement | null = containerRef.current;
+
+    if (inputElement && containerElement) {
+      if (inputElement.files?.length) {
+        buildThumbnail(containerElement, inputElement.files[0]);
+        const file = inputElement.files[0];
+        setCurrentFile(file);
+      }
+    }
+  };
+  const handleClick = (e: MouseEvent<HTMLDivElement>) => {
+    const inputElement: HTMLInputElement | null = fileInputRef.current;
+    inputElement?.click();
+  };
+  const handleDrop = (e: DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    const inputElement: HTMLInputElement | null = fileInputRef.current;
+    const dropZoneElement: HTMLDivElement | null = containerRef.current;
+    if (inputElement && dropZoneElement && e.dataTransfer?.files.length) {
+      inputElement.files = e.dataTransfer.files;
+      buildThumbnail(dropZoneElement, e.dataTransfer.files[0]);
+      dropZoneElement.classList.remove(`${styles["drop-zone--over"]}`);
     }
   };
 
+  const handleDrag = (e: DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    const dropZoneElement: HTMLDivElement | null = containerRef.current;
+    dropZoneElement?.classList.add(`${styles["drop-zone--over"]}`);
+  };
+
+  const handleDragOut = (e: DragEvent<HTMLDivElement>) => {
+    const dropZoneElement: HTMLDivElement | null = containerRef.current;
+    dropZoneElement?.classList.remove(`${styles["drop-zone--over"]}`);
+  };
   const uploadCSV = async () => {
     if (props) {
+      debugger;
       if (!currentFile) {
         props.showBanner("Error! File must be selected before uploading", true);
       } else {
@@ -32,91 +69,48 @@ export default function UploadPage() {
     }
   };
 
-  useEffect(() => {
-    /**
-     * Updates the thumbnail on a drop zone element.
-     *
-     * @param {HTMLElement} dropZoneElement
-     * @param {File} file
-     */
-    function updateThumbnail(dropZoneElement, file) {
-      let thumbnailElement = dropZoneElement.querySelector(
-        `.${styles["drop-zone__thumb"]}`
-      );
-
-      // First time - remove the prompt
-      if (dropZoneElement.querySelector(`.${styles["drop-zone__prompt"]}`)) {
-        dropZoneElement
-          .querySelector(`.${styles["drop-zone__prompt"]}`)
-          .remove();
-      }
-
-      // First time - there is no thumbnail element, so lets create it
-      if (!thumbnailElement) {
-        thumbnailElement = document.createElement("div");
-        thumbnailElement.classList.add(styles["drop-zone__thumb"]);
-        dropZoneElement.appendChild(thumbnailElement);
-      }
-
-      thumbnailElement.dataset.label = file.name;
-    }
-
-    const inputElement: HTMLInputElement | null = document.querySelector(
-      `.${styles["file-container__input"]}`
+  const buildThumbnail = (dropZoneElement: HTMLDivElement, file: File) => {
+    const prompt = dropZoneElement.querySelector(
+      `.${styles["drop-zone__prompt"]}`
     );
-    const dropZoneElement = inputElement?.closest(`.${styles["drop-zone"]}`);
-
-    if (inputElement && dropZoneElement) {
-      dropZoneElement.addEventListener("click", (e) => {
-        inputElement.click();
-      });
-      inputElement.addEventListener("change", (e) => {
-        if (inputElement.files.length) {
-          updateThumbnail(dropZoneElement, inputElement.files[0]);
-          const file = inputElement.files[0];
-          console.log(file);
-          setCurrentFile(file);
-        }
-      });
-      dropZoneElement.addEventListener("dragover", (e) => {
-        e.preventDefault();
-        dropZoneElement.classList.add(`${styles["drop-zone--over"]}`);
-      });
-
-      ["dragleave", "dragend"].forEach((type) => {
-        dropZoneElement.addEventListener(type, (e) => {
-          dropZoneElement.classList.remove(`${styles["drop-zone--over"]}`);
-        });
-      });
-      dropZoneElement.addEventListener("drop", (e) => {
-        e.preventDefault();
-
-        if (e.dataTransfer.files.length) {
-          inputElement.files = e.dataTransfer.files;
-          updateThumbnail(dropZoneElement, e.dataTransfer.files[0]);
-        }
-
-        dropZoneElement.classList.remove(`${styles["drop-zone--over"]}`);
-      });
+    if (prompt) {
+      prompt.remove();
     }
-  });
+    const thumbnailElement = (
+      <div className={styles["drop-zone__thumb"]} data-label={file.name}></div>
+    );
+
+    return thumbnailElement;
+  };
 
   return (
     <>
       <div>
-        <div className={`${styles["drop-zone"]}`}>
+        <div
+          className={`${styles["drop-zone"]}`}
+          ref={containerRef}
+          onClick={handleClick}
+          onDrop={handleDrop}
+          onDragOver={handleDrag}
+          onDragLeave={handleDragOut}
+          onDragEnd={handleDragOut}
+        >
           <span className={`${styles["drop-zone__prompt"]}`}>
             Drop file here or click to upload
           </span>
           <input
             className={`${styles["file-container__input"]} ${styles["drop-zone__input"]}`}
+            ref={fileInputRef}
             type="file"
-            // onChange={onFileChange}
+            onChange={handleFileChange}
             name="file"
             placeholder="file"
             accept=".csv"
             required
           />
+          {containerRef.current &&
+            currentFile &&
+            buildThumbnail(containerRef.current, currentFile)}
         </div>
         <div className="flex justify-center">
           <button

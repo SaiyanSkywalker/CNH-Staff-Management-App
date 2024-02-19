@@ -1,17 +1,11 @@
 "use client";
+import { BannerContextProps } from "@webSrc/interfaces/BannerContextProps";
 import { createContext, useState, ReactNode } from "react";
 
 type BannerContextProviderProps = {
   children: ReactNode;
 };
 
-export interface BannerContextProps {
-  bannerText: string;
-  isError: boolean;
-  isVisible: boolean;
-  showBanner: (text: string, isError?: boolean) => void;
-  hideBanner: () => void;
-}
 export const BannerContext = createContext<BannerContextProps | undefined>(
   undefined
 );
