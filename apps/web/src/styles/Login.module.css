@@ -26,6 +26,10 @@
   border: 2px solid #067496;
 }
 
+.error input {
+  border: 2px solid #b21d09;
+}
+
 .btn-login {
   background-color: #067496 !important;
   color: white;
