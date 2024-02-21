@@ -37,6 +37,11 @@ const styles = StyleSheet.create({
     color: "white",
     fontSize: 11,
   },
+  loginText: {
+    color: "white",
+    fontSize: 16,
+    fontWeight: "700",
+  },
   loginBtn: {
     width: "80%",
     backgroundColor: "#fb5b5a",
@@ -81,7 +86,7 @@ const Page = () => {
         <Text style={styles.forgotText}>Forgot Password?</Text>
       </TouchableOpacity>
       <TouchableOpacity onPress={onPressLogin} style={styles.loginBtn}>
-        <Text style={styles.forgotText}>LOGIN </Text>
+        <Text style={styles.loginText}>LOGIN </Text>
       </TouchableOpacity>
     </View>
   );
