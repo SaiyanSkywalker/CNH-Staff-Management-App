@@ -1,28 +1,14 @@
 import { Request, Response, Router } from "express";
 import { UploadedFile } from "express-fileupload";
-import { csvToScheduleData } from "../../util/CsvUtils";
 
-import ScheduleData from "../../constants/ScheduleData";
 import ScheduleEntryAttributes from "@shared/src/interfaces/ScheduleEntryAttributes";
+import { handleTestScheduleData } from "../services/ScheduleEntryService";
+
 const scheduleRouter = Router();
 
 scheduleRouter.get("/", async (req: Request, res: Response): Promise<void> => {
-  // const record = await sequelize.models.ScheduleEntry.findAll();
-
-  const data = ScheduleData;
-  const scheduleEntries: ScheduleEntryAttributes[] = csvToScheduleData(data);
-
-  // Group entries by cost center
-  const entriesByCostCenter: {
-    [key in ScheduleEntryAttributes["costCenterId"]]: ScheduleEntryAttributes[];
-  } = scheduleEntries.reduce((result, obj) => {
-    const key = obj.costCenterId;
-    if (!result[obj.costCenterId]) {
-      result[key] = [];
-    }
-    result[key].push(obj);
-    return result;
-  }, {} as { [key: string]: ScheduleEntryAttributes[] });
+  const entriesByCostCenter: { [key: string]: ScheduleEntryAttributes[] } =
+    handleTestScheduleData(req.query.unit as string);
 
   res.json(entriesByCostCenter);
 });
