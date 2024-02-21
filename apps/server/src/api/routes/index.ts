@@ -1,6 +1,8 @@
 import { Router } from "express";
-import uploadRoutes from "./upload";
+import scheduleRoutes from "./schedule";
+import unitRoutes from "./unit";
 
 const router = Router();
-router.use("/upload", uploadRoutes);
+router.use("/schedule", scheduleRoutes);
+router.use("/unit", unitRoutes);
 export default router;
