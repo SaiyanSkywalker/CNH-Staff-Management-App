@@ -281,7 +281,7 @@ button.rbc-input::-moz-focus-inner {
 }
 .rbc-event.rbc-selected,
 .rbc-day-slot .rbc-selected.rbc-background-event {
-  background-color: #265985;
+  filter: brightness(88%);
 }
 .rbc-event:focus,
 .rbc-day-slot .rbc-background-event:focus {
@@ -335,18 +335,22 @@ button.rbc-input::-moz-focus-inner {
 }
 
 .rbc-show-more {
-  background-color: rgba(255, 255, 255, 0.3);
+  /* background-color: rgba(255, 255, 255, 0.3);
   z-index: 4;
   font-weight: bold;
   font-size: 85%;
   height: auto;
   line-height: normal;
-  color: #3174ad;
+  color: #3174ad; */
+  z-index: 4;
+  opacity: 0;
+  cursor: pointer !important;
+  padding: 5rem;
 }
-.rbc-show-more:hover,
+/* .rbc-show-more:hover,
 .rbc-show-more:focus {
   color: #265985;
-}
+} */
 
 .rbc-month-view {
   position: relative;
@@ -407,6 +411,12 @@ button.rbc-input::-moz-focus-inner {
   min-width: 0;
   padding-right: 5px;
   text-align: right;
+  width: 100%;
+}
+.rbc-date-cell > button {
+  width: 100%;
+  text-align: right;
+  cursor: pointer;
 }
 .rbc-date-cell.rbc-now {
   font-weight: bold;
@@ -586,7 +596,7 @@ button.rbc-input::-moz-focus-inner {
 }
 .rbc-day-slot .rbc-event,
 .rbc-day-slot .rbc-background-event {
-  border: 1px solid #265985;
+  /* border: 1px solid #265985; */
   display: -webkit-box;
   display: -ms-flexbox;
   display: flex;
@@ -707,6 +717,7 @@ button.rbc-input::-moz-focus-inner {
   width: 100%;
   border: 1px solid #ddd;
   min-height: 0;
+  overflow: scroll;
 }
 .rbc-time-view .rbc-time-gutter {
   white-space: nowrap;
