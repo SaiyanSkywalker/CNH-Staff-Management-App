@@ -2,20 +2,31 @@ import { Request, Response, Router } from "express";
 import { UploadedFile } from "express-fileupload";
 
 import ScheduleEntryAttributes from "@shared/src/interfaces/ScheduleEntryAttributes";
-import { handleTestScheduleData } from "../services/ScheduleEntryService";
 import {
   csvToArray,
   csvToScheduleData,
   validateSchedule,
 } from "server/src/util/CsvUtils";
 import ScheduleEntry from "server/src/models/ScheduleEntry";
+import { getScheduleData } from "../services/ScheduleEntryService";
 
 const scheduleRouter = Router();
 
 scheduleRouter.get("/", async (req: Request, res: Response): Promise<void> => {
-  const entriesByCostCenter: { [key: string]: ScheduleEntryAttributes[] } =
-    handleTestScheduleData(req.query.unit as string);
-  res.json(entriesByCostCenter);
+  try {
+    if (!req.query.costCenterId) {
+      res
+        .status(400)
+        .send({ error: "query param costCenterId can not be undefined" });
+    }
+    const scheduleData = await getScheduleData(
+      req.query.costCenterId as string
+    );
+    res.json(scheduleData);
+  } catch (err) {
+    console.error("Error in retrieving schedule data:", err);
+    res.status(500).send({ error: "Error in retrieving schedule data" });
+  }
 });
 
 scheduleRouter.post("/", async (req: Request, res: Response) => {
@@ -36,6 +47,8 @@ scheduleRouter.post("/", async (req: Request, res: Response) => {
         csvToArray(file.data.toString())
       );
 
+      // Inserts shift if it doesn't exist
+      // Otherwise, update shift
       await Promise.all(
         schedule.map(async (data) => {
           try {

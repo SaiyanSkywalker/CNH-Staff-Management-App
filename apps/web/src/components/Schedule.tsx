@@ -170,7 +170,7 @@ const Schedule = () => {
     try {
       const response = await axios({
         method: "GET",
-        url: `${config.apiUrl}/schedule?unit=${selectedOption}`,
+        url: `${config.apiUrl}/schedule?costCenterId=${selectedOption}`,
         responseType: "json",
       });
       const data = await response.data;

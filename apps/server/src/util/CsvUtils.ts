@@ -1,6 +1,6 @@
 import ScheduleEntryAttributes from "@shared/src/interfaces/ScheduleEntryAttributes";
 import { UploadedFile } from "express-fileupload";
-
+import moment from "moment";
 // Converts CSV file to a 2D
 export const csvToArray = (content: string): string[][] => {
   let lines = content.split("\n").slice(1); // Skip line with header columns
@@ -16,7 +16,7 @@ export const csvToScheduleData = (
       lastName: l[2],
       firstName: l[3],
       middleInitial: l[4],
-      shiftDate: l[5], // TODO: store this as a date, will help with retrieval process
+      shiftDate: moment(l[5], "YYYYMMDD").toDate(),
       startTime: l[6],
       endTime: l[7],
       duration: l[8],
@@ -55,8 +55,6 @@ export const validateSchedule = (schedule: UploadedFile): any => {
   }
 
   const headers = content.trim().split("\n")[0].split(",");
-
-  console.log(headers);
 
   const isValid =
     headers.length === defaultHeaders.length &&

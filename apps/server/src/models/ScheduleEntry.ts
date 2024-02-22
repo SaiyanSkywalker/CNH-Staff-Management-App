@@ -39,8 +39,8 @@ class ScheduleEntry extends Model<ScheduleEntryAttributes> {
   @Column(DataType.STRING)
   middleInitial!: string;
 
-  @Column(DataType.STRING)
-  shiftDate!: string;
+  @Column(DataType.DATE)
+  shiftDate!: Date;
 
   @Column(DataType.STRING)
   startTime!: string;
