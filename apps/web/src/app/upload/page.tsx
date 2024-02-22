@@ -11,11 +11,11 @@ import React, {
 import styles from "../../styles/Upload.module.css";
 import { BannerContext } from "@webSrc/contexts/BannerContext";
 import { BannerContextProps } from "@webSrc/interfaces/BannerContextProps";
+import axios from "axios";
+import config from "@webSrc/config";
 
 export default function UploadPage() {
   const [currentFile, setCurrentFile] = useState<File | null>(null);
-  const [uploadSuccess, setUploadSuccess] = useState<boolean>(false);
-  const [fileError, setFileError] = useState<boolean>(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -59,13 +59,33 @@ export default function UploadPage() {
     dropZoneElement?.classList.remove(`${styles["drop-zone--over"]}`);
   };
   const uploadCSV = async () => {
-    if (props) {
-      debugger;
-      if (!currentFile) {
-        props.showBanner("Error! File must be selected before uploading", true);
-      } else {
-        props.showBanner("Success! File has been uploaded", false);
+    try {
+      if (props) {
+        if (!currentFile) {
+          props.showBanner(
+            "Error! File must be selected before uploading",
+            true
+          );
+        } else {
+          const formData = new FormData();
+          formData.append("schedule", currentFile);
+
+          const response = await axios.post(
+            `${config.apiUrl}/schedule`,
+            formData,
+            {
+              headers: {
+                "Content-Type": "multipart/form-data",
+              },
+            }
+          );
+          if (response.status === 200) {
+            props.showBanner("Success! File has been uploaded", false);
+          }
+        }
       }
+    } catch (err) {
+      console.error(err);
     }
   };
 
