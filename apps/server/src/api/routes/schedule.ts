@@ -14,11 +14,6 @@ const scheduleRouter = Router();
 
 scheduleRouter.get("/", async (req: Request, res: Response): Promise<void> => {
   try {
-    if (!req.query.costCenterId) {
-      res
-        .status(400)
-        .send({ error: "query param costCenterId can not be undefined" });
-    }
     const scheduleData = await getScheduleData(
       req.query.costCenterId as string
     );
@@ -49,15 +44,23 @@ scheduleRouter.post("/", async (req: Request, res: Response) => {
 
       // Inserts shift if it doesn't exist
       // Otherwise, update shift
-      await Promise.all(
-        schedule.map(async (data) => {
-          try {
-            await ScheduleEntry.upsert(data);
-          } catch (error) {
-            console.error("Error upserting data:", error);
-          }
-        })
-      );
+      //TODO: Come up with a more performant way to do this
+      const batchSize = 500;
+      for (let i = 0; i < schedule.length; i += batchSize) {
+        const batch: ScheduleEntryAttributes[] = schedule.slice(
+          i,
+          i + batchSize
+        );
+        await Promise.all(
+          batch.map(async (data: ScheduleEntryAttributes) => {
+            try {
+              await ScheduleEntry.upsert(data);
+            } catch (error) {
+              console.error("Error upserting data:", error);
+            }
+          })
+        );
+      }
 
       res.send({ data: "File successfully uploaded" });
     }

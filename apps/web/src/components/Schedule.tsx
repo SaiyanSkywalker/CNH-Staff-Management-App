@@ -28,10 +28,20 @@ const Schedule = () => {
   const [showModal, setShowModal] = useState(false);
   const defaultCapacity = 10; // Will change with actual capacity once shift capacity page is finished
 
-  const { views, defaultView } = useMemo(() => {
+  const { views, defaultView, formats } = useMemo(() => {
     return {
       views: ["month", "week", "day"] as View[],
       defaultView: Views.DAY,
+      formats: {
+        timeGutterFormat: (date, culture, localizer) =>
+          localizer.format(date, "HH:mm", culture),
+        eventTimeRangeFormat: ({ start, end }, culture, localizer) =>
+          `${localizer.format(start, "HH:mm", culture)} - ${localizer.format(
+            end,
+            "HH:mm",
+            culture
+          )}`,
+      },
     };
   }, []);
 
@@ -112,9 +122,10 @@ const Schedule = () => {
     let mc: { [key: string]: number } = {};
 
     // Group shifts by shiftDate, startTime, and endTime
-    for (const [key, value] of Object.entries(data)) {
-      value.forEach((v: any) => {
-        const newKey = `${v["costCenterId"]}-${v["shiftDate"]}-${v["startTime"]}-${v["endTime"]}`;
+    for (const [_, value] of Object.entries(data)) {
+      value.forEach((v: ScheduleEntryAttributes) => {
+        const dateString = moment(new Date(v["shiftDate"])).format("YYYYMMDD");
+        const newKey = `${v.costCenterId}-${dateString}-${v.startTime}-${v.endTime}`;
         if (!groupedShifts[newKey]) {
           groupedShifts[newKey] = [];
         }
@@ -163,7 +174,6 @@ const Schedule = () => {
   const handleSelectChange = async (event: ChangeEvent<HTMLSelectElement>) => {
     const selectedValue = event.target.value;
     setSelectedOption(selectedValue);
-    await getSchedules();
   };
 
   const getSchedules = async () => {
@@ -174,6 +184,7 @@ const Schedule = () => {
         responseType: "json",
       });
       const data = await response.data;
+      debugger;
       setEvents(buildEvents(data));
     } catch (err) {
       console.error(err);
@@ -198,14 +209,15 @@ const Schedule = () => {
   }, []);
 
   useEffect(() => {
+    debugger;
     getSchedules();
   }, [units, selectedOption]);
   return (
     <>
       <h1 className="text-4xl  p-8 font-bold text-center">Schedule</h1>
 
-      <div className="w-100 pt-12 flex justify-center items-center">
-        <div className="flex flex-col w-[85%]">
+      <div className="w-[85%] pt-12 flex justify-center items-center">
+        <div className="flex flex-col w-full">
           <div className="self-end mb-8">
             <label htmlFor="units" className="block mb-2 font-semibold">
               Select Cost Center:
@@ -236,6 +248,7 @@ const Schedule = () => {
             dayPropGetter={customDayPropGetter}
             onSelectEvent={handleEventSelect}
             selectable
+            formats={formats}
           />
         </div>
       </div>

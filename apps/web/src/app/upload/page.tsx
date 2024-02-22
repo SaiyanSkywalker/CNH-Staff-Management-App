@@ -81,6 +81,8 @@ export default function UploadPage() {
           );
           if (response.status === 200) {
             props.showBanner("Success! File has been uploaded", false);
+          }else{
+            props.showBanner("Success! File has been uploaded", false);
           }
         }
       }
@@ -138,7 +140,7 @@ export default function UploadPage() {
             type="button"
             onClick={uploadCSV}
           >
-            Upload CSV File
+            Upload File
           </button>
         </div>
       </div>

@@ -5,7 +5,7 @@ import ScheduleEntry from "server/src/models/ScheduleEntry";
 import { csvToScheduleData } from "server/src/util/CsvUtils";
 
 export const getScheduleData = async (filter: string) => {
-  //TODO: Implement (based on handleTestScheduleData)
+  //TODO: refactor code
   try {
     const upperDateBound: Date = new Date();
     const lowerDateBound = new Date(upperDateBound);
@@ -49,13 +49,14 @@ export const getScheduleData = async (filter: string) => {
       });
       let entriesByCostCenter: { [key: string]: ScheduleEntryAttributes[] } =
         {};
-      return (entriesByCostCenter[id] =
-        scheduleEntries as ScheduleEntryAttributes[]);
+      entriesByCostCenter[id] = scheduleEntries as ScheduleEntryAttributes[];
+      return entriesByCostCenter;
     }
   } catch (error) {
     console.log(error);
   }
 };
+
 /** Filters test data by cost center */
 export const handleTestScheduleData = (filter: string) => {
   const costCenterId = parseInt(filter);
