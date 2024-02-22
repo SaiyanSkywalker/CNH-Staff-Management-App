@@ -1,10 +1,11 @@
-import { View, Text } from "react-native";
+import { Redirect } from "expo-router";
+import React from "react";
+
 const Home = () => {
   return (
-    <View>
-      <Text>Welcome to Staffing for Nurses!</Text>
-    </View>
+    <>
+      <Redirect href={`/login`} />
+    </>
   );
 };
-
 export default Home;
