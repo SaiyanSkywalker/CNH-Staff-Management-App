@@ -1,11 +1,17 @@
+import { UploadedFile } from "express-fileupload";
 import ScheduleData from "../../constants/ScheduleData";
 import ScheduleEntryAttributes from "@shared/src/interfaces/ScheduleEntryAttributes";
 import { Op } from "sequelize";
 import ScheduleEntry from "server/src/models/ScheduleEntry";
-import { csvToScheduleData } from "server/src/util/CsvUtils";
+import { csvToArray, csvToScheduleData } from "server/src/util/CsvUtils";
 
+/**
+ * Retrieves data about shifts from the db
+ * @param filter costCenterId, used to filter shifts
+ * @returns dictioanry where each key is a costCenterId and every value is a
+ * list of shifts under that cost center
+ */
 export const getScheduleData = async (filter: string) => {
-  //TODO: refactor code
   try {
     const upperDateBound: Date = new Date();
     const lowerDateBound = new Date(upperDateBound);
@@ -14,7 +20,7 @@ export const getScheduleData = async (filter: string) => {
     if (!id) {
       // Get shifts from all cost centers if filter is undefined
       const scheduleEntries: ScheduleEntry[] = await ScheduleEntry.findAll({
-        where: {
+        where: { 
           [Op.and]: [
             {
               shiftDate: {
@@ -57,8 +63,40 @@ export const getScheduleData = async (filter: string) => {
   }
 };
 
-/** Filters test data by cost center */
-export const handleTestScheduleData = (filter: string) => {
+/**
+ * saves shifts to database using data from CSV file
+ * @param file file containing schedule data
+ */
+export const saveScheduleData = async (file: UploadedFile): Promise<void> => {
+  try {
+    const schedule: ScheduleEntryAttributes[] = csvToScheduleData(
+      csvToArray(file.data.toString())
+    );
+    const batchSize = 500;
+
+    //TODO: Come up with a more performant way to do this
+    for (let i = 0; i < schedule.length; i += batchSize) {
+      const batch: ScheduleEntryAttributes[] = schedule.slice(i, i + batchSize);
+      await Promise.all(
+        batch.map(async (data: ScheduleEntryAttributes) => {
+          await ScheduleEntry.upsert(data);
+        })
+      );
+    }
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+/**
+ * Gets shifts (from test data file)
+ * @param filter costCenterId, used to filter shifts
+ * @returns dictioanry where each key is a costCenterId and every value is a
+ * list of shifts under that cost center
+ */
+export const handleTestScheduleData = (
+  filter: string
+): { [key: string]: ScheduleEntryAttributes[] } => {
   const costCenterId = parseInt(filter);
   const data = ScheduleData;
   const scheduleEntries: ScheduleEntryAttributes[] = csvToScheduleData(data);

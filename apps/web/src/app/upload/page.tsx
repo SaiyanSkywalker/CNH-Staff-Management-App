@@ -9,8 +9,10 @@ import React, {
   useRef,
 } from "react";
 import styles from "../../styles/Upload.module.css";
-import { BannerContext } from "@webSrc/contexts/BannerContext";
-import { BannerContextProps } from "@webSrc/interfaces/BannerContextProps";
+import {
+  BannerContext,
+  BannerContextProps,
+} from "@webSrc/contexts/BannerContext";
 import axios from "axios";
 import config from "@webSrc/config";
 
@@ -81,8 +83,11 @@ export default function UploadPage() {
           );
           if (response.status === 200) {
             props.showBanner("Success! File has been uploaded", false);
-          }else{
-            props.showBanner("Success! File has been uploaded", false);
+          } else {
+            props.showBanner(
+              `Error in uploading ${currentFile.name}! ${response.data.err}`,
+              true
+            );
           }
         }
       }

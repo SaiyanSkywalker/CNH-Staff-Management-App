@@ -5,6 +5,7 @@ import {
   BannerContextProps,
 } from "@webSrc/contexts/BannerContext";
 import styles from "@webSrc/styles/Banner.module.css";
+
 const Banner = () => {
   const bannerContext: BannerContextProps | undefined =
     useContext(BannerContext);
