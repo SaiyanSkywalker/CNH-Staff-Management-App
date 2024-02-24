@@ -1,0 +1,30 @@
+
+.input {
+    border: 1px solid #067496;
+    border-radius: 10px;
+    padding: 5px;
+    width: 70%;
+}
+
+.label {
+    font-weight: bold;
+    display: block;
+}
+
+.h1 {
+    @apply text-center font-bold;
+}
+
+.button {
+    background-color: #067496;
+    color: white;
+    width: 10%;
+    border-radius: 10px;
+}
+
+
+@media(max-width <= 600px) {
+    .button {
+        width: 20%;
+    }
+}
