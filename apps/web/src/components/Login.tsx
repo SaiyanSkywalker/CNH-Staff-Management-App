@@ -1,9 +1,10 @@
+"use client";
+
 import { useState, ChangeEvent } from "react";
 import styles from "../styles/Login.module.css";
 import { useAuth } from "@webSrc/context/Auth";
 import { useRouter } from "next/navigation";
 import Schedule from "./Schedule";
-import Page from "@webSrc/app/page";
 
 const Login = () => {
   const [username, setUsername] = useState("");
@@ -22,8 +23,9 @@ const Login = () => {
     setError(false);
   };
 
-  const submitForm = () => {
-    if (auth?.login(username, password)) {
+  const submitForm = async () => {
+    const isAuthenticated = await auth?.login(username, password);
+    if (isAuthenticated) {
       router.replace("/schedule");
       alert("Login successful!");
     } else {
@@ -34,13 +36,11 @@ const Login = () => {
 
   return (
     <>
-      {auth?.authenticated ? (
-        <Schedule />
-      ) : (
-        <main className="flex min-h-screen flex-col items-center justify-between p-24">
-        <div className={styles["center-container"]}>
-          <div className={`${styles["login-container"]}`}>
-            <h2 className={`font-semibold text-center text-3xl p-3`}>Welcome!</h2>
+      {auth?.authenticated ? <Schedule/> : (
+        <div className="min-h-screen items-center justify-between p-24">
+        <div className="center-container">
+          <div className={styles["login-container"]}>
+            <h2 className="font-semibold text-center text-3xl p-3">Welcome!</h2>
             <form>
               <div className={[styles[error ? "error" : ""], styles["inputs-container"]].join(" ")}>
                 <label htmlFor="username">Username:</label>
@@ -72,7 +72,7 @@ const Login = () => {
             </form>
           </div>
         </div>
-      </main>
+      </div>
       )}
     </>
   );

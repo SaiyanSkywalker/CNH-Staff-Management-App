@@ -1,16 +1,19 @@
-"use client"
+"use client";
+
+import axios from "axios";
 import { createContext, useContext, useState } from "react";
+import config from "web/src/config";
+import UserInformation from "@shared/src/interfaces/UserInformationAttributes";
 
 interface AuthDetails {
   authenticated: boolean;
   user: {} | null;
-  login: (username: string, password: string) => boolean;
-  logout: () => boolean;
+  login: (username: string, password: string) => Promise<boolean>;
+  logout: () => Promise<boolean>;
 }
 
 interface IAuthContext {
-  auth: AuthDetails
-  setAuth: (auth: boolean) => void
+  auth: AuthDetails;
 }
 
 const AuthContext = createContext<Partial<IAuthContext>>({});
@@ -20,32 +23,44 @@ export default function AuthProvider ({ children,
   children: React.ReactNode;
 }) {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
-    const [user, setUser] = useState(null);
+    const [user, setUser] = useState<UserInformation[]>([]);
 
-    const login = (username: string, password: string): boolean => {
-      // Perform validation and authentication logic here
-      if (username === "example" && password === "password") {
-          setIsLoggedIn(true);
-          return true;
+    const login = async (username: string, password: string): Promise<boolean> => {
+      const userInfo = await getUser(username, password);
+
+      if (userInfo) {
+        setUser(userInfo);
+        setIsLoggedIn(true);
+        return Promise.resolve(true);
       }
-      
-      return false;
+
+      return Promise.resolve(false);
     }
 
-    const logout = (): boolean => {
+    const logout = (): Promise<boolean> => {
       setIsLoggedIn(false);
-      //window.location.reload();
-      return true;
+      setUser([]);
+      return Promise.resolve(true);
     }
 
-    const setAuthDetails = (auth: boolean): void => {
-        if (auth !== undefined) {
-            setIsLoggedIn(auth);
-        }
-    }
+    const getUser = async (username: string, password: string) => {
+      try {
+        const response = await axios({
+          method: "GET",
+          url: `${config.apiUrl}/user/?username=${username}&password=${password}`,
+          responseType: "json",
+        });
+        const data = await response.data;
+        return data
+      } catch (err) {
+        console.error(err);
+      }
+
+      return null;
+    };
 
     return (
-        <AuthContext.Provider value={{auth: {authenticated: isLoggedIn, user, login, logout,}, setAuth: setAuthDetails}}>
+        <AuthContext.Provider value={{auth: {authenticated: isLoggedIn, user: user, login: login, logout: logout}}}>
             {children}
         </AuthContext.Provider>
     );
