@@ -1,0 +1,15 @@
+.links-container {
+  padding: 15px;
+  float: right;
+  display: flex;
+}
+
+.links-container a {
+    color: #E2F6FF;
+    padding: 10px;
+}
+
+.links-container a:hover {
+    opacity: 0.7;
+    color: #E2F6FF;
+  }
