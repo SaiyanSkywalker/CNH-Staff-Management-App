@@ -4,6 +4,7 @@ import "../styles/globals.css";
 import Navbar from "../components/Navbar";
 import Banner from "@webSrc/components/Banner";
 import { BannerContextProvider } from "@webSrc/contexts/BannerContext";
+import AuthProvider from "@webSrc/contexts/AuthContext";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -20,13 +21,15 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        <BannerContextProvider>
-          <Navbar />
-          <Banner />
-          <main className="flex min-h-screen flex-col items-center justify-between p-24">
-            {children}
-          </main>
-        </BannerContextProvider>
+        <AuthProvider>
+          <BannerContextProvider>
+            <Navbar />
+            <Banner />
+            <main className="flex min-h-screen flex-col items-center justify-between p-24">
+              {children}
+            </main>
+          </BannerContextProvider>
+        </AuthProvider>
       </body>
     </html>
   );

@@ -1,0 +1,9 @@
+.links-container a {
+  color: #e2f6ff;
+  padding: 0.625rem;
+}
+
+.links-container a:hover {
+  opacity: 0.7;
+  color: #e2f6ff;
+}
