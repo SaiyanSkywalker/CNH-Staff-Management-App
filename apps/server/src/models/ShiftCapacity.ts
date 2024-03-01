@@ -8,7 +8,7 @@ import {
 import ShiftCapacityAttributes from "@shared/src/interfaces/ShiftCapacityAttributes";
 import Unit from "./Unit";
 
-@Table({ tableName: "ShiftCapcity" })
+@Table({ tableName: "ShiftCapacity" })
 class ShiftCapacity extends Model<ShiftCapacityAttributes> {
   @Column({
     primaryKey: true,

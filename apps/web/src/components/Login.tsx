@@ -2,7 +2,7 @@
 
 import { useState, ChangeEvent } from "react";
 import styles from "../styles/Login.module.css";
-import { useAuth } from "@webSrc/context/Auth";
+import { useAuth } from "@webSrc/contexts/AuthContext";
 import { useRouter } from "next/navigation";
 import Schedule from "./Schedule";
 
@@ -36,45 +36,54 @@ const Login = () => {
 
   return (
     <>
-      {auth?.authenticated ? <Schedule/> : (
+      {auth?.authenticated ? (
+        <Schedule />
+      ) : (
         <div className="min-h-screen items-center justify-between p-24">
-        <div className="center-container">
-          <div className={styles["login-container"]}>
-            <h2 className="font-semibold text-center text-3xl p-3">Welcome!</h2>
-            <form>
-              <div className={[styles[error ? "error" : ""], styles["inputs-container"]].join(" ")}>
-                <label htmlFor="username">Username:</label>
-                <input
-                type="username"
-                onChange={onUsernameChange}
-                name="username"
-                placeholder="username"
-                required
-                />
+          <div className="center-container">
+            <div className={styles["login-container"]}>
+              <h2 className="font-semibold text-center text-3xl p-3">
+                Welcome!
+              </h2>
+              <form>
+                <div
+                  className={[
+                    styles[error ? "error" : ""],
+                    styles["inputs-container"],
+                  ].join(" ")}
+                >
+                  <label htmlFor="username">Username:</label>
+                  <input
+                    type="username"
+                    onChange={onUsernameChange}
+                    name="username"
+                    placeholder="username"
+                    required
+                  />
 
-                <label htmlFor="password">Password:</label>
-                <input
-                type="password"
-                onChange={onPasswordChange}
-                name="password"
-                placeholder="password"
-                required
-                />
-              </div>
+                  <label htmlFor="password">Password:</label>
+                  <input
+                    type="password"
+                    onChange={onPasswordChange}
+                    name="password"
+                    placeholder="password"
+                    required
+                  />
+                </div>
 
-              <button
-              className={styles["btn-login"]}
-              type="button"
-              onClick={submitForm}
-              >
-                Login
-              </button>
-            </form>
+                <button
+                  className={styles["btn-login"]}
+                  type="button"
+                  onClick={submitForm}
+                >
+                  Login
+                </button>
+              </form>
+            </div>
           </div>
         </div>
-      </div>
       )}
     </>
   );
-}
+};
 export default Login;
