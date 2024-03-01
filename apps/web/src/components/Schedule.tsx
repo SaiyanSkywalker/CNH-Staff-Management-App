@@ -9,8 +9,10 @@ import config from "web/src/config";
 import { CNHEvent } from "@webSrc/interfaces/CNHEvent";
 import Modal from "@webSrc/components/EventModal";
 
-//TODO: handle case where event goes into the next day (update: ask CNH what to do with these shifts,
-// might need "Night shift" toggle?)
+/*TODO: Add filters (4hr, 8hr, 12hr) for shifts
+//TODO: Group shifts into intervals (shift that span 2 days count to start day)
+//TODO: Add night shift toggle?
+*/
 
 const Schedule = () => {
   const localizer = momentLocalizer(moment);

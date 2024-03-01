@@ -20,7 +20,7 @@ export const getScheduleData = async (filter: string) => {
     if (!id) {
       // Get shifts from all cost centers if filter is undefined
       const scheduleEntries: ScheduleEntry[] = await ScheduleEntry.findAll({
-        where: { 
+        where: {
           [Op.and]: [
             {
               shiftDate: {

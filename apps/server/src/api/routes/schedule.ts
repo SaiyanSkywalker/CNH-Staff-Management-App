@@ -1,8 +1,10 @@
+import config from "server/src/config";
 import { Request, Response, Router } from "express";
 import { UploadedFile } from "express-fileupload";
 import { validateSchedule } from "server/src/util/CsvUtils";
 import {
   getScheduleData,
+  handleTestScheduleData,
   saveScheduleData,
 } from "../services/ScheduleEntryService";
 
@@ -10,9 +12,10 @@ const scheduleRouter = Router();
 
 scheduleRouter.get("/", async (req: Request, res: Response): Promise<void> => {
   try {
-    const scheduleData = await getScheduleData(
-      req.query.costCenterId as string
-    );
+    const isTest = config.environment.toLowerCase() === "dev";
+    const scheduleData = isTest
+      ? handleTestScheduleData(req.query.costCenterId as string)
+      : await getScheduleData(req.query.costCenterId as string);
     res.json(scheduleData);
   } catch (err) {
     console.error("Error in retrieving schedule data:", err);
