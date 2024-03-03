@@ -9,9 +9,6 @@ import config from "web/src/config";
 import { CNHEvent } from "@webSrc/interfaces/CNHEvent";
 import Modal from "@webSrc/components/EventModal";
 import styles from "@webSrc/styles/Schedule.module.css";
-//TODO: Add night shift toggle?
-//TODO: Change events based on user filter
-//TODO: Add some type of checked styling to filters (on page load for default)
 
 const Schedule = () => {
   const localizer = momentLocalizer(moment);
@@ -31,7 +28,7 @@ const Schedule = () => {
     return {
       views: ["month", "week", "day"] as View[],
       defaultView: Views.DAY,
-      // Formats dates to use
+      // Formats dates in the calendar to use 24-hr clock
       formats: {
         timeGutterFormat: (date, culture, localizer) =>
           localizer.format(date, "HH:mm", culture),
@@ -45,13 +42,17 @@ const Schedule = () => {
     };
   }, []);
 
-  const getEvents = (
+  /**
+   * Creates list of events for calnedar component based on schedule data
+   * and user selection for shift intervals
+   * @param shifts shifts from CSV file
+   * @param filter string; represents shift intervals (4, 8, 12 hr shifts)
+   * @returns list of events for Calendar component
+   */
+  const buildEvents = (
     shifts: { [key: string]: ScheduleEntryAttributes[] },
     filter: string
-  ) => {
-    //TODO: filter shifts based on user selection
-    //TODO: Add filters (4hr, 8hr, 12hr) for shifts
-    //TODO: Group shifts into intervals (shift that span 2 days count to start day)
+  ): CNHEvent[] => {
     const shiftFilters: { [key: string]: string[][] } = {
       "4": [
         ["07:00", "11:00"],
@@ -163,7 +164,11 @@ const Schedule = () => {
         mc[date] = Math.min(mc[date], capacityRatio);
       }
       const event: CNHEvent = {
-        title: `Cost Center: ${tokens[0]}, ${buckets[b].length}/${defaultCapacity}`,
+        title: `Cost Center: ${tokens[0]}, ${
+          buckets[b].length
+        }/${defaultCapacity} ${
+          endTime.getDay() - startTime.getDay() != 0 ? " (Night Shift)" : ""
+        }`,
         start: startTime,
         end: endTime,
         capacityRatio: capacityRatio,
@@ -240,73 +245,13 @@ const Schedule = () => {
     return {};
   };
 
-  /**
-   * Builds a list of events to be used in calendar widget
-   * @param data shifts group by unit
-   * @returns
-   */
-  const buildEvents = (data: { [key: string]: ScheduleEntryAttributes[] }) => {
-    let results: any[] = [];
-    let groupedShifts: { [key: string]: ScheduleEntryAttributes[] } = {};
-    let mc: { [key: string]: number } = {};
-
-    // Group shifts by shiftDate, startTime, and endTime
-    for (const [_, value] of Object.entries(data)) {
-      value.forEach((v: ScheduleEntryAttributes) => {
-        const dateString = moment(new Date(v["shiftDate"])).format("YYYYMMDD");
-        const newKey = `${v.costCenterId}-${dateString}-${v.startTime}-${v.endTime}`;
-        if (!groupedShifts[newKey]) {
-          groupedShifts[newKey] = [];
-        }
-        groupedShifts[newKey].push(v);
-      });
-    }
-
-    // Iterate through each shift
-    for (const property in groupedShifts) {
-      const tokens = property.split("-");
-      const startTime = moment(
-        `${tokens[1]} ${tokens[2]}`,
-        "YYYYMMDD HH:mm"
-      ).toDate();
-      const endTime = moment(
-        `${tokens[1]} ${tokens[3]}`,
-        "YYYYMMDD HH:mm"
-      ).toDate();
-
-      if (endTime < startTime) {
-        endTime.setDate(endTime.getDate() + 1);
-      }
-      const capacityRatio = groupedShifts[property].length / defaultCapacity;
-
-      // Get the lowest shift capacity for each date on the schedule
-      const date = moment(tokens[1], "YYYYMMDD").toDate().toString();
-      if (!mc[date]) {
-        mc[date] = capacityRatio;
-      } else {
-        mc[date] = Math.min(mc[date], capacityRatio);
-      }
-
-      const event = {
-        title: `Cost Center: ${tokens[0]}, ${groupedShifts[property].length}/${defaultCapacity}`,
-        start: startTime,
-        end: endTime,
-        capacityRatio: capacityRatio,
-      };
-      results.push(event);
-    }
-
-    setmonthCapacities(mc);
-    return results;
-  };
-
   const handleSelectChange = async (event: ChangeEvent<HTMLSelectElement>) => {
     const selectedValue = event.target.value;
     setSelectedOption(selectedValue);
   };
   const handleShiftFilterChange = (e: ChangeEvent<HTMLFormElement>) => {
     setShiftFilter(e.target.value);
-    setEvents(getEvents(schedules, e.target.value));
+    setEvents(buildEvents(schedules, e.target.value));
   };
   const getSchedules = async () => {
     try {
@@ -316,10 +261,9 @@ const Schedule = () => {
         responseType: "json",
       });
       const data = await response.data;
-      // setEvents(buildEvents(data));
       if (data) {
         setSchedules(data);
-        setEvents(getEvents(data, shiftFilter));
+        setEvents(buildEvents(data, shiftFilter));
       }
     } catch (err) {
       console.error(err);

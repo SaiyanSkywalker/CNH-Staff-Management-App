@@ -12,6 +12,7 @@ const scheduleRouter = Router();
 
 scheduleRouter.get("/", async (req: Request, res: Response): Promise<void> => {
   try {
+    // Change this if you want to use data from db instead
     const isTest = config.environment.toLowerCase() === "dev";
     const scheduleData = isTest
       ? handleTestScheduleData(req.query.costCenterId as string)
