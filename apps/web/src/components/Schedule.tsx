@@ -8,11 +8,8 @@ import ScheduleEntryAttributes from "@shared/src/interfaces/ScheduleEntryAttribu
 import config from "web/src/config";
 import { CNHEvent } from "@webSrc/interfaces/CNHEvent";
 import Modal from "@webSrc/components/EventModal";
-
-/*TODO: Add filters (4hr, 8hr, 12hr) for shifts
-//TODO: Group shifts into intervals (shift that span 2 days count to start day)
+import styles from "@webSrc/styles/Schedule.module.css";
 //TODO: Add night shift toggle?
-*/
 
 const Schedule = () => {
   const localizer = momentLocalizer(moment);
@@ -22,9 +19,9 @@ const Schedule = () => {
   const [monthCapacities, setmonthCapacities] = useState<any>({});
   const [view, setView] = useState<any>(Views.DAY);
   const [selectedEvent, setSelectedEvent] = useState<CNHEvent>({} as CNHEvent);
-  const [showModal, setShowModal] = useState(false);
+  const [showModal, setShowModal] = useState<boolean>(false);
+  const [shiftFilter, setShiftFilter] = useState<string>("4");
   const defaultCapacity = 10; // Will change with actual capacity once shift capacity page is finished
-
   const { views, defaultView, formats } = useMemo(() => {
     return {
       views: ["month", "week", "day"] as View[],
@@ -43,6 +40,65 @@ const Schedule = () => {
     };
   }, []);
 
+  const getEvents = (
+    shifts: { [key: string]: ScheduleEntryAttributes[] },
+    filter: string
+  ) => {
+    //TODO: filter shifts based on user selection
+    //TODO: Add filters (4hr, 8hr, 12hr) for shifts
+    //TODO: Group shifts into intervals (shift that span 2 days count to start day)
+    const shiftFilters: { [key: string]: string[][] } = {
+      "4": [
+        ["07:00", "11:00"],
+        ["11:00", "15:00"],
+        ["15:00", "19:00"],
+        ["19:00", "23:00"],
+        ["23:00", "07:00"],
+      ],
+      "8": [
+        ["07:00", "15:00"],
+        ["15:00", "23:00"],
+        ["23:00", "07:00"],
+      ],
+      "12": [
+        ["07:00", "19:00"],
+        ["19:00", "07:00"],
+      ],
+    };
+
+    const selectedFilters: string[][] = shiftFilters[filter];
+    const buckets = {};
+    const events: any[] = [];
+
+    // Group shifts by date
+    for (const costCenter in shifts) {
+      const costCenterShifts = shifts[costCenter];
+      const shiftsByDate: any = costCenterShifts.reduce((acc, val) => {
+        const shiftDate: string = val.shiftDate as string;
+        if (!acc[shiftDate]) {
+          acc[shiftDate] = [];
+        }
+        acc[shiftDate].push(val);
+        return acc;
+      }, {} as { [key: string]: ScheduleEntryAttributes[] });
+
+      for (const day in shiftsByDate) {
+        const currentShifts = shiftsByDate[day];
+        selectedFilters.forEach((x) => {
+          const key = `${costCenter}-${day}-${x[0]},${x[1]}`;
+          buckets[key] = [];
+          // Compare shift times with selected window
+
+          // If shift is in window, add it to bucket
+        });
+      }
+    }
+
+    // For each date, loop through shifts and place them in appropiate bucket
+
+    // Go through buckets, create events and push them to final events array
+    return events;
+  };
   const handleEventSelect = (event: CNHEvent) => {
     setSelectedEvent(event);
     openModal();
@@ -60,6 +116,7 @@ const Schedule = () => {
     },
     [setView]
   );
+
   /**
    * Returns tailwind class for background color styling based on capacityRatio
    * @param capacityRatio ratio of current staff members to expected amount based on shift
@@ -173,7 +230,10 @@ const Schedule = () => {
     const selectedValue = event.target.value;
     setSelectedOption(selectedValue);
   };
-
+  const handleShiftFilterChange = (e: ChangeEvent<HTMLFormElement>) => {
+    console.log(e.target.value);
+    setShiftFilter(e.target.value);
+  };
   const getSchedules = async () => {
     try {
       const response = await axios({
@@ -183,6 +243,9 @@ const Schedule = () => {
       });
       const data = await response.data;
       setEvents(buildEvents(data));
+      if (data) {
+        getEvents(data, shiftFilter);
+      }
     } catch (err) {
       console.error(err);
     }
@@ -214,27 +277,67 @@ const Schedule = () => {
 
       <div className="w-[85%] pt-12 flex justify-center items-center">
         <div className="flex flex-col w-full">
-          <div className="self-end mb-8">
-            <label htmlFor="units" className="block mb-2 font-semibold">
-              Select Cost Center:
-            </label>
-            <select
-              id="unit-select"
-              name="units"
-              defaultValue={""}
-              onChange={handleSelectChange}
-              className={`w-[200px] p-4 text-md border border-nuetral-500 rounded cursor-pointer bg-transparent`}
-            >
-              <option value="">All</option>
-              {units.map((unit, idx) => (
-                <option key={idx} value={unit["laborLevelEntryId"]}>
-                  {unit["name"]}
-                </option>
-              ))}
-            </select>
+          <div className="flex justify-between align-center">
+            <div>
+              <label htmlFor="units" className="block mb-2 font-semibold">
+                Choose Shift Filter:
+              </label>
+              <form
+                className="self-center flex gap-x-4"
+                onChange={handleShiftFilterChange}
+              >
+                <div className={styles["shift-filter-container"]}>
+                  <input
+                    type="radio"
+                    name="shiftFilter"
+                    id="fourHourShift"
+                    value="4"
+                  />
+                  <label htmlFor="fourHourShift">4 Hour</label>
+                </div>
+                <div className={styles["shift-filter-container"]}>
+                  <input
+                    type="radio"
+                    name="shiftFilter"
+                    id="eightHourShift"
+                    value="8"
+                  />
+                  <label htmlFor="eightHourShift">8 Hour</label>
+                </div>
+                <div className={styles["shift-filter-container"]}>
+                  <input
+                    type="radio"
+                    name="shiftFilter"
+                    id="twelveHourShift"
+                    value="12"
+                  />
+                  <label htmlFor="twelveHourShift">12 Hour</label>
+                </div>
+              </form>
+            </div>
+            <div className="self-end mb-8">
+              <label htmlFor="units" className="block mb-2 font-semibold">
+                Select Cost Center:
+              </label>
+              <select
+                id="unit-select"
+                name="units"
+                defaultValue={""}
+                onChange={handleSelectChange}
+                className={`w-[200px] p-4 text-md border border-nuetral-500 rounded cursor-pointer bg-transparent`}
+              >
+                <option value="">All</option>
+                {units.map((unit, idx) => (
+                  <option key={idx} value={unit["laborLevelEntryId"]}>
+                    {unit["name"]}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
+
           <Calendar
-            className="h-[800px] overflow-scroll border-4 rounded-lg border-gray-400 shadow-lg p-12"
+            className="h-[600px] overflow-scroll border-4 rounded-lg border-gray-400 shadow-lg p-12"
             localizer={localizer}
             events={events}
             views={views}

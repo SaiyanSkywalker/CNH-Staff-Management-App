@@ -4,7 +4,7 @@ export default interface ScheduleEntryAttributes {
   lastName: string;
   firstName: string;
   middleInitial: string;
-  shiftDate: Date;
+  shiftDate: Date | string;
   startTime: string;
   endTime: string;
   duration: string;
