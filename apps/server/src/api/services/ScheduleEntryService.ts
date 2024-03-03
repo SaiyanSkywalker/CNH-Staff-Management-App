@@ -113,7 +113,6 @@ export const handleTestScheduleData = (
       return acc;
     }, {} as { [key: string]: ScheduleEntryAttributes[] });
   } else {
-    console.log(scheduleEntries[0].shiftDate);
     entriesByCostCenter[costCenterId] = scheduleEntries.filter(
       (x) => x.costCenterId === costCenterId
     );
