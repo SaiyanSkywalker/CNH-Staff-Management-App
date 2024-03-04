@@ -1,10 +1,12 @@
 import React, { useState } from "react";
+import { useAuth } from "../contexts/AuthContext";
 import {
   StyleSheet,
   Text,
   View,
   TextInput,
   TouchableOpacity,
+  Alert,
 } from "react-native";
 const styles = StyleSheet.create({
   container: {
@@ -54,8 +56,18 @@ const styles = StyleSheet.create({
   },
 });
 const Page = () => {
-  const onPressLogin = () => {
-    // Do something about login operation
+  const { auth } = useAuth();
+  const onPressLogin = async () => {
+    if (!email || !password) {
+      Alert.alert("Error", "Please enter both email and password.");
+      return;
+    }
+    const success = await auth?.login(email, password);
+    if (success) {
+      Alert.alert("Login Successful", "You are now logged in.");
+    } else {
+      Alert.alert("Login Failed", "Invalid email or password.");
+    } 
   };
   const onPressForgotPassword = () => {
     // Do something about forgot password operation
