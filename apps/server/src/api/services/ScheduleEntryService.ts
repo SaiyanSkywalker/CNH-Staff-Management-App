@@ -28,6 +28,7 @@ export const getScheduleData = async (filter: string) => {
                 [Op.lte]: upperDateBound,
               },
             },
+            { shiftType: "REG" },
           ],
         },
       });
@@ -50,6 +51,7 @@ export const getScheduleData = async (filter: string) => {
                 [Op.lte]: upperDateBound,
               },
             },
+            { shiftType: "REG" },
           ],
         },
       });
@@ -99,7 +101,9 @@ export const handleTestScheduleData = (
 ): { [key: string]: ScheduleEntryAttributes[] } => {
   const costCenterId = parseInt(filter);
   const data = ScheduleData;
-  const scheduleEntries: ScheduleEntryAttributes[] = csvToScheduleData(data);
+  const scheduleEntries: ScheduleEntryAttributes[] = csvToScheduleData(
+    data
+  ).filter((schedule) => schedule.shiftType === "REG");
   let entriesByCostCenter: { [key: string]: ScheduleEntryAttributes[] } = {};
 
   // If no filter is applied return all the shifts across all cost centers
