@@ -112,7 +112,7 @@ export default function UploadPage() {
 
   return (
     <>
-      <div>
+      <section className="flex flex-col items-center">
         <div
           className={`${styles["drop-zone"]}`}
           ref={containerRef}
@@ -139,16 +139,14 @@ export default function UploadPage() {
             currentFile &&
             buildThumbnail(containerRef.current, currentFile)}
         </div>
-        <div className="flex justify-center">
-          <button
-            className={`${styles["btn-upload"]} mt-4`}
-            type="button"
-            onClick={uploadCSV}
-          >
-            Upload File
-          </button>
-        </div>
-      </div>
+        <button
+          className={`${styles["btn-upload"]} mt-4`}
+          type="button"
+          onClick={uploadCSV}
+        >
+          Upload File
+        </button>
+      </section>
     </>
   );
 }
