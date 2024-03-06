@@ -47,7 +47,7 @@ export default function AuthProvider({
   const getUser = async (username: string, password: string) => {
     try {
       const androidURL = "http://10.0.2.2:3003"; // android doesn't allow you to use localhost (idk why, it's weird)
-      const url = Platform.OS == "ios" ? config.apiUrl : "http://10.0.2.2:3003";
+      const url = Platform.OS === "android" ? androidURL : config.apiUrl;
       const response = await axios({
         method: "GET",
         url: `${url}/user/?username=${username}&password=${password}`,
