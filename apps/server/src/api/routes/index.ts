@@ -1,10 +1,10 @@
 import { Router } from "express";
 import scheduleRoutes from "./schedule";
-import unitRoutes from "./unit";
 import shiftHistoryRoutes from "./shift-history";
+import userRoutes from "./user";
 
 const router = Router();
 router.use("/schedule", scheduleRoutes);
-router.use("/unit", unitRoutes);
-router.use("/shift-history", shiftHistoryRoutes)
+router.use("/user", userRoutes);
+router.use("/shift-history", shiftHistoryRoutes);
 export default router;
