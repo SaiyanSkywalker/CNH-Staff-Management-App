@@ -3,8 +3,7 @@ import { Sequelize, SequelizeOptions } from "sequelize-typescript";
 import DefaultUnits from "../constants/DefaultUnits";
 import Unit from "../models/Unit";
 import ServerConfig from "../interfaces/ServerConfig";
-import UserInformation from "../models/UserInformation";
-import ShiftHistory from "../models/ShiftHistory";
+
 
 let sequelize: Sequelize;
 
