@@ -103,7 +103,7 @@ export default function shiftHistory() {
 
   return (
     <>
-      <div>
+      <div className="w-full">
         <h1 className={page.h1}>History</h1>
         <form className={page.form} onSubmit={getEmployeeList}>
           <div className={page.submission}>

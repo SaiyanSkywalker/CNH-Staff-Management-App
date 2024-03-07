@@ -22,10 +22,10 @@ class UserInformation extends Model<UserInformationAttributes> {
   @Column({ type: DataType.STRING, allowNull: false })
   username!: string;
 
-  @Column({ type: DataType.STRING, allowNull: false })
+  @Column({ type: DataType.STRING, allowNull: true })
   firstName!: string;
 
-  @Column({ type: DataType.STRING, allowNull: false })
+  @Column({ type: DataType.STRING, allowNull: true })
   lastName!: string;
 
   @Column({ type: DataType.STRING, allowNull: false })

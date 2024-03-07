@@ -20,7 +20,7 @@ export const getScheduleData = async (filter: string) => {
     if (!id) {
       // Get shifts from all cost centers if filter is undefined
       const scheduleEntries: ScheduleEntry[] = await ScheduleEntry.findAll({
-        where: { 
+        where: {
           [Op.and]: [
             {
               shiftDate: {
@@ -28,6 +28,7 @@ export const getScheduleData = async (filter: string) => {
                 [Op.lte]: upperDateBound,
               },
             },
+            { shiftType: "REG" },
           ],
         },
       });
@@ -50,6 +51,7 @@ export const getScheduleData = async (filter: string) => {
                 [Op.lte]: upperDateBound,
               },
             },
+            { shiftType: "REG" },
           ],
         },
       });
@@ -99,7 +101,9 @@ export const handleTestScheduleData = (
 ): { [key: string]: ScheduleEntryAttributes[] } => {
   const costCenterId = parseInt(filter);
   const data = ScheduleData;
-  const scheduleEntries: ScheduleEntryAttributes[] = csvToScheduleData(data);
+  const scheduleEntries: ScheduleEntryAttributes[] = csvToScheduleData(
+    data
+  ).filter((schedule) => schedule.shiftType === "REG");
   let entriesByCostCenter: { [key: string]: ScheduleEntryAttributes[] } = {};
 
   // If no filter is applied return all the shifts across all cost centers
@@ -117,6 +121,5 @@ export const handleTestScheduleData = (
       (x) => x.costCenterId === costCenterId
     );
   }
-
   return entriesByCostCenter;
 };
