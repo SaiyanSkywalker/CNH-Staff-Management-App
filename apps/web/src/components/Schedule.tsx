@@ -1,5 +1,16 @@
 "use client";
-import { Calendar, View, Views, momentLocalizer } from "react-big-calendar";
+import {
+  Calendar,
+  DateLocalizer,
+  View,
+  Views,
+  momentLocalizer,
+  DateFormatFunction,
+  DateFormat,
+  DateRange,
+  Culture,
+  DateRangeFormatFunction,
+} from "react-big-calendar";
 import moment from "moment";
 import { ChangeEvent, useCallback, useEffect, useMemo, useState } from "react";
 import axios from "axios";
@@ -10,6 +21,10 @@ import { CNHEvent } from "@webSrc/interfaces/CNHEvent";
 import Modal from "@webSrc/components/EventModal";
 import styles from "@webSrc/styles/Schedule.module.css";
 
+interface Range {
+  start: Date;
+  end: Date;
+}
 const Schedule = () => {
   const localizer = momentLocalizer(moment);
   const [selectedOption, setSelectedOption] = useState<string>("");
@@ -23,21 +38,40 @@ const Schedule = () => {
   const [schedules, setSchedules] = useState<{
     [key: string]: ScheduleEntryAttributes[];
   }>({});
-  const defaultCapacity = 10; // Will change with actual capacity once shift capacity page is finished
+
+  const defaultCapacity = 10; // TODO: change with actual capacity once shift capacity page is finished
   const { views, defaultView, formats } = useMemo(() => {
+    const timeGutterFormatter: DateFormatFunction = (
+      date: Date,
+      culture?: Culture,
+      localizer?: DateLocalizer
+    ): string => {
+      if (localizer && date && culture) {
+        return localizer.format(date, "HH:mm", culture);
+      }
+      return "";
+    };
+    const eventTimeRangeFormatter: DateRangeFormatFunction = (
+      range: DateRange,
+      culture?: Culture,
+      localizer?: DateLocalizer
+    ): string => {
+      if (range.start && range.end && culture && localizer) {
+        return `${localizer.format(
+          range.start,
+          "HH:mm",
+          culture
+        )} - ${localizer.format(range.end, "HH:mm", culture)}`;
+      }
+      return "";
+    };
     return {
       views: ["month", "week", "day"] as View[],
       defaultView: Views.DAY,
       // Formats dates in the calendar to use 24-hr clock
       formats: {
-        timeGutterFormat: (date, culture, localizer) =>
-          localizer.format(date, "HH:mm", culture),
-        eventTimeRangeFormat: ({ start, end }, culture, localizer) =>
-          `${localizer.format(start, "HH:mm", culture)} - ${localizer.format(
-            end,
-            "HH:mm",
-            culture
-          )}`,
+        timeGutterFormat: timeGutterFormatter,
+        eventTimeRangeFormat: eventTimeRangeFormatter,
       },
     };
   }, []);
