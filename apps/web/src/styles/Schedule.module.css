@@ -1,0 +1,29 @@
+.shift-filter-container {
+  border: 3px solid rgb(110, 189, 220);
+  width: 100%;
+  position: relative;
+  border-radius: 0.5rem;
+  display: flex;
+  align-items: center;
+  width: 100px;
+}
+.shift-filter-container label {
+  text-align: center;
+  width: 100%;
+  display: block;
+}
+.shift-filter-container input {
+  border: 1px dashed blue;
+  position: absolute;
+  padding: 0;
+  margin: 0;
+  left: 0;
+  top: 0;
+  height: 100%;
+  width: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+.shift-filter-container input:checked + label {
+  background: rgba(6, 116, 150, 0.2);
+}

@@ -25,7 +25,7 @@ export default function RootLayout({
           <BannerContextProvider>
             <Navbar />
             <Banner />
-            <main className="flex min-h-screen flex-col items-center justify-between p-24">
+            <main className="flex min-h-screen flex-col items-center p-24">
               {children}
             </main>
           </BannerContextProvider>
