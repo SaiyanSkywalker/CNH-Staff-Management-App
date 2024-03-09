@@ -22,12 +22,18 @@ class UserInformation extends Model<UserInformationAttributes> {
   @Column({ type: DataType.STRING, allowNull: false })
   username!: string;
 
+  @Column({ type: DataType.STRING, allowNull: true })
+  firstName!: string;
+
+  @Column({ type: DataType.STRING, allowNull: true })
+  lastName!: string;
+
   @Column({ type: DataType.STRING, allowNull: false })
   password!: string;
 
   @BelongsTo(() => Unit, { foreignKey: "unitId", targetKey: "id" })
-  unit!: Unit;
+  unit?: Unit;
   @BelongsTo(() => Role, { foreignKey: "roleId", targetKey: "id" })
-  role!: Role;
+  role?: Role;
 }
 export default UserInformation;

@@ -1,0 +1,92 @@
+.h1 {
+  @apply text-center font-bold text-3xl;
+}
+
+.form {
+  @apply flex flex-row justify-around items-center;
+}
+
+.submission {
+  width: 70%;
+}
+
+.loading {
+  opacity: 0.7;
+  animation: table-loading 1s linear infinite alternate;
+}
+
+@keyframes table-loading {
+  0% {
+    background-color: hsl(200, 20%, 70%);
+  }
+  100% {
+    background-color: hsl(200, 20%, 95%);
+  }
+}
+
+.input {
+  border: 1px solid #067496;
+  border-radius: 15px;
+  padding: 5px;
+}
+
+.button {
+  color: white;
+  @apply rounded-[10px] font-semibold justify-self-end px-7 py-3;
+}
+
+.section {
+  @apply flex flex-row justify-center;
+  margin-top: 10px;
+}
+
+.table {
+  @apply border-collapse;
+  margin-top: 50px;
+  width: 80%;
+  max-width: 1200px;
+}
+
+.th,
+.td {
+  @apply border-solid border-2 border-gray-400 text-center overflow-auto;
+}
+
+.th {
+  background-color: #f5f5f5;
+}
+
+.label {
+  @apply font-bold mb-4;
+  display: block;
+}
+
+@media (min-width: 475px) and (max-width: 650px) {
+  .button {
+    width: 15%;
+  }
+}
+
+@media (max-width: 475px) {
+  .table {
+    @apply border-collapse;
+    margin-top: 50px;
+    width: 50%;
+  }
+
+  .input {
+    width: 25%;
+  }
+
+  .th,
+  .td {
+    @apply border-solid border-2 border-gray-400 text-center text-xs;
+  }
+
+  .button {
+    background-color: #067496;
+    color: white;
+    @apply rounded-[10px] font-bold justify-self-end;
+    width: 20%;
+  }
+}

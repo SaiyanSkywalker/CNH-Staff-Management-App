@@ -326,9 +326,8 @@ const Schedule = () => {
   }, [units, selectedOption]);
   return (
     <>
-      <h1 className="text-4xl  p-8 font-bold text-center">Schedule</h1>
-
-      <div className="w-[85%] pt-12 flex items-center">
+      <h1 className="text-4xl p-8 font-bold text-center">Schedule</h1>
+      <div className="pt-4 flex justify-center items-center w-full">
         <div className="flex flex-col w-full">
           <div className="flex justify-between align-center">
             <div>
