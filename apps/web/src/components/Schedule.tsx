@@ -46,7 +46,7 @@ const Schedule = () => {
       culture?: Culture,
       localizer?: DateLocalizer
     ): string => {
-      if (localizer && date && culture) {
+      if (localizer) {
         return localizer.format(date, "HH:mm", culture);
       }
       return "";
@@ -56,7 +56,7 @@ const Schedule = () => {
       culture?: Culture,
       localizer?: DateLocalizer
     ): string => {
-      if (range.start && range.end && culture && localizer) {
+      if (localizer) {
         return `${localizer.format(
           range.start,
           "HH:mm",
