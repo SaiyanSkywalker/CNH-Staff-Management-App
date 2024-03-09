@@ -11,6 +11,7 @@ import ServerConfig from "../interfaces/ServerConfig";
 import Role from "../models/Role";
 import DefaultRoles from "../constants/DefaultRoles";
 
+
 let sequelize: Sequelize;
 
 /**
