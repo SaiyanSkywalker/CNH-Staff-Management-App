@@ -1,6 +1,10 @@
+import { CNHEvent } from "@webSrc/interfaces/CNHEvent";
 import React from "react";
-import ModalProps from "@webSrc/interfaces/ModalProps";
-
+interface ModalProps {
+  event: CNHEvent;
+  isOpen: boolean;
+  closeModal: () => void;
+}
 const EventModal: React.FC<ModalProps> = ({ event, isOpen, closeModal }) => {
   return (
     <>

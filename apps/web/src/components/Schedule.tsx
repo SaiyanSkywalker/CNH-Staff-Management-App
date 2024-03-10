@@ -1,10 +1,15 @@
 "use client";
 import {
   Calendar,
-  SlotInfo,
+  DateLocalizer,
   View,
   Views,
   momentLocalizer,
+  DateFormatFunction,
+  DateFormat,
+  DateRange,
+  Culture,
+  DateRangeFormatFunction,
 } from "react-big-calendar";
 import moment from "moment";
 import { ChangeEvent, useCallback, useEffect, useMemo, useState } from "react";
@@ -13,10 +18,13 @@ import UnitAttributes from "@shared/src/interfaces/UnitAttributes";
 import ScheduleEntryAttributes from "@shared/src/interfaces/ScheduleEntryAttributes";
 import config from "web/src/config";
 import { CNHEvent } from "@webSrc/interfaces/CNHEvent";
-import Modal from "./EventModal";
-//TODO: handle case where event goes into the next day (update: ask CNH what to do with these shifts,
-// might need "Night shift" toggle?)
+import Modal from "@webSrc/components/EventModal";
+import styles from "@webSrc/styles/Schedule.module.css";
 
+interface Range {
+  start: Date;
+  end: Date;
+}
 const Schedule = () => {
   const localizer = momentLocalizer(moment);
   const [selectedOption, setSelectedOption] = useState<string>("");
@@ -25,16 +33,185 @@ const Schedule = () => {
   const [monthCapacities, setmonthCapacities] = useState<any>({});
   const [view, setView] = useState<any>(Views.DAY);
   const [selectedEvent, setSelectedEvent] = useState<CNHEvent>({} as CNHEvent);
-  const [showModal, setShowModal] = useState(false);
-  const defaultCapacity = 10; // Will change with actual capacity once shift capacity page is finished
+  const [showModal, setShowModal] = useState<boolean>(false);
+  const [shiftFilter, setShiftFilter] = useState<string>("4");
+  const [schedules, setSchedules] = useState<{
+    [key: string]: ScheduleEntryAttributes[];
+  }>({});
 
-  const { views, defaultView } = useMemo(() => {
+  const defaultCapacity = 10; // TODO: change with actual capacity once shift capacity page is finished
+  const { views, defaultView, formats } = useMemo(() => {
+    const timeGutterFormatter: DateFormatFunction = (
+      date: Date,
+      culture?: Culture,
+      localizer?: DateLocalizer
+    ): string => {
+      if (localizer) {
+        return localizer.format(date, "HH:mm", culture);
+      }
+      return "";
+    };
+    const eventTimeRangeFormatter: DateRangeFormatFunction = (
+      range: DateRange,
+      culture?: Culture,
+      localizer?: DateLocalizer
+    ): string => {
+      if (localizer) {
+        return `${localizer.format(
+          range.start,
+          "HH:mm",
+          culture
+        )} - ${localizer.format(range.end, "HH:mm", culture)}`;
+      }
+      return "";
+    };
     return {
       views: ["month", "week", "day"] as View[],
       defaultView: Views.DAY,
+      // Formats dates in the calendar to use 24-hr clock
+      formats: {
+        timeGutterFormat: timeGutterFormatter,
+        eventTimeRangeFormat: eventTimeRangeFormatter,
+      },
     };
   }, []);
 
+  /**
+   * Creates list of events for calnedar component based on schedule data
+   * and user selection for shift intervals
+   * @param shifts shifts from CSV file
+   * @param filter string; represents shift intervals (4, 8, 12 hr shifts)
+   * @returns list of events for Calendar component
+   */
+  const buildEvents = (
+    shifts: { [key: string]: ScheduleEntryAttributes[] },
+    filter: string
+  ): CNHEvent[] => {
+    const shiftFilters: { [key: string]: string[][] } = {
+      "4": [
+        ["07:00", "11:00"],
+        ["11:00", "15:00"],
+        ["15:00", "19:00"],
+        ["19:00", "23:00"],
+        ["23:00", "07:00"],
+      ],
+      "8": [
+        ["07:00", "15:00"],
+        ["15:00", "23:00"],
+        ["23:00", "07:00"],
+      ],
+      "12": [
+        ["07:00", "19:00"],
+        ["19:00", "07:00"],
+      ],
+    };
+
+    const selectedFilters: string[][] = shiftFilters[filter];
+    const buckets: { [key: string]: ScheduleEntryAttributes[] } = {};
+    const events: any[] = [];
+
+    // Group shifts by date
+    for (const costCenter in shifts) {
+      const costCenterShifts = shifts[costCenter];
+      const shiftsByDate: any = costCenterShifts.reduce((acc, val) => {
+        const shiftDate = val.shiftDate.toString();
+        if (!acc[shiftDate]) {
+          acc[shiftDate] = [];
+        }
+        acc[shiftDate].push(val);
+        return acc;
+      }, {} as { [key: string]: ScheduleEntryAttributes[] });
+
+      // For each date, loop through shifts and place them in appropiate bucket
+      for (const day in shiftsByDate) {
+        const currentShifts: ScheduleEntryAttributes[] = shiftsByDate[day];
+        const dateString = moment(new Date(day)).format("YYYYMMDD");
+        selectedFilters.forEach((filter) => {
+          const key = `${costCenter},${day},${filter[0]},${filter[1]}`;
+          // Compare shift times with selected window
+          const lowerDateBound = moment(
+            `${dateString} ${filter[0]}`,
+            "YYYYMMDD HH:mm"
+          ).toDate();
+          const upperDateBound = moment(
+            `${dateString} ${filter[1]}`,
+            "YYYYMMDD HH:mm"
+          ).toDate();
+
+          // Handles case where shift extends into next day
+          if (upperDateBound < lowerDateBound) {
+            upperDateBound.setDate(upperDateBound.getDate() + 1);
+          }
+
+          // If shift is in window, add it to bucket
+          buckets[key] = currentShifts.filter(
+            (shift: ScheduleEntryAttributes) => {
+              // store start and end times of shift
+              const shiftStartTime = moment(
+                `${dateString} ${shift.startTime}`,
+                "YYYYMMDD HH:mm"
+              ).toDate();
+              const shiftEndTime = moment(
+                `${dateString} ${shift.endTime}`,
+                "YYYYMMDD HH:mm"
+              ).toDate();
+
+              if (shiftEndTime < shiftStartTime) {
+                shiftEndTime.setDate(shiftEndTime.getDate() + 1);
+              }
+              //Subtract 30 minutes from shiftEndTIme (30 minutes is added to each shift to account for change over between staff)
+              shiftEndTime.setMinutes(shiftEndTime.getMinutes() - 30);
+
+              return !(
+                (shiftStartTime < lowerDateBound &&
+                  shiftEndTime < lowerDateBound) ||
+                (shiftStartTime > upperDateBound &&
+                  shiftEndTime > upperDateBound)
+              );
+            }
+          );
+        });
+      }
+    }
+    const mc: { [key: string]: number } = {};
+    // Go through buckets, create events and push them to final events array
+    for (const b in buckets) {
+      const tokens = b.split(",");
+      const startTime = moment(
+        `${moment(new Date(tokens[1])).format("YYYYMMDD")} ${tokens[2]} `,
+        "YYYYMMDD HH:mm"
+      ).toDate();
+      const endTime = moment(
+        `${moment(new Date(tokens[1])).format("YYYYMMDD")} ${tokens[3]} `,
+        "YYYYMMDD HH:mm"
+      ).toDate();
+      if (endTime < startTime) {
+        endTime.setDate(endTime.getDate() + 1);
+      }
+      // Get the lowest shift capacity for each date on the schedule
+      const capacityRatio = buckets[b].length / defaultCapacity;
+      const date = moment(tokens[1], "YYYYMMDD").toDate().toString();
+
+      if (!mc[date]) {
+        mc[date] = capacityRatio;
+      } else {
+        mc[date] = Math.min(mc[date], capacityRatio);
+      }
+      const event: CNHEvent = {
+        title: `Cost Center: ${tokens[0]}, ${
+          buckets[b].length
+        }/${defaultCapacity} ${
+          endTime.getDay() - startTime.getDay() != 0 ? " (Night Shift)" : ""
+        }`,
+        start: startTime,
+        end: endTime,
+        capacityRatio: capacityRatio,
+      };
+      events.push(event);
+    }
+    setmonthCapacities(mc);
+    return events;
+  };
   const handleEventSelect = (event: CNHEvent) => {
     setSelectedEvent(event);
     openModal();
@@ -52,6 +229,7 @@ const Schedule = () => {
     },
     [setView]
   );
+
   /**
    * Returns tailwind class for background color styling based on capacityRatio
    * @param capacityRatio ratio of current staff members to expected amount based on shift
@@ -101,80 +279,26 @@ const Schedule = () => {
     return {};
   };
 
-  /**
-   * Builds a list of events to be used in calendar widget
-   * @param data shifts group by unit
-   * @returns
-   */
-  const buildEvents = (data: { [key: string]: ScheduleEntryAttributes[] }) => {
-    let results: any[] = [];
-    let groupedShifts: { [key: string]: ScheduleEntryAttributes[] } = {};
-    let mc: { [key: string]: number } = {};
-
-    // Group shifts by shiftDate, startTime, and endTime
-    for (const [key, value] of Object.entries(data)) {
-      value.forEach((v: any) => {
-        const newKey = `${v["costCenterId"]}-${v["shiftDate"]}-${v["startTime"]}-${v["endTime"]}`;
-        if (!groupedShifts[newKey]) {
-          groupedShifts[newKey] = [];
-        }
-        groupedShifts[newKey].push(v);
-      });
-    }
-
-    // Iterate through each shift
-    for (const property in groupedShifts) {
-      const tokens = property.split("-");
-      const startTime = moment(
-        `${tokens[1]} ${tokens[2]}`,
-        "YYYYMMDD HH:mm"
-      ).toDate();
-      const endTime = moment(
-        `${tokens[1]} ${tokens[3]}`,
-        "YYYYMMDD HH:mm"
-      ).toDate();
-
-      if (endTime < startTime) {
-        endTime.setDate(endTime.getDate() + 1);
-      }
-      const capacityRatio = groupedShifts[property].length / defaultCapacity;
-
-      // Get the lowest shift capacity for each date on the schedule
-      const date = moment(tokens[1], "YYYYMMDD").toDate().toString();
-      if (!mc[date]) {
-        mc[date] = capacityRatio;
-      } else {
-        mc[date] = Math.min(mc[date], capacityRatio);
-      }
-
-      const event = {
-        title: `Cost Center: ${tokens[0]}, ${groupedShifts[property].length}/${defaultCapacity}`,
-        start: startTime,
-        end: endTime,
-        capacityRatio: capacityRatio,
-      };
-      results.push(event);
-    }
-
-    setmonthCapacities(mc);
-    return results;
-  };
-
   const handleSelectChange = async (event: ChangeEvent<HTMLSelectElement>) => {
     const selectedValue = event.target.value;
     setSelectedOption(selectedValue);
-    await getSchedules();
   };
-
+  const handleShiftFilterChange = (e: ChangeEvent<HTMLFormElement>) => {
+    setShiftFilter(e.target.value);
+    setEvents(buildEvents(schedules, e.target.value));
+  };
   const getSchedules = async () => {
     try {
       const response = await axios({
         method: "GET",
-        url: `${config.apiUrl}/schedule?unit=${selectedOption}`,
+        url: `${config.apiUrl}/schedule?costCenterId=${selectedOption}`,
         responseType: "json",
       });
       const data = await response.data;
-      setEvents(buildEvents(data));
+      if (data) {
+        setSchedules(data);
+        setEvents(buildEvents(data, shiftFilter));
+      }
     } catch (err) {
       console.error(err);
     }
@@ -202,31 +326,71 @@ const Schedule = () => {
   }, [units, selectedOption]);
   return (
     <>
-      <h1 className="text-4xl  p-8 font-bold text-center">Schedule</h1>
-
-      <div className="w-100 pt-12 flex justify-center items-center">
-        <div className="flex flex-col w-[85%]">
-          <div className="self-end mb-8">
-            <label htmlFor="units" className="block mb-2 font-semibold">
-              Select Cost Center:
-            </label>
-            <select
-              id="unit-select"
-              name="units"
-              defaultValue={""}
-              onChange={handleSelectChange}
-              className={`w-[200px] p-4 text-md border border-nuetral-500 rounded cursor-pointer bg-transparent`}
-            >
-              <option value="">All</option>
-              {units.map((unit, idx) => (
-                <option key={idx} value={unit["laborLevelEntryId"]}>
-                  {unit["name"]}
-                </option>
-              ))}
-            </select>
+      <h1 className="text-4xl p-8 font-bold text-center">Schedule</h1>
+      <div className="pt-4 flex justify-center items-center w-full">
+        <div className="flex flex-col w-full">
+          <div className="flex justify-between align-center">
+            <div>
+              <label htmlFor="units" className="block mb-2 font-semibold">
+                Choose Shift Filter:
+              </label>
+              <form
+                className="self-center flex gap-x-4"
+                onChange={handleShiftFilterChange}
+              >
+                <div className={styles["shift-filter-container"]}>
+                  <input
+                    defaultChecked
+                    type="radio"
+                    name="shiftFilter"
+                    id="fourHourShift"
+                    value="4"
+                  />
+                  <label htmlFor="fourHourShift">4 Hour</label>
+                </div>
+                <div className={styles["shift-filter-container"]}>
+                  <input
+                    type="radio"
+                    name="shiftFilter"
+                    id="eightHourShift"
+                    value="8"
+                  />
+                  <label htmlFor="eightHourShift">8 Hour</label>
+                </div>
+                <div className={styles["shift-filter-container"]}>
+                  <input
+                    type="radio"
+                    name="shiftFilter"
+                    id="twelveHourShift"
+                    value="12"
+                  />
+                  <label htmlFor="twelveHourShift">12 Hour</label>
+                </div>
+              </form>
+            </div>
+            <div className="self-end mb-8">
+              <label htmlFor="units" className="block mb-2 font-semibold">
+                Select Cost Center:
+              </label>
+              <select
+                id="unit-select"
+                name="units"
+                defaultValue={""}
+                onChange={handleSelectChange}
+                className={`w-[200px] p-4 text-md border border-nuetral-500 rounded cursor-pointer bg-transparent`}
+              >
+                <option value="">All</option>
+                {units.map((unit, idx) => (
+                  <option key={idx} value={unit["laborLevelEntryId"]}>
+                    {unit["name"]}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
+
           <Calendar
-            className="h-[800px] overflow-scroll border-4 rounded-lg border-gray-400 shadow-lg p-12"
+            className="h-[700px] overflow-scroll border-4 rounded-lg border-gray-400 shadow-lg p-12"
             localizer={localizer}
             events={events}
             views={views}
@@ -236,6 +400,7 @@ const Schedule = () => {
             dayPropGetter={customDayPropGetter}
             onSelectEvent={handleEventSelect}
             selectable
+            formats={formats}
           />
         </div>
       </div>
@@ -243,5 +408,4 @@ const Schedule = () => {
     </>
   );
 };
-
 export default Schedule;

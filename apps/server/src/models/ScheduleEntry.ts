@@ -1,7 +1,24 @@
-import { Column, DataType, Model, Table } from "sequelize-typescript";
+import { Column, DataType, Model, Table, Unique } from "sequelize-typescript";
 import ScheduleEntryAttributes from "@shared/src/interfaces/ScheduleEntryAttributes";
-@Table({ tableName: "ScheduleEntry" })
+@Table({
+  tableName: "ScheduleEntry",
+  indexes: [
+    {
+      unique: true,
+      fields: [
+        "employeeId",
+        "shiftDate",
+        "startTime",
+        "endTime",
+        "costCenterId",
+      ],
+    },
+  ],
+})
 class ScheduleEntry extends Model<ScheduleEntryAttributes> {
+  // Remove this column (not needed)
+  // Idea: employeeId, shiftDate, startTime, endTime, and costCenterId
+
   @Column({
     primaryKey: true,
     type: DataType.INTEGER,
@@ -22,8 +39,8 @@ class ScheduleEntry extends Model<ScheduleEntryAttributes> {
   @Column(DataType.STRING)
   middleInitial!: string;
 
-  @Column(DataType.STRING)
-  shiftDate!: string;
+  @Column(DataType.DATE)
+  shiftDate!: Date;
 
   @Column(DataType.STRING)
   startTime!: string;

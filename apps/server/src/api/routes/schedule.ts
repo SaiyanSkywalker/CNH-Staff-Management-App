@@ -1,26 +1,48 @@
+import config from "server/src/config";
 import { Request, Response, Router } from "express";
 import { UploadedFile } from "express-fileupload";
-
-import ScheduleEntryAttributes from "@shared/src/interfaces/ScheduleEntryAttributes";
-import { handleTestScheduleData } from "../services/ScheduleEntryService";
+import { validateSchedule } from "server/src/util/CsvUtils";
+import {
+  getScheduleData,
+  handleTestScheduleData,
+  saveScheduleData,
+} from "../services/ScheduleEntryService";
 
 const scheduleRouter = Router();
 
 scheduleRouter.get("/", async (req: Request, res: Response): Promise<void> => {
-  const entriesByCostCenter: { [key: string]: ScheduleEntryAttributes[] } =
-    handleTestScheduleData(req.query.unit as string);
-
-  res.json(entriesByCostCenter);
+  try {
+    // Change this if you want to use data from db instead
+    const isTest = config.environment.toLowerCase() === "dev";
+    const scheduleData = isTest
+      ? handleTestScheduleData(req.query.costCenterId as string)
+      : await getScheduleData(req.query.costCenterId as string);
+    res.json(scheduleData);
+  } catch (err) {
+    console.error("Error in retrieving schedule data:", err);
+    res.status(500).send({ error: "Error in retrieving schedule data" });
+  }
 });
 
-scheduleRouter.post("/", (req: Request, res: Response): void => {
-  if (!req.files?.csvFile) {
-    res.status(400).send({ err: "file not found" });
-  } else {
-    const file: UploadedFile = req.files.csvFile as UploadedFile;
-    // TODO: Include some validation for CSV file (handle empty file case, without correct # of columns, etc.)
-    // TODO: add logic to store uploaded schedule into database
-    res.send({ data: "File successfully uploaded" });
+scheduleRouter.post("/", async (req: Request, res: Response) => {
+  try {
+    if (!req.files?.schedule) {
+      res.status(400).send({ error: "Schedule file not found" });
+    } else {
+      const file: UploadedFile = req.files.schedule as UploadedFile;
+
+      // Check if CSV is valid, then attempt to save shifts
+      const validationStatus: any = validateSchedule(file);
+      if (!validationStatus.isValid) {
+        res.status(400).send({ error: validationStatus.error });
+      }
+
+      await saveScheduleData(file);
+      res.send({ isError: false });
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).send({ error: `Error saving schedule data from file` });
   }
 });
 
