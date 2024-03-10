@@ -36,7 +36,7 @@ const Layout = () => {
           name="schedule"
           options={{
             drawerLabel: "Schedule",
-            title: "",
+            title: "Schedule",
           }}
         />
       </Drawer>

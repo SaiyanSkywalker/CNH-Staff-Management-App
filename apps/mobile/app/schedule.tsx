@@ -1,14 +1,7 @@
 import React, { useState } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import DropDownPicker from "react-native-dropdown-picker";
-import {
-  StyleSheet,
-  Text,
-  View,
-  TextInput,
-  TouchableOpacity,
-  Alert,
-} from "react-native";
+import { StyleSheet, Text, View, TouchableOpacity, Alert } from "react-native";
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -24,13 +17,9 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   dropdownView: {
-    width: "80%",
-    backgroundColor: "#FFFFFF",
-    borderRadius: 25,
-    height: 50,
-    marginBottom: 80,
-    justifyContent: "center",
-    padding: 20,
+    width: "85%",
+    marginBottom: 100,
+    zIndex: 10,
   },
   submitText: {
     color: "white",
@@ -51,14 +40,26 @@ const styles = StyleSheet.create({
 const Page = () => {
   const { auth } = useAuth();
   const onPressSubmit = async () => {
-    Alert.alert("Submission Successful", "Your request has been forwarded to your manager.");
+    Alert.alert(
+      "Submission Successful",
+      "Your request has been forwarded to your manager."
+    );
   };
   const [open, setOpen] = useState(false);
   const [value, setValue] = useState(null);
   const [items, setItems] = useState([
-    {label: '09/27/23 - 11:00 am - 3:00 pm', value: '09/27/23 - 11:00 am - 3:00 pm'},
-    {label: '09/27/23 - 11:30 am - 3:30 pm', value: '09/27/23 - 11:30 am - 3:30 pm'},
-    {label: '09/27/23 - 12:00 pm - 4:00 pm', value: '09/27/23 - 12:00 pm - 4:00 pm'}
+    {
+      label: "09/27/23 - 11:00 am - 3:00 pm",
+      value: "09/27/23 - 11:00 am - 3:00 pm",
+    },
+    {
+      label: "09/27/23 - 11:30 am - 3:30 pm",
+      value: "09/27/23 - 11:30 am - 3:30 pm",
+    },
+    {
+      label: "09/27/23 - 12:00 pm - 4:00 pm",
+      value: "09/27/23 - 12:00 pm - 4:00 pm",
+    },
   ]);
   return (
     <View style={styles.container}>
@@ -71,6 +72,7 @@ const Page = () => {
           setOpen={setOpen}
           setValue={setValue}
           setItems={setItems}
+          placeholder="Select a shift"
         />
       </View>
       <TouchableOpacity onPress={onPressSubmit} style={styles.submitBtn}>

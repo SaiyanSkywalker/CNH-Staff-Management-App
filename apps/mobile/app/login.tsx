@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
   Alert,
 } from "react-native";
+import { router } from "expo-router";
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -60,11 +61,12 @@ const Page = () => {
   const onPressLogin = async () => {
     if (!username || !password) {
       Alert.alert("Error", "Please enter both email and password.");
-      return;
+      router.replace("/schedule");
     }
     const success = await auth?.login(username, password);
     if (success) {
       Alert.alert("Login Successful", "You are now logged in.");
+      router.replace("/schedule");
     } else {
       Alert.alert("Login Failed", "Invalid email or password.");
     }
