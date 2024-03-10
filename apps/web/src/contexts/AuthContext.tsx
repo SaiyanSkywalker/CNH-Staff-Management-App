@@ -7,12 +7,8 @@ import UserInformation from "@shared/src/interfaces/UserInformationAttributes";
 
 interface AuthDetails {
   authenticated: boolean;
-  user: {} | null;
-  login: (
-    username: string,
-    password: string,
-    isMobile: string
-  ) => Promise<boolean>;
+  user: UserInformation | null;
+  login: (username: string, password: string) => Promise<boolean>;
   logout: () => Promise<boolean>;
 }
 
@@ -28,7 +24,7 @@ export default function AuthProvider({
   children: React.ReactNode;
 }) {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [user, setUser] = useState<UserInformation[]>([]);
+  const [user, setUser] = useState<UserInformation>({} as UserInformation);
 
   const login = async (
     username: string,
@@ -47,11 +43,14 @@ export default function AuthProvider({
 
   const logout = (): Promise<boolean> => {
     setIsLoggedIn(false);
-    setUser([]);
+    setUser({} as UserInformation);
     return Promise.resolve(true);
   };
 
-  const getUser = async (username: string, password: string) => {
+  const getUser = async (
+    username: string,
+    password: string
+  ): Promise<UserInformation | undefined> => {
     try {
       const response = await axios({
         method: "GET",
@@ -63,8 +62,6 @@ export default function AuthProvider({
     } catch (err) {
       console.error(err);
     }
-
-    return null;
   };
 
   return (

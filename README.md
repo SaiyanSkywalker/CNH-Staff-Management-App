@@ -14,8 +14,9 @@ This is the monorepo for the Drexel University senior design project Staffing Fo
 ## Getting Started
 
   
-
-1. Start the mobile app by running the following commands:
+1. If this is the first time starting the project, run `npm i` to install all npm packages between the three apps
+ 
+2. Start the mobile app by running the following commands:
 
 
 - `cd apps/mobile`
@@ -30,7 +31,7 @@ This is the monorepo for the Drexel University senior design project Staffing Fo
 
   
 
-2. Start the web app by running the following commands:
+3. Start the web app by running the following commands:
 
   
 
@@ -42,7 +43,7 @@ This is the monorepo for the Drexel University senior design project Staffing Fo
 
   
 
-3. Start the server by running the following commands:
+4. Start the server by running the following commands:
 
   
 
@@ -56,4 +57,4 @@ This is the monorepo for the Drexel University senior design project Staffing Fo
   
 
 ## Development Notes
-When doing work for the mobile app or admin portal, make sure to first start the server project before the starting mobile or web projects. This prevents your calls to the server from failing and that you'll always be connected to the database.
+- When doing work for the mobile app or admin portal, make sure to first start the server project before the starting mobile or web projects. This prevents your calls to the server from failing and that you'll always be connected to the database.
