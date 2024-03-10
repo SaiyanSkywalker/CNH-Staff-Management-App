@@ -2,7 +2,7 @@
 
 import { useState, FormEvent, BaseSyntheticEvent } from "react";
 
-import page from './page.module.css';
+import styles from '../../styles/shift-capacity.module.css';
 
 export default function shiftCapacity() {
 
@@ -78,17 +78,17 @@ export default function shiftCapacity() {
     }
 
     return(
-        <div className={page.container}>
-            <form className={page.capacity} onSubmit={onSubmit}>
-                <h1 className={page.h1}>Max Unit Capacity</h1>
-                <div className={page.grid}>
-                    <div className={page.field}>
-                        <label className={page.label} htmlFor="widget">Date</label>
-                        <input className={page.input} value={date} onChange={handleDateChange} min={todayDate.toISOString().substring(0, 10)} name="date" id="widget" type="date"></input>
+        <div className={styles.container}>
+            <form className={styles.capacity} onSubmit={onSubmit}>
+                <h1 className={styles.h1}>Max Unit Capacity</h1>
+                <div className={styles.grid}>
+                    <div className={styles.field}>
+                        <label className={styles.label} htmlFor="widget">Date</label>
+                        <input className={styles.input} value={date} onChange={handleDateChange} min={todayDate.toISOString().substring(0, 10)} name="date" id="widget" type="date"></input>
                     </div>
-                    <div className={page.field}>
-                        <label className={page.label} htmlFor="shift">Shift</label>
-                        <select className={page.input} value={shiftIndex} onChange={handleShiftIndexChange} name="shift" id="shift">
+                    <div className={styles.field}>
+                        <label className={styles.label} htmlFor="shift">Shift</label>
+                        <select className={styles.input} value={shiftIndex} onChange={handleShiftIndexChange} name="shift" id="shift">
                             <option value="0">{shifts[0]}</option>
                             <option value="1">{shifts[1]}</option>
                             <option value="2">{shifts[2]}</option>
@@ -99,33 +99,33 @@ export default function shiftCapacity() {
                             <option value="7">{shifts[7]}</option>
                         </select>
                     </div>
-                    <div className={page.field}>
-                        <label className={page.label}>PICU</label>
-                        <input className={page.input} value={picu} onChange={handlePicuChange} name="picu" type="number" min="0" max="100"></input>
+                    <div className={styles.field}>
+                        <label className={styles.label}>PICU</label>
+                        <input className={styles.input} value={picu} onChange={handlePicuChange} name="picu" type="number" min="0" max="100"></input>
                     </div>
-                    <div className={page.field}>
-                        <label className={page.label}>NICU</label>
-                        <input className={page.input} value={nicu} onChange={handleNicuChange} name="nicu" type="number" min="0" max="100"></input>
+                    <div className={styles.field}>
+                        <label className={styles.label}>NICU</label>
+                        <input className={styles.input} value={nicu} onChange={handleNicuChange} name="nicu" type="number" min="0" max="100"></input>
                     </div>
-                    <div className={page.field}>
-                        <label className={page.label}>Critical Care</label>
-                        <input className={page.input} value={criticalCare} onChange={handleCriticalCareChange} name="criticalcare" type="number" min="0" max="100"></input>
+                    <div className={styles.field}>
+                        <label className={styles.label}>Critical Care</label>
+                        <input className={styles.input} value={criticalCare} onChange={handleCriticalCareChange} name="criticalcare" type="number" min="0" max="100"></input>
                     </div>
-                    <div className={page.field}>
-                        <label className={page.label}>Acute Care</label>
-                        <input className={page.input} value={acuteCare} onChange={handleAcuteCareChange} name="acutecare" type="number" min="0" max="100"></input>
+                    <div className={styles.field}>
+                        <label className={styles.label}>Acute Care</label>
+                        <input className={styles.input} value={acuteCare} onChange={handleAcuteCareChange} name="acutecare" type="number" min="0" max="100"></input>
                     </div>
-                    <div className={page.field}>
-                        <label className={page.label}>3E</label>
-                        <input className={page.input} value={threeEast} onChange={handleUnitThreeEChange} name="3E" type="number" min="0" max="100"></input>
+                    <div className={styles.field}>
+                        <label className={styles.label}>3E</label>
+                        <input className={styles.input} value={threeEast} onChange={handleUnitThreeEChange} name="3E" type="number" min="0" max="100"></input>
                     </div>
-                    <div className={page.field}>
-                        <label className={page.label}>7E</label>
-                        <input className={page.input} value={sevenEast} onChange={handleUnitSevenEChange} name="7E" type="number" min="0" max="100"></input>
+                    <div className={styles.field}>
+                        <label className={styles.label}>7E</label>
+                        <input className={styles.input} value={sevenEast} onChange={handleUnitSevenEChange} name="7E" type="number" min="0" max="100"></input>
                     </div>
                 </div>
-                <div className={page.submission}>
-                    <button className={page.button}>Submit</button>
+                <div className={styles.submission}>
+                    <button className={styles.button}>Submit</button>
                 </div>
             </form>
         </div>
