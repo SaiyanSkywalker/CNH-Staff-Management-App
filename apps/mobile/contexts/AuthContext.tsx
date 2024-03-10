@@ -6,7 +6,11 @@ import { Platform } from "react-native";
 interface AuthDetails {
   authenticated: boolean;
   user: {} | null;
-  login: (username: string, password: string) => Promise<boolean>;
+  login: (
+    username: string,
+    password: string,
+    isMobile: string
+  ) => Promise<boolean>;
   logout: () => Promise<boolean>;
 }
 
@@ -26,9 +30,10 @@ export default function AuthProvider({
 
   const login = async (
     username: string,
-    password: string
+    password: string,
+    isMobile: string
   ): Promise<boolean> => {
-    const userInfo = await getUser(username, password);
+    const userInfo = await getUser(username, password, isMobile);
     if (userInfo) {
       setUser(userInfo);
       setIsLoggedIn(true);
@@ -44,13 +49,17 @@ export default function AuthProvider({
     return Promise.resolve(true);
   };
 
-  const getUser = async (username: string, password: string) => {
+  const getUser = async (
+    username: string,
+    password: string,
+    isMobile: string
+  ) => {
     try {
       const androidURL = "http://10.0.2.2:3003"; // android doesn't allow you to use localhost (idk why, it's weird)
       const url = Platform.OS === "android" ? androidURL : config.apiUrl;
       const response = await axios({
         method: "GET",
-        url: `${url}/user/?username=${username}&password=${password}`,
+        url: `${url}/user/?username=${username}&password=${password}&isMobile=${isMobile}`,
         responseType: "json",
       });
       const data = await response.data;
