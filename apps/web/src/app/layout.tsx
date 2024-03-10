@@ -5,6 +5,8 @@ import Navbar from "../components/Navbar";
 import Banner from "@webSrc/components/Banner";
 import { BannerContextProvider } from "@webSrc/contexts/BannerContext";
 import AuthProvider from "@webSrc/contexts/AuthContext";
+import Loading from "@webSrc/components/Loading";
+import { LoadingContextProvider } from "@webSrc/contexts/LoadingContext";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -23,11 +25,14 @@ export default function RootLayout({
       <body className={inter.className}>
         <AuthProvider>
           <BannerContextProvider>
-            <Navbar />
-            <Banner />
-            <main className="flex min-h-screen flex-col items-center p-24">
-              {children}
-            </main>
+            <LoadingContextProvider>
+              <Navbar />
+              <Banner />
+              <Loading />
+              <main className="flex min-h-screen flex-col items-center p-24">
+                {children}
+              </main>
+            </LoadingContextProvider>
           </BannerContextProvider>
         </AuthProvider>
       </body>

@@ -15,14 +15,20 @@ import {
 } from "@webSrc/contexts/BannerContext";
 import axios from "axios";
 import config from "@webSrc/config";
+import {
+  LoadingContext,
+  LoadingContextProps,
+} from "@webSrc/contexts/LoadingContext";
 
 export default function UploadPage() {
   const [currentFile, setCurrentFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const props: BannerContextProps | undefined = useContext(BannerContext);
-
+  const bannerContext: BannerContextProps | undefined =
+    useContext(BannerContext);
+  const loadingContext: LoadingContextProps | undefined =
+    useContext(LoadingContext);
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     const inputElement: HTMLInputElement | null = fileInputRef.current;
     const containerElement: HTMLDivElement | null = containerRef.current;
@@ -62,16 +68,16 @@ export default function UploadPage() {
   };
   const uploadCSV = async () => {
     try {
-      if (props) {
+      if (bannerContext && loadingContext) {
         if (!currentFile) {
-          props.showBanner(
+          bannerContext.showBanner(
             "Error! File must be selected before uploading",
             true
           );
         } else {
           const formData = new FormData();
           formData.append("schedule", currentFile);
-
+          loadingContext.showLoader();
           const response = await axios.post(
             `${config.apiUrl}/schedule`,
             formData,
@@ -81,10 +87,11 @@ export default function UploadPage() {
               },
             }
           );
+          loadingContext.hideLoader();
           if (response.status === 200) {
-            props.showBanner("Success! File has been uploaded", false);
+            bannerContext.showBanner("Success! File has been uploaded", false);
           } else {
-            props.showBanner(
+            bannerContext.showBanner(
               `Error in uploading ${currentFile.name}! ${response.data.err}`,
               true
             );
