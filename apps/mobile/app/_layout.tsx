@@ -32,6 +32,13 @@ const Layout = () => {
             title: "Login",
           }}
         />
+        <Drawer.Screen
+          name="schedule"
+          options={{
+            drawerLabel: "Schedule",
+            title: "Schedule",
+          }}
+        />
       </Drawer>
     </AuthProvider>
   );

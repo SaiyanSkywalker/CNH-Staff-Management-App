@@ -54,10 +54,11 @@ export default function AuthProvider({
     try {
       const response = await axios({
         method: "GET",
-        url: `${config.apiUrl}/user/?username=${username}&password=${password}`,
+        url: `${config.apiUrl}/user/?username=${username}&password=${password}&isMobile={0}`,
         responseType: "json",
       });
-      return response.data;
+      const data = await response.data;
+      return data;
     } catch (err) {
       console.error(err);
     }

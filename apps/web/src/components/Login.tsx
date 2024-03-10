@@ -24,7 +24,7 @@ const Login = () => {
   };
 
   const submitForm = async () => {
-    const isAuthenticated = await auth?.login(username, password);
+    const isAuthenticated = await auth?.login(username, password, "0");
     if (isAuthenticated) {
       router.replace("/schedule");
       alert("Login successful!");
