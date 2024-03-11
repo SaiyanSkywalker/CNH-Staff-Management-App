@@ -1,25 +1,24 @@
 'use client';
 
-import { useState, FormEvent, BaseSyntheticEvent } from "react";
-
-import styles from '../../styles/shift-capacity.module.css';
+import { useState, useEffect, FormEvent, BaseSyntheticEvent } from "react";
+import UnitAttributes from "@shared/src/interfaces/UnitAttributes";
+import styles from '../../styles/ShiftCapacity.module.css';
+import config from "web/src/config";
+import axios from "axios";
+import ShiftCapacityRequest from "@shared/src/interfaces/ShiftCapacityRequest";
 
 export default function shiftCapacity() {
-
-    const [picu, setPicu] = useState(0); 
-    const [nicu, setNicu] = useState(0); 
-
-    const [criticalCare, setCriticalCare] = useState(0); 
-    const [acuteCare, setAcuteCare] = useState(0); 
-
-    const [threeEast, setThreeEast] = useState(0);
-    const [sevenEast, setSevenEast] = useState(0);
+    const [units, setUnits] = useState<UnitAttributes[]>([]);
 
     const todayDate = new Date();
     const todayDateString = todayDate.toISOString().substring(0, 10);
 
+    const [capacities, setCapacities] = useState<{[key:string]: number}>({});
+    
     const [shiftIndex, setShiftIndex] = useState("0");
     const [date, setDate] = useState(todayDateString);
+
+    const [initialLoad, setInitialLoad] = useState(false);
 
     const shifts: string[] = [
         "07:00 - 11:00",
@@ -32,29 +31,26 @@ export default function shiftCapacity() {
         "23:00 - 07:00",
     ]
 
-    function handlePicuChange(event: BaseSyntheticEvent) {
-        setPicu(prevPicuValue => event.target.value);
-    }
+    const getUnits = async () => {
+        try {
+          const response = await axios({
+            method: "GET",
+            url: `${config.apiUrl}/unit`,
+            responseType: "json",
+          });
+          const data = await response.data;
+          setInitialLoad(true);
+          console.log("data is: ");
+          console.dir(data);
+          setUnits(data);
+        } catch (err) {
+          console.error(err);
+        }
+    };
 
-    function handleNicuChange(event: BaseSyntheticEvent) {
-        setNicu(prevNicuValue => event.target.value);
-    }
-
-    function handleCriticalCareChange(event: BaseSyntheticEvent) {
-        setCriticalCare(prevCriticalCare => event.target.value);
-    }
-
-    function handleAcuteCareChange(event: BaseSyntheticEvent) {
-        setAcuteCare(prevAcuteCare => event.target.value);
-    }
-
-    function handleUnitThreeEChange(event: BaseSyntheticEvent) {
-        setThreeEast(prevUnitThreeE => event.target.value);
-    }
-
-    function handleUnitSevenEChange(event: BaseSyntheticEvent) {
-        setSevenEast(prevUnitSevenE => event.target.value);
-    }
+    useEffect(() => {
+        getUnits();
+      }, []);
 
     function handleDateChange(event: BaseSyntheticEvent) {
         const newDateString = event.target.value.substring(0, 10);
@@ -65,15 +61,29 @@ export default function shiftCapacity() {
         setShiftIndex(prevSelectedShift => event.target.selectedIndex);
     }
 
+    function handleCapacityChange(event: BaseSyntheticEvent) {
+        let id: string = event.target.id;
+        setCapacities(prevCapacities => {
+            prevCapacities[id] = Number(event.target.value);
+            return prevCapacities;
+        })
+    }
+
 
     async function onSubmit(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
+        let shiftCapacityRequest: ShiftCapacityRequest = {
+            shiftDate: date,
+            shiftTime: shifts[Number(shiftIndex)],
+            capacities
+        }
+        
         const res = await fetch("http://localhost:3003/shift-capacity", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
             },
-            body: JSON.stringify({picu, nicu, acuteCare, criticalCare, threeEast, sevenEast, shift: shifts[Number(shiftIndex)], date})
+            body: JSON.stringify(shiftCapacityRequest)
         });
     }
 
@@ -84,11 +94,11 @@ export default function shiftCapacity() {
                 <div className={styles.grid}>
                     <div className={styles.field}>
                         <label className={styles.label} htmlFor="widget">Date</label>
-                        <input className={styles.input} value={date} onChange={handleDateChange} min={todayDate.toISOString().substring(0, 10)} name="date" id="widget" type="date"></input>
+                        <input className={styles.input} value={date} onChange={handleDateChange} min={todayDate.toISOString().substring(0, 10)} name="date" id="widget" type="date" required></input>
                     </div>
                     <div className={styles.field}>
                         <label className={styles.label} htmlFor="shift">Shift</label>
-                        <select className={styles.input} value={shiftIndex} onChange={handleShiftIndexChange} name="shift" id="shift">
+                        <select className={styles.input} value={shiftIndex} onChange={handleShiftIndexChange} name="shift" id="shift" required>
                             <option value="0">{shifts[0]}</option>
                             <option value="1">{shifts[1]}</option>
                             <option value="2">{shifts[2]}</option>
@@ -99,33 +109,16 @@ export default function shiftCapacity() {
                             <option value="7">{shifts[7]}</option>
                         </select>
                     </div>
-                    <div className={styles.field}>
-                        <label className={styles.label}>PICU</label>
-                        <input className={styles.input} value={picu} onChange={handlePicuChange} name="picu" type="number" min="0" max="100"></input>
-                    </div>
-                    <div className={styles.field}>
-                        <label className={styles.label}>NICU</label>
-                        <input className={styles.input} value={nicu} onChange={handleNicuChange} name="nicu" type="number" min="0" max="100"></input>
-                    </div>
-                    <div className={styles.field}>
-                        <label className={styles.label}>Critical Care</label>
-                        <input className={styles.input} value={criticalCare} onChange={handleCriticalCareChange} name="criticalcare" type="number" min="0" max="100"></input>
-                    </div>
-                    <div className={styles.field}>
-                        <label className={styles.label}>Acute Care</label>
-                        <input className={styles.input} value={acuteCare} onChange={handleAcuteCareChange} name="acutecare" type="number" min="0" max="100"></input>
-                    </div>
-                    <div className={styles.field}>
-                        <label className={styles.label}>3E</label>
-                        <input className={styles.input} value={threeEast} onChange={handleUnitThreeEChange} name="3E" type="number" min="0" max="100"></input>
-                    </div>
-                    <div className={styles.field}>
-                        <label className={styles.label}>7E</label>
-                        <input className={styles.input} value={sevenEast} onChange={handleUnitSevenEChange} name="7E" type="number" min="0" max="100"></input>
-                    </div>
+
+                    {units.map((unit, index) =>
+                      <div className={styles.field} key={index}>
+                        <label className={styles.label}>{unit.name}</label>
+                        <input className={styles.input} id={String(unit.id)} onChange={handleCapacityChange} name="unit" type="number" min="0" max="100" required></input>
+                      </div>
+                    )}
                 </div>
-                <div className={styles.submission}>
-                    <button className={styles.button}>Submit</button>
+                <div style={!initialLoad ? {alignSelf: "flex-end" } : {}} className={styles.submission}>
+                    <button disabled={!initialLoad} className={styles.button}>Submit</button>
                 </div>
             </form>
         </div>

@@ -1,20 +1,16 @@
-/*
 import ShiftCapacity from "server/src/models/ShiftCapacity";
+import ShiftCapacityRequest from "@shared/src/interfaces/ShiftCapacityRequest";
 
-
-
-export const postShiftCapacity = async (unitId: number, chosenUnit: string, shiftDate: Date) => {
+export const postShiftCapacity = async (shiftCapacityRequest: ShiftCapacityRequest): Promise<void> => {
+    const {shiftDate, shiftTime, capacities} = shiftCapacityRequest;
+    console.dir(capacities);
     let myDate: Date = new Date(shiftDate + "T00:00:00Z");
-        const model = await ShiftCapacity.findOne( { where: {shift: req.body.shift, shiftDate: myDate, unitId  } } ) ?? await ShiftCapacity.create( { shift: req.body.shift, shiftDate: myDate, unitId, capacity: req.body[chosenUnit] } );
-        if(model.capacity != req.body[chosenUnit]) {
-            model.capacity = req.body[chosenUnit];
+    for(let unitId in capacities) {
+        let nUnitId = Number(unitId);
+        const model = await ShiftCapacity.findOne( { where: {shift: shiftTime, shiftDate: myDate, unitId: nUnitId  } } ) ?? await ShiftCapacity.create( { shift: shiftTime, shiftDate: myDate, unitId: nUnitId, capacity: capacities[unitId] } );
+        if(model.capacity != capacities[unitId]) {
+            model.capacity = capacities[unitId];
             model.save();
         }
+    }
 }
-*/
-
-//shiftCapacity data modular
-
-//shiftDate
-//capacities [key:string]: number
-//

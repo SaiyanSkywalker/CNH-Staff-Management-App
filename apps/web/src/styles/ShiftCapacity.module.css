@@ -1,13 +1,14 @@
 
 .container {
-    @apply flex flex-row justify-center items-center w-full;
-    background-color: #E2F6FF;
+    @apply flex flex-row justify-center w-full;
+    
     height: 92vh;
 }
 
 
 .capacity {
-    @apply h-4/5 bg-white rounded-[15px] flex flex-col items-center;
+    @apply bg-white rounded-[15px] flex flex-col items-center overflow-auto;
+    background-color: #E2F6FF;
     box-shadow: 10px 10px 3px 0px rgba(0, 0, 0, 0.3);
     width: 55.56%;
     padding: 2%;
@@ -16,7 +17,6 @@
 .grid {
     display: grid;
     width: 73.5%;
-    height: 60%;
     //grid-template-columns: 1fr 1fr;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     grid-template-rows: 1fr 1fr 1fr 1fr
@@ -36,13 +36,11 @@
 
 .h1 {
     @apply font-bold;
-    height: 10%;
 }
 
 
 .submission {
     width: 100%;
-    height: 30%;
     @apply flex flex-col justify-end items-center;
 }
 
@@ -51,7 +49,6 @@
     background-color: #067496;
     color: white;
     @apply rounded-[15px] font-bold justify-self-end;
-    height: fit-content;
     padding: 1.5% 6%;
 }
 
