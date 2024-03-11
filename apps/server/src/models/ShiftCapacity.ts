@@ -25,5 +25,7 @@ class ShiftCapacity extends Model<ShiftCapacityAttributes> {
   shift!: string;
   @Column(DataType.INTEGER)
   capacity!: number;
+  @Column(DataType.DATE)
+  shiftDate!: Date;
 }
 export default ShiftCapacity;
