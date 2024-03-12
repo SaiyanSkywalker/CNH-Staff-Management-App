@@ -78,28 +78,23 @@ export default function UploadPage() {
           const formData = new FormData();
           formData.append("schedule", currentFile);
           loadingContext.showLoader();
-          const response = await axios.post(
-            `${config.apiUrl}/schedule`,
-            formData,
-            {
-              headers: {
-                "Content-Type": "multipart/form-data",
-              },
-            }
-          );
+          await axios.post(`${config.apiUrl}/schedule`, formData, {
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+          });
           loadingContext.hideLoader();
-          if (response.status === 200) {
-            bannerContext.showBanner("Success! File has been uploaded", false);
-          } else {
-            bannerContext.showBanner(
-              `Error in uploading ${currentFile.name}! ${response.data.err}`,
-              true
-            );
-          }
+          bannerContext.showBanner("Success! File has been uploaded", false);
         }
       }
     } catch (err) {
-      console.error(err);
+      if (bannerContext && loadingContext) {
+        bannerContext.showBanner(
+          "Error: Schedule data could not be saved to the database",
+          true
+        );
+        loadingContext.hideLoader();
+      }
     }
   };
 
@@ -119,40 +114,42 @@ export default function UploadPage() {
 
   return (
     <>
-      <section className="flex flex-col items-center">
-        <div
-          className={`${styles["drop-zone"]}`}
-          ref={containerRef}
-          onClick={handleClick}
-          onDrop={handleDrop}
-          onDragOver={handleDrag}
-          onDragLeave={handleDragOut}
-          onDragEnd={handleDragOut}
-        >
-          <span className={`${styles["drop-zone__prompt"]}`}>
-            Drop file here or click to upload
-          </span>
-          <input
-            className={`${styles["file-container__input"]} ${styles["drop-zone__input"]}`}
-            ref={fileInputRef}
-            type="file"
-            onChange={handleFileChange}
-            name="file"
-            placeholder="file"
-            accept=".csv"
-            required
-          />
-          {containerRef.current &&
-            currentFile &&
-            buildThumbnail(containerRef.current, currentFile)}
+      <section className="h-full w-full flex justify-center items-center pt-32">
+        <div className="flex flex-col items-center">
+          <div
+            className={`${styles["drop-zone"]}`}
+            ref={containerRef}
+            onClick={handleClick}
+            onDrop={handleDrop}
+            onDragOver={handleDrag}
+            onDragLeave={handleDragOut}
+            onDragEnd={handleDragOut}
+          >
+            <span className={`${styles["drop-zone__prompt"]}`}>
+              Drop file here or click to upload
+            </span>
+            <input
+              className={`${styles["file-container__input"]} ${styles["drop-zone__input"]}`}
+              ref={fileInputRef}
+              type="file"
+              onChange={handleFileChange}
+              name="file"
+              placeholder="file"
+              accept=".csv"
+              required
+            />
+            {containerRef.current &&
+              currentFile &&
+              buildThumbnail(containerRef.current, currentFile)}
+          </div>
+          <button
+            className={`${styles["btn-upload"]} mt-4`}
+            type="button"
+            onClick={uploadCSV}
+          >
+            Upload File
+          </button>
         </div>
-        <button
-          className={`${styles["btn-upload"]} mt-4`}
-          type="button"
-          onClick={uploadCSV}
-        >
-          Upload File
-        </button>
       </section>
     </>
   );

@@ -29,7 +29,7 @@ export default function RootLayout({
               <Navbar />
               <Banner />
               <Loading />
-              <main className="flex min-h-screen flex-col items-center p-24">
+              <main className="flex min-h-screen flex-col items-center px-24 pt-16">
                 {children}
               </main>
             </LoadingContextProvider>

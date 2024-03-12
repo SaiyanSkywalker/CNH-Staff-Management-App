@@ -74,19 +74,26 @@ export const saveScheduleData = async (file: UploadedFile): Promise<void> => {
     const schedule: ScheduleEntryAttributes[] = csvToScheduleData(
       csvToArray(file.data.toString())
     );
-    const batchSize = 500;
 
-    //TODO: Come up with a more performant way to do this
-    for (let i = 0; i < schedule.length; i += batchSize) {
-      const batch: ScheduleEntryAttributes[] = schedule.slice(i, i + batchSize);
-      await Promise.all(
-        batch.map(async (data: ScheduleEntryAttributes) => {
-          await ScheduleEntry.upsert(data);
-        })
-      );
-    }
+    const primaryKeys = schedule.map((data) => {
+      return {
+        employeeId: data.employeeId,
+        shiftDate: data.shiftDate,
+        shiftType: data.shiftType,
+        costCenterId: data.costCenterId,
+      };
+    });
+    // Remove all exisiting entries in table that are on incoming CSV
+    await ScheduleEntry.destroy({
+      where: {
+        [Op.or]: primaryKeys,
+      },
+    });
+
+    // Add all new data to db
+    await ScheduleEntry.bulkCreate(schedule);
   } catch (error) {
-    console.log(error);
+    throw new Error("Error saving data to UserInformation table");
   }
 };
 

@@ -390,7 +390,7 @@ const Schedule = () => {
           </div>
 
           <Calendar
-            className="h-[700px] overflow-scroll border-4 rounded-lg border-gray-400 shadow-lg p-12"
+            className="h-[500px] overflow-scroll border-4 rounded-lg border-gray-400 shadow-lg p-12"
             localizer={localizer}
             events={events}
             views={views}

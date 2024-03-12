@@ -42,7 +42,7 @@ scheduleRouter.post("/", async (req: Request, res: Response) => {
     }
   } catch (error) {
     console.error(error);
-    res.status(500).send({ error: `Error saving schedule data from file` });
+    res.status(500).send({ message: `Error saving schedule data from file` });
   }
 });
 
