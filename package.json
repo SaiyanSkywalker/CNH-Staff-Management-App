@@ -8,6 +8,6 @@
     "apps/web"
   ],
   "dependencies": {
-    "react": "^18.2.0"
+    "socket.io": "^4.7.4"
   }
 }
