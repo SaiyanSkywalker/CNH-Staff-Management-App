@@ -16,6 +16,10 @@ const startServer = async () => {
     cors: {
       origin: "http://localhost:3000",
     },
+    connectionStateRecovery: {
+      maxDisconnectionDuration: 120000, //2 minute recovery
+      skipMiddlewares: true
+    }
   });
   const onConnection = (socket: Socket) => {
     socketHandler(io, socket);

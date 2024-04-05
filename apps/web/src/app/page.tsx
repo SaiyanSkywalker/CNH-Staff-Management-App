@@ -15,12 +15,7 @@ export default function Page() {
 
   return (
     <>
-      {useEffect(() => {
-        !auth?.authenticated
-          ? router.replace("/login")
-          : router.replace("/schedule"),
-          [];
-      })}
+      <Login/>
     </>
   );
 }
