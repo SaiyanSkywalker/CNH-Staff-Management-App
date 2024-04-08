@@ -39,8 +39,7 @@ export default function AuthProvider({
     if (userInfo) {
       setUser(userInfo);
       setIsLoggedIn(true);
-      const newSocket = io(config.apiUrl);
-      newSocket?.emit("user", {username, password});
+      const newSocket = io(config.apiUrl);      
       setSocket(newSocket);
       return Promise.resolve(true);
     }
