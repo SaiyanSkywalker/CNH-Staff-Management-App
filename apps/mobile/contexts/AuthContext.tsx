@@ -3,6 +3,9 @@ import { createContext, useContext, useState } from "react";
 import config from "../config";
 import UserInformation from "@shared/src/interfaces/UserInformationAttributes";
 import { Platform } from "react-native";
+import { Socket } from "socket.io-client";
+import { io } from "socket.io-client";
+
 interface AuthDetails {
   authenticated: boolean;
   user: {} | null;
@@ -27,6 +30,7 @@ export default function AuthProvider({
 }) {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [user, setUser] = useState<UserInformation[]>([]);
+  const [socket, setSocket] = useState<Socket | null | undefined>(undefined);
 
   const login = async (
     username: string,
@@ -37,6 +41,9 @@ export default function AuthProvider({
     if (userInfo) {
       setUser(userInfo);
       setIsLoggedIn(true);
+      const newSocket = io(config.apiUrl);
+      newSocket?.emit("user", {username, password});
+      setSocket(newSocket);
       return Promise.resolve(true);
     }
 
@@ -46,6 +53,8 @@ export default function AuthProvider({
   const logout = (): Promise<boolean> => {
     setIsLoggedIn(false);
     setUser([]);
+    socket?.disconnect();
+    setSocket(undefined);
     return Promise.resolve(true);
   };
 
