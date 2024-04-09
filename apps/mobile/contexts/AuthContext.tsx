@@ -5,10 +5,11 @@ import UserInformation from "@shared/src/interfaces/UserInformationAttributes";
 import { Platform } from "react-native";
 import { Socket } from "socket.io-client";
 import { io } from "socket.io-client";
+import {v4 as uuidv4} from 'uuid';
 
 interface AuthDetails {
   authenticated: boolean;
-  user: {} | null;
+  user: UserInformation | null;
   login: (
     username: string,
     password: string,
@@ -29,8 +30,9 @@ export default function AuthProvider({
   children: React.ReactNode;
 }) {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [user, setUser] = useState<UserInformation[]>([]);
+  const [user, setUser] = useState<UserInformation>({} as UserInformation);
   const [socket, setSocket] = useState<Socket | null | undefined>(undefined);
+  const [userUUID, setUserUUID] = useState<string | undefined>(undefined);
 
   const login = async (
     username: string,
@@ -41,9 +43,11 @@ export default function AuthProvider({
     if (userInfo) {
       setUser(userInfo);
       setIsLoggedIn(true);
+      const randomUUID = uuidv4();
       const newSocket = io(config.apiUrl);
-      newSocket?.emit("user", {username, password});
+      newSocket?.emit("add_user", {username, uuid: randomUUID});
       setSocket(newSocket);
+      setUserUUID(randomUUID);
       return Promise.resolve(true);
     }
 
@@ -51,10 +55,11 @@ export default function AuthProvider({
   };
 
   const logout = (): Promise<boolean> => {
+    socket?.emit("remove_user", {username: user?.username, uuid: userUUID});
     setIsLoggedIn(false);
-    setUser([]);
-    socket?.disconnect();
+    setUser({} as UserInformation);
     setSocket(undefined);
+    setUserUUID(undefined);
     return Promise.resolve(true);
   };
 

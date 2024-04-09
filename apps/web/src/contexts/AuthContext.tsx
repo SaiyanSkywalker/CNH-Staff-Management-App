@@ -10,9 +10,9 @@ import { io } from "socket.io-client";
 interface AuthDetails {
   authenticated: boolean;
   user: UserInformation | null;
+  socket: Socket | null | undefined;
   login: (username: string, password: string) => Promise<boolean>;
   logout: () => Promise<boolean>;
-  socket: Socket | null | undefined;
 }
 
 interface IAuthContext {
