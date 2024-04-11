@@ -10,6 +10,7 @@ import {v4 as uuidv4} from 'uuid';
 interface AuthDetails {
   authenticated: boolean;
   user: UserInformation | null;
+  socket: Socket | null | undefined;
   login: (
     username: string,
     password: string,
@@ -93,6 +94,7 @@ export default function AuthProvider({
           user: user,
           login: login,
           logout: logout,
+          socket: socket,
         },
       }}
     >
