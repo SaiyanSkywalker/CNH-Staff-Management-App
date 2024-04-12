@@ -5,7 +5,8 @@ import UserInformation from "@shared/src/interfaces/UserInformationAttributes";
 import { Platform } from "react-native";
 import { Socket } from "socket.io-client";
 import { io } from "socket.io-client";
-import {v4 as uuidv4} from 'uuid';
+import "react-native-get-random-values";
+import { v4 as uuidv4 } from "uuid";
 
 interface AuthDetails {
   authenticated: boolean;
@@ -45,8 +46,9 @@ export default function AuthProvider({
       setUser(userInfo);
       setIsLoggedIn(true);
       const randomUUID = uuidv4();
+      console.log(randomUUID);
       const newSocket = io(config.apiUrl);
-      newSocket?.emit("add_user", {username, uuid: randomUUID});
+      newSocket?.emit("add_user", { username, uuid: randomUUID });
       setSocket(newSocket);
       setUserUUID(randomUUID);
       return Promise.resolve(true);
@@ -56,7 +58,7 @@ export default function AuthProvider({
   };
 
   const logout = (): Promise<boolean> => {
-    socket?.emit("remove_user", {username: user?.username, uuid: userUUID});
+    socket?.emit("remove_user", { username: user?.username, uuid: userUUID });
     setIsLoggedIn(false);
     setUser({} as UserInformation);
     setSocket(undefined);
