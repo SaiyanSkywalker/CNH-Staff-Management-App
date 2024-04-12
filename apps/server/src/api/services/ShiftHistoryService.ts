@@ -19,6 +19,7 @@ export const getShiftHistory = async (id: string) => {
     });
     return shiftHistory.map((shiftHistory: ShiftHistory) => {
       return {
+        id: shiftHistory.id,
         employeeId: shiftHistory.userId,
         employeeName:
           shiftHistory.user.firstName + " " + shiftHistory.user.lastName,
