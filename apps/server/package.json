@@ -24,6 +24,7 @@
     "reflect-metadata": "^0.2.1",
     "sequelize": "^6.37.0",
     "sequelize-typescript": "^2.1.6",
+    "socket.io": "^4.7.5",
     "ssh2": "^1.15.0",
     "tedious": "^16.6.1",
     "tunnel-ssh": "^5.1.2",

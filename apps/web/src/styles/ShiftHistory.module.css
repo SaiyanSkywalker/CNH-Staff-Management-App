@@ -3,11 +3,16 @@
 }
 
 .form {
-  @apply flex flex-row justify-around items-center;
+  @apply flex flex-col justify-around items-center;
+  background-color: #E2F6FF;
+  border: 2px solid black;
+  padding: 5px;
 }
 
 .submission {
+  @apply flex flex-row justify-center flex-wrap;
   width: 70%;
+  padding: 5px;
 }
 
 .loading {
@@ -24,10 +29,15 @@
   }
 }
 
+.label {
+  @apply font-bold mb-4;
+  display: block;
+}
+
 .input {
   border: 1px solid #067496;
-  border-radius: 15px;
   padding: 5px;
+  margin: 5px;
 }
 
 .button {
@@ -56,14 +66,33 @@
   background-color: #f5f5f5;
 }
 
-.label {
-  @apply font-bold mb-4;
-  display: block;
+.accept {
+  background-color: green;
+  color: white;
+  @apply rounded-[5px] justify-self-end text-sm;
+  width: 47%;
+}
+
+.deny {
+  background-color: red;
+  color: white;
+  @apply rounded-[5px] justify-self-end text-sm;
+  width: 47%;
+}
+
+.buttons {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+  align-items: center;
 }
 
 @media (min-width: 475px) and (max-width: 650px) {
   .button {
-    width: 15%;
+    color: white;
+    @apply rounded-[10px] font-semibold justify-self-end px-2 py-2;
+    width: 25%;
+    font-size: small;
   }
 }
 
@@ -75,7 +104,7 @@
   }
 
   .input {
-    width: 25%;
+    width: 100%;
   }
 
   .th,
@@ -86,7 +115,17 @@
   .button {
     background-color: #067496;
     color: white;
-    @apply rounded-[10px] font-bold justify-self-end;
-    width: 20%;
+    @apply rounded-[10px] font-bold justify-self-end text-sm;
+    width: fit-content;
+  }
+
+  .accept {
+    @apply text-xs;
+    width: fit-content;
+  }
+
+  .deny {
+    @apply text-xs;
+    width: fit-content;
   }
 }
