@@ -1,11 +1,15 @@
-import AuthProvider from "../contexts/AuthContext";
+import AuthProvider, { useAuth } from "../contexts/AuthContext";
 import { Drawer } from "expo-router/drawer";
 import React from "react";
 import { Ionicons } from "@expo/vector-icons";
+
+import CustomDrawerContent from "../components/CustomDrawerContent";
+
 const Layout = () => {
   return (
     <AuthProvider>
       <Drawer
+        drawerContent={(props) => <CustomDrawerContent {...props} />}
         screenOptions={({ navigation }) => ({
           headerLeft: () => (
             <Ionicons
@@ -18,6 +22,7 @@ const Layout = () => {
           ),
         })}
       >
+        {/* Screens */}
         <Drawer.Screen
           name="index"
           options={{
@@ -43,4 +48,5 @@ const Layout = () => {
     </AuthProvider>
   );
 };
+
 export default Layout;

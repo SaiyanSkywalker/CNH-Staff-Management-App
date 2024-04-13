@@ -14,7 +14,7 @@
   },
   "dependencies": {
     "@expo/vector-icons": "^13.0.0",
-    "@react-navigation/drawer": "^6.6.7",
+    "@react-navigation/drawer": "^6.6.15",
     "@react-navigation/native": "^6.1.10",
     "@react-navigation/stack": "^6.3.21",
     "expo": "~49.0.15",
