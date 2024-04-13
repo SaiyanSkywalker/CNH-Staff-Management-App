@@ -7,6 +7,8 @@ import {
   handleTestScheduleData,
   saveScheduleData,
 } from "../services/ScheduleEntryService";
+import { adminSocketMap } from "server/src/sockets/socketHandler";
+import { Socket } from "socket.io";
 
 const scheduleRouter = Router();
 
@@ -30,15 +32,25 @@ scheduleRouter.post("/", async (req: Request, res: Response) => {
       res.status(400).send({ error: "Schedule file not found" });
     } else {
       const file: UploadedFile = req.files.schedule as UploadedFile;
+      const username: string = req.body.username;
 
       // Check if CSV is valid, then attempt to save shifts
       const validationStatus: any = validateSchedule(file);
       if (!validationStatus.isValid) {
         res.status(400).send({ error: validationStatus.error });
       }
-
       await saveScheduleData(file);
       res.send({ isError: false });
+
+      // Emit event to web client once schedule is finished saving
+      const socketMap: Map<string, Socket> | undefined =
+        adminSocketMap.get(username);
+
+      if (socketMap) {
+        socketMap.forEach((value: Socket, _) => {
+          value.emit("schedule_upload_complete");
+        });
+      }
     }
   } catch (error) {
     console.error(error);

@@ -19,6 +19,7 @@ import {
   LoadingContext,
   LoadingContextProps,
 } from "@webSrc/contexts/LoadingContext";
+import { useAuth } from "@webSrc/contexts/AuthContext";
 
 export default function UploadPage() {
   const [currentFile, setCurrentFile] = useState<File | null>(null);
@@ -29,6 +30,7 @@ export default function UploadPage() {
     useContext(BannerContext);
   const loadingContext: LoadingContextProps | undefined =
     useContext(LoadingContext);
+  const authContext = useAuth();
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     const inputElement: HTMLInputElement | null = fileInputRef.current;
     const containerElement: HTMLDivElement | null = containerRef.current;
@@ -75,16 +77,21 @@ export default function UploadPage() {
             true
           );
         } else {
-          const formData = new FormData();
+          const user = authContext.auth?.user?.username || "steve"; //TODO: Remove the steve
+          const formData: FormData = new FormData();
+          formData.append("username", user);
           formData.append("schedule", currentFile);
           loadingContext.showLoader();
-          await axios.post(`${config.apiUrl}/schedule`, formData, {
+          axios.post(`${config.apiUrl}/schedule`, formData, {
             headers: {
               "Content-Type": "multipart/form-data",
             },
           });
           loadingContext.hideLoader();
-          bannerContext.showBanner("Success! File has been uploaded", false);
+          bannerContext.showBanner(
+            "File upload has been started, notification will be shown once upload is complete",
+            false
+          );
         }
       }
     } catch (err) {

@@ -1,10 +1,6 @@
 import { useNavigation } from "expo-router";
 import { useAuth } from "../contexts/AuthContext";
-import {
-  DrawerContentScrollView,
-  DrawerItem,
-  DrawerItemList,
-} from "@react-navigation/drawer";
+import { DrawerContentScrollView, DrawerItem } from "@react-navigation/drawer";
 import { CommonActions } from "@react-navigation/native";
 
 export default function CustomDrawerContent(props: any) {
