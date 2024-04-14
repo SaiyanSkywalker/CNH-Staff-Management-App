@@ -42,10 +42,9 @@ scheduleRouter.post("/", async (req: Request, res: Response) => {
       await saveScheduleData(file);
       res.send({ isError: false });
 
-      // Emit event to web client once schedule is finished saving
       const socketMap: Map<string, Socket> | undefined =
         adminSocketMap.get(username);
-
+      // Emit event to web client once schedule is finished saving
       if (socketMap) {
         socketMap.forEach((value: Socket, _) => {
           value.emit("schedule_upload_complete");
