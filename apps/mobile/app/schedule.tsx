@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import DropDownPicker from "react-native-dropdown-picker";
-import { StyleSheet, Text, View, TouchableOpacity, Alert, Button, TextInput} from "react-native";
+import { StyleSheet, Text, View, TouchableOpacity, Alert } from "react-native";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 const styles = StyleSheet.create({
   container: {
@@ -26,6 +26,7 @@ const styles = StyleSheet.create({
     color: "black",
     fontSize: 16,
     fontWeight: "700",
+    marginLeft: 5,
   },
   submitText: {
     color: "white",
@@ -36,11 +37,10 @@ const styles = StyleSheet.create({
     width: "85%",
     backgroundColor: "#ffffff",
     height: 50,
-    alignItems: "left",
     borderRadius: 8,
     justifyContent: "center",
     marginTop: 40,
-    marginBottom: 0,
+    marginBottom: 40,
     borderColor: "black",
     borderWidth: 1,
   },
@@ -67,6 +67,9 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
 });
+// TODO: Develop a way to get shifts based on capacity
+// TODO: Find a way to send shift requests to server through sockets
+
 const Page = () => {
   const { auth } = useAuth();
   const onPressSubmit = async () => {
@@ -78,8 +81,9 @@ const Page = () => {
       "Your request has been forwarded to your manager."
     );
   };
-  const [open, setOpen] = useState(false);
-  const [value, setValue] = useState(null);
+  const [open, setOpen] = useState<boolean>(false);
+  const [shift, setShift] = useState<string>("");
+
   const [items, setItems] = useState([
     {
       label: "11:00 am - 3:00 pm",
@@ -94,8 +98,9 @@ const Page = () => {
       value: "12:00 pm - 4:00 pm",
     },
   ]);
-  const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
-  const [datePicked, setDate] = useState<string>("");
+  const [isDatePickerVisible, setDatePickerVisibility] =
+    useState<boolean>(false);
+  const [datePicked, setDatePicked] = useState<Date | null>(null);
   const showDatePicker = () => {
     setDatePickerVisibility(true);
   };
@@ -104,58 +109,52 @@ const Page = () => {
     setDatePickerVisibility(false);
   };
 
-  const handleConfirm = (date) => {
-    setDate(date);
+  const handleConfirm = (date: Date) => {
+    setDatePicked(date);
     hideDatePicker();
   };
   const getDate = () => {
-    let tempDate = datePicked.toString().split(' ');
-    return datePicked !== ''
-      ? `  ${tempDate[0]} ${tempDate[1]} ${tempDate[2]} ${tempDate[3]}`
-      : '';
+    let tempDate = datePicked?.toString().split(" ");
+    return tempDate
+      ? `${tempDate[0]} ${tempDate[1]} ${tempDate[2]} ${tempDate[3]}`
+      : "";
   };
   return (
     <View style={styles.container}>
       <Text style={styles.title}> Schedule Shift</Text>
-      <TouchableOpacity style = {styles.dateSelectedBtn}>
-      <TextInput
-        style={styles.dateText}
-        value={getDate()}
-        placeholder="  No Date Selected"
-        placeholderTextColor={"black"}
-      />
+
+      <TouchableOpacity onPress={showDatePicker} style={styles.dateSelectedBtn}>
+        <Text style={styles.dateText}>{getDate() || "Select a date"}</Text>
       </TouchableOpacity>
-      <TouchableOpacity onPress={showDatePicker} style={styles.dateBtn}>
-        <Text style={styles.dateText}> Select a date</Text>
-      </TouchableOpacity>
-      <DateTimePickerModal
-        isVisible={isDatePickerVisible}
-        mode="date"
-        onConfirm={handleConfirm}
-        onCancel={hideDatePicker}
-        onChange={datePicked => setDate(datePicked)}
-      />
+
       <View style={styles.dropdownView}>
         <DropDownPicker
           open={open}
-          value={value}
+          value={shift}
           items={items}
           setOpen={setOpen}
-          setValue={setValue}
+          setValue={setShift}
           setItems={setItems}
-          placeholder="Select a time"
+          placeholder="Select a shift"
           placeholderStyle={{
             color: "black",
             alignItems: "center",
             justifyContent: "center",
             fontSize: 16,
-            fontWeight: "700"
+            fontWeight: "700",
           }}
           labelStyle={{
-            fontWeight: "700"
+            fontWeight: "700",
           }}
         />
       </View>
+      <DateTimePickerModal
+        isVisible={isDatePickerVisible}
+        mode="date"
+        onConfirm={handleConfirm}
+        onCancel={hideDatePicker}
+        onChange={(datePicked: Date) => setDatePicked(datePicked)}
+      />
       <TouchableOpacity onPress={onPressSubmit} style={styles.submitBtn}>
         <Text style={styles.submitText}>SUBMIT REQUEST </Text>
       </TouchableOpacity>
