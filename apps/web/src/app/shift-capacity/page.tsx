@@ -23,16 +23,13 @@ import {
 
 export default function shiftCapacity() {
   const [units, setUnits] = useState<UnitAttributes[]>([]);
-
   const todayDate = new Date();
   const todayDateString = todayDate.toISOString().substring(0, 10);
-
   const [capacities, setCapacities] = useState<{ [key: string]: number }>({});
-
   const [shiftIndex, setShiftIndex] = useState("0");
-  const [date, setDate] = useState(todayDateString);
-
-  const [initialLoad, setInitialLoad] = useState(false);
+  const [date, setDate] = useState<string>(todayDateString);
+  const [initialLoad, setInitialLoad] = useState<boolean>(false);
+  const [isChecked, setIsChecked] = useState<boolean>(false);
 
   const bannerContext: BannerContextProps | undefined =
     useContext(BannerContext);
@@ -91,7 +88,13 @@ export default function shiftCapacity() {
     });
   }
 
+  function handleIsChecked() {
+    setIsChecked(prevIsChecked => !prevIsChecked);
+  }
+
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
+    console.log("date is:");
+    console.dir(date);
     try {
       event.preventDefault();
       if (Object.keys(capacities).length === 0) {
@@ -104,6 +107,7 @@ export default function shiftCapacity() {
           shiftDate: date,
           shiftTime: shifts[Number(shiftIndex)],
           capacities,
+          isDefault: isChecked
         };
         loadingContext?.showLoader();
         const res = await fetch("http://localhost:3003/shift-capacity", {
@@ -189,6 +193,10 @@ export default function shiftCapacity() {
               ></input>
             </div>
           ))}
+          <div className={styles.checkbox}>
+              <input type='checkbox' id='default' name='default' checked={isChecked} onChange={handleIsChecked}></input>
+              <label htmlFor='default' className={styles.checkboxLabel}>Set Defaults</label>
+          </div>
         </div>
         <div
           style={!initialLoad ? { alignSelf: "flex-end" } : {}}
