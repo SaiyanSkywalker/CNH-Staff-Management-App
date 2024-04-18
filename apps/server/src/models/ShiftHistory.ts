@@ -25,7 +25,7 @@ class ShiftHistory extends Model<ShiftHistoryAttributes> {
   @Column(DataType.STRING)
   status!: string;
 
-  @BelongsTo(() => UserInformation, { targetKey: "id", foreignKey: "userId" })
+  @BelongsTo(() => UserInformation, { targetKey: "employeeId", foreignKey: "userId" })
   user!: UserInformation;
 
   @BelongsTo(() => Unit, { targetKey: "id", foreignKey: "unitId" })

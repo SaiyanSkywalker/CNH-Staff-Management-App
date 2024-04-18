@@ -2,6 +2,7 @@
 import { useState, FormEvent, BaseSyntheticEvent, useEffect } from "react";
 import page from "@webSrc/styles/ShiftHistory.module.css";
 import { useAuth } from "@webSrc/contexts/AuthContext";
+import { useSearchParams } from "next/navigation";
 
 interface ShiftHistory {
   id: number;
@@ -14,13 +15,23 @@ interface ShiftHistory {
 }
 
 export default function shiftHistory() {
-  const [isLoading, setIsLoading] = useState(false);
-  const [employeeId, setEmployeeId] = useState("");
-  const [employeeName, setEmployeeName] = useState("");
-  const [unit, setUnit] = useState("");
-  const [date, setDate] = useState("");
-  const [shift, setShift] = useState("");
-  const [status, setStatus] = useState("");
+  const params = useSearchParams();
+  const employeeNameQuery: string = params.get('employeeName') ?? "";
+  const employeeIdQuery: string = params.get('employeeId') ?? "";
+  const unitQuery: string = params.get('unit') ?? "";
+  const dateQuery: string = params.get('date') ?? "";
+  const shiftQuery: string = params.get('shift') ?? "";
+  const statusQuery: string = params.get('status') ?? "";
+
+  console.log(`employeeNameQuery is ${employeeNameQuery}, employeeIdQuery is ${employeeIdQuery}, unitQuery is ${unitQuery}, dateQuery is ${dateQuery}, shiftQuery is ${shiftQuery}, statusQuery is ${statusQuery}`);
+
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [employeeId, setEmployeeId] = useState<string>(employeeIdQuery);
+  const [employeeName, setEmployeeName] = useState<string>(employeeNameQuery);
+  const [unit, setUnit] = useState<string>(unitQuery);
+  const [date, setDate] = useState<string>(dateQuery);
+  const [shift, setShift] = useState<string>(shiftQuery);
+  const [status, setStatus] = useState<string>(statusQuery);
   const [shiftHistories, setShiftHistories] = useState<ShiftHistory[]>([]);
   const { auth } = useAuth();
 
@@ -48,7 +59,7 @@ export default function shiftHistory() {
   const updateList = async (): Promise<void> => {
     setIsLoading((prevLoad) => !prevLoad);
     const res = await fetch(
-      "http://localhost:3003/shift-history/" + employeeId,
+      `http://localhost:3003/shift-history?employeeId=${employeeId}&employeeName=${employeeName}&unit=${unit}&date=${date}&shift=${shift}&status=${status}`,
       {
         method: "GET",
         headers: {

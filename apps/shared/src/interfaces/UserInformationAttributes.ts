@@ -1,5 +1,6 @@
 export default interface UserInformationAttributes {
   id?: number;
+  employeeId: number;
   username: string;
   firstName: string;
   lastName: string;
