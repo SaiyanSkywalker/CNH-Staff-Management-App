@@ -2,7 +2,7 @@ export default interface ShiftHistoryQuery {
     employeeId?: number;
     unitId?: number;
     employeeName?: string;
-    date?: Date;
+    dateRequested?: string;
     shift?: string;
     status?: string;
 }

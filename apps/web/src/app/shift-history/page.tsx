@@ -3,16 +3,7 @@ import { useState, FormEvent, BaseSyntheticEvent, useEffect } from "react";
 import page from "@webSrc/styles/ShiftHistory.module.css";
 import { useAuth } from "@webSrc/contexts/AuthContext";
 import { useSearchParams } from "next/navigation";
-
-interface ShiftHistory {
-  id: number;
-  employeeId: number;
-  employeeName: string;
-  unit: string;
-  shift: string;
-  status: string;
-  dateRequested: string;
-}
+import ShiftHistoryClient from "@shared/src/interfaces/ShiftHistoryClient";
 
 export default function shiftHistory() {
   const params = useSearchParams();
@@ -32,7 +23,7 @@ export default function shiftHistory() {
   const [date, setDate] = useState<string>(dateQuery);
   const [shift, setShift] = useState<string>(shiftQuery);
   const [status, setStatus] = useState<string>(statusQuery);
-  const [shiftHistories, setShiftHistories] = useState<ShiftHistory[]>([]);
+  const [shiftHistories, setShiftHistories] = useState<ShiftHistoryClient[]>([]);
   const { auth } = useAuth();
 
   const validateEmployeeId = (): boolean => {
@@ -69,7 +60,7 @@ export default function shiftHistory() {
     );
     console.log("res is:");
     console.dir(res);
-    const jsonResponse: ShiftHistory[] = await res.json();
+    const jsonResponse: ShiftHistoryClient[] = await res.json();
     console.log("jsonResponse is:");
     console.dir(jsonResponse);
     setIsLoading((prevLoad) => !prevLoad);
@@ -89,6 +80,7 @@ export default function shiftHistory() {
   };
 
   const handleDateChange = (event: BaseSyntheticEvent): void => {
+    console.log("date is: ");
     setDate((prevDate) => event.target.value);
   };
 
@@ -98,19 +90,6 @@ export default function shiftHistory() {
 
   const handleStatusChange = (event: BaseSyntheticEvent): void => {
     setStatus((prevStatus) => event.target.value);
-  };
-
-  const parseDate = (requestedDate: string): string => {
-    let newDate = new Date(requestedDate);
-    let month =
-      newDate.getMonth() + 1 < 10
-        ? "0" + String(newDate.getMonth() + 1)
-        : String(newDate.getMonth() + 1);
-    let day =
-      newDate.getDate() + 1 < 10
-        ? "0" + String(newDate.getDate())
-        : String(newDate.getDate());
-    return month + "/" + day + "/" + newDate.getFullYear();
   };
 
   const statusStyle = (
@@ -249,9 +228,7 @@ export default function shiftHistory() {
                   <td className={page.td}> {shiftHistory.employeeName} </td>
                   <td className={page.td}> {shiftHistory.unit} </td>
                   <td className={page.td}>
-                    {shiftHistory.dateRequested
-                      ? parseDate(shiftHistory.dateRequested)
-                      : ""}
+                    {shiftHistory.dateRequested}
                   </td>
                   <td className={page.td}> {shiftHistory.shift} </td>
                   <td className={page.td} style={statusStyle(shiftHistory.status)}>

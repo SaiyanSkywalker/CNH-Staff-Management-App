@@ -31,11 +31,8 @@ class ShiftHistory extends Model<ShiftHistoryAttributes> {
   @BelongsTo(() => Unit, { targetKey: "id", foreignKey: "unitId" })
   unit!: Unit;
 
-  @Column( {
-    type: DataType.DATE,
-    allowNull: false
-  })
-  dateRequested!: Date;
+  @Column( { type: DataType.STRING, allowNull: false })
+  dateRequested!: string;
 
   @Column(DataType.INTEGER)
   userId!: number;

@@ -2,6 +2,7 @@ import { Router } from "express";
 import { getShiftHistory } from "../services/ShiftHistoryService";
 import ShiftHistoryQuery from "../../../../shared/src/interfaces/ShiftHistoryQuery"
 import Unit from "server/src/models/Unit";
+import ShiftHistoryClient from "@shared/src/interfaces/ShiftHistoryClient";
 
 const shiftHistoryRouter = Router();
 
@@ -25,9 +26,7 @@ shiftHistoryRouter.get("/", async (req, res) => {
     attributes.unitId = unitRecord?.id;
   }
   if(date) {
-    let dateString = date as string;
-    let reqDate = new Date(dateString);
-    attributes.date = reqDate;
+    attributes.dateRequested = date as string;
   }
   if(shift) {
     attributes.shift = shift as string;
@@ -37,7 +36,7 @@ shiftHistoryRouter.get("/", async (req, res) => {
   }
 
 
-  const shiftHistories = await getShiftHistory(attributes);
+  const shiftHistories: ShiftHistoryClient[] = await getShiftHistory(attributes);
 
   res.send(shiftHistories);
 });
