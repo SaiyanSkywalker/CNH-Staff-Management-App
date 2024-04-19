@@ -4,7 +4,7 @@ import React from "react";
 const Home = () => {
   return (
     <>
-      <Redirect href={`/calendar`} />
+      <Redirect href={`/login`} />
     </>
   );
 };

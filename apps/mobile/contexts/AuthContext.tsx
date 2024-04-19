@@ -5,7 +5,7 @@ import UserInformation from "@shared/src/interfaces/UserInformationAttributes";
 import { Platform } from "react-native";
 interface AuthDetails {
   authenticated: boolean;
-  user: {} | null;
+  user: UserInformation | null;
   login: (
     username: string,
     password: string,
@@ -26,7 +26,7 @@ export default function AuthProvider({
   children: React.ReactNode;
 }) {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [user, setUser] = useState<UserInformation[]>([]);
+  const [user, setUser] = useState<UserInformation>({} as UserInformation);
 
   const login = async (
     username: string,
@@ -45,7 +45,7 @@ export default function AuthProvider({
 
   const logout = (): Promise<boolean> => {
     setIsLoggedIn(false);
-    setUser([]);
+    setUser({} as UserInformation);
     return Promise.resolve(true);
   };
 
