@@ -36,7 +36,7 @@ const parseShift = (shiftTime: string): string[] => {
   return shiftStrings;
 }
 
-const nextDay = (currentDate: Date) => {
+const nextDay = (currentDate: string) => {
   const newDate = new Date(currentDate);
   const currentDay = newDate.getDate();
   newDate.setDate(currentDay + 1);
@@ -47,24 +47,19 @@ const nextDay = (currentDate: Date) => {
     }
     newDate.setDate(1);
   }
-  return newDate;
+  return newDate.toISOString().substring(0, 10);
 }
 
 export const postShiftCapacity = async (
   shiftCapacityRequest: ShiftCapacityRequest
 ): Promise<void> => {
   const { shiftDate, shiftTime, capacities } = shiftCapacityRequest;
-  let shiftTimeStrings: string[] = parseShift(shiftTime);
-  let myDate: Date = new Date(shiftDate + "T00:00:00Z");
-  let todayDate: Date = new Date();
-  console.log("todayDate.toUTCString() is: " + todayDate.toUTCString());
-  console.log("todayDate is: ");
-  console.dir(todayDate);
-  let nextDate: Date = nextDay(myDate);
-  let currDate: Date = myDate;
-  let dayCounter = 0;
+  let shiftTimeStrings: string[] = parseShift(shiftTime);  
+  let nextDate: string = nextDay(shiftDate);
 
   for (let unitId in capacities) {
+    let currDate: string = shiftDate;
+    let dayCounter = 0;
     for(let shiftTimeString of shiftTimeStrings) {
       if(dayCounter > 0) {
         currDate = nextDate;
@@ -83,8 +78,6 @@ export const postShiftCapacity = async (
         }));
       }
       else {
-        console.log("currDate is: ");
-        console.dir(currDate);
         model = 
         (await ShiftCapacity.findOne({
           where: { shift: shiftTimeString, shiftDate: currDate, unitId: nUnitId },
@@ -95,8 +88,6 @@ export const postShiftCapacity = async (
           unitId: nUnitId,
           capacity: capacities[unitId],
         }));
-        console.log("model is: ");
-        console.dir(model);
       }
 
       if (model.capacity != capacities[unitId]) {
