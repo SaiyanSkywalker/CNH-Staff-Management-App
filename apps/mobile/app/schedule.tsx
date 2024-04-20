@@ -248,7 +248,7 @@ const Page = () => {
 
     // Compare against capacities
     const result = [];
-    const defaultCapacity = 25;
+    const defaultCapacity = 25; // TODO: Change this to use actual capacities from db once fahid's branch is merged in
     for (let key in buckets) {
       const numShifts = buckets[key].length;
       if (numShifts < defaultCapacity) {
