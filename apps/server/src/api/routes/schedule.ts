@@ -10,6 +10,7 @@ import {
 
 const scheduleRouter = Router();
 
+// Gets all shift data for admin portal
 scheduleRouter.get("/", async (req: Request, res: Response): Promise<void> => {
   try {
     // Change this if you want to use data from db instead
@@ -23,6 +24,20 @@ scheduleRouter.get("/", async (req: Request, res: Response): Promise<void> => {
     res.status(500).send({ error: "Error in retrieving schedule data" });
   }
 });
+
+// Gets avaialble shifts for nurses
+scheduleRouter.get(
+  "/nurse",
+  async (req: Request, res: Response): Promise<void> => {
+    try {
+      res.json({});
+    } catch (error) {
+      res
+        .status(500)
+        .send({ error: "Error in retrieving avaialble shifts for nurse" });
+    }
+  }
+);
 
 scheduleRouter.post("/", async (req: Request, res: Response) => {
   try {

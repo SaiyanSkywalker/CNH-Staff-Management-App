@@ -9,17 +9,16 @@ const styles = StyleSheet.create({
     backgroundColor: "#71B7C7",
     alignItems: "center",
     justifyContent: "center",
+    gap: 20,
   },
   title: {
     textAlign: "center",
     fontWeight: "bold",
     fontSize: 30,
     color: "#FFFFFF",
-    marginBottom: 20,
   },
   dropdownView: {
     width: "85%",
-    marginBottom: 100,
     zIndex: 10,
   },
   dateText: {
@@ -34,14 +33,10 @@ const styles = StyleSheet.create({
     fontWeight: "700",
   },
   dateSelectedBtn: {
-    width: "85%",
     backgroundColor: "#ffffff",
     height: 50,
     borderRadius: 8,
     justifyContent: "center",
-    marginTop: 40,
-    marginBottom: 40,
-    borderColor: "black",
     borderWidth: 1,
   },
   dateBtn: {
@@ -66,13 +61,42 @@ const styles = StyleSheet.create({
     marginTop: 40,
     marginBottom: 10,
   },
+  inputLabel: {
+    color: "white",
+    fontWeight: "bold",
+    marginBottom: 6,
+    fontSize: 16,
+  },
+
+  filterBtnContainer: {
+    justifyContent: "space-between",
+    flexDirection: "row",
+  },
+  filterBtn: {
+    width: "25%",
+    borderColor: "#cde3ea",
+    borderRadius: 5,
+    borderWidth: 1,
+  },
+  defaultBackground: {
+    backgroundColor: "white",
+  },
+  selectedBackground: {
+    backgroundColor: "#fb5b5a",
+    borderColor: "#fff",
+    color: "white",
+  },
+  filterBtnText: {
+    fontSize: 20,
+    textAlign: "center",
+    fontWeight: "bold",
+  },
 });
-// TODO: Develop a way to get shifts based on capacity
-// TODO: Find a way to send shift requests to server through sockets
 
 const Page = () => {
   const { auth } = useAuth();
   const onPressSubmit = async () => {
+    // TODO: Find a way to send shift requests to server through sockets
     console.warn("A date has been picked: ", datePicked);
     auth?.socket?.emit("shift_submission");
 
@@ -83,7 +107,7 @@ const Page = () => {
   };
   const [open, setOpen] = useState<boolean>(false);
   const [shift, setShift] = useState<string>("");
-
+  const defaultIntervals = ["4hr", "8hr", "12hr"];
   const [items, setItems] = useState([
     {
       label: "11:00 am - 3:00 pm",
@@ -100,6 +124,7 @@ const Page = () => {
   ]);
   const [isDatePickerVisible, setDatePickerVisibility] =
     useState<boolean>(false);
+  const [filter, setFilter] = useState<string>("4");
   const [datePicked, setDatePicked] = useState<Date | null>(null);
   const showDatePicker = () => {
     setDatePickerVisibility(true);
@@ -123,11 +148,38 @@ const Page = () => {
     <View style={styles.container}>
       <Text style={styles.title}> Schedule Shift</Text>
 
-      <TouchableOpacity onPress={showDatePicker} style={styles.dateSelectedBtn}>
-        <Text style={styles.dateText}>{getDate() || "Select a date"}</Text>
-      </TouchableOpacity>
-
       <View style={styles.dropdownView}>
+        <Text style={styles.inputLabel}>Date</Text>
+        <TouchableOpacity
+          onPress={showDatePicker}
+          style={styles.dateSelectedBtn}
+        >
+          <Text style={styles.dateText}>{getDate() || "Select a date"}</Text>
+        </TouchableOpacity>
+      </View>
+      <View style={styles.dropdownView}>
+        <Text style={styles.inputLabel}>Shift Interval Filter</Text>
+        <View style={styles.filterBtnContainer}>
+          {defaultIntervals.map((interval, index) => {
+            return (
+              <TouchableOpacity
+                key={index}
+                style={[
+                  styles.filterBtn,
+                  interval === filter
+                    ? styles.selectedBackground
+                    : styles.defaultBackground,
+                ]}
+                onPress={() => setFilter(interval)}
+              >
+                <Text style={styles.filterBtnText}>{interval}</Text>
+              </TouchableOpacity>
+            );
+          })}
+        </View>
+      </View>
+      <View style={styles.dropdownView}>
+        <Text style={styles.inputLabel}>Shift</Text>
         <DropDownPicker
           open={open}
           value={shift}
