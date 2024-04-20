@@ -4,6 +4,7 @@ import { UploadedFile } from "express-fileupload";
 import { validateSchedule } from "server/src/util/CsvUtils";
 import {
   getScheduleData,
+  getUnitScheduleData,
   handleTestScheduleData,
   saveScheduleData,
 } from "../services/ScheduleEntryService";
@@ -25,12 +26,15 @@ scheduleRouter.get("/", async (req: Request, res: Response): Promise<void> => {
   }
 });
 
-// Gets avaialble shifts for nurses
+// Gets all shifts in a day for unit
 scheduleRouter.get(
-  "/nurse",
+  "/unit",
   async (req: Request, res: Response): Promise<void> => {
     try {
-      res.json({});
+      const shiftDate = req.query.shiftDate as string;
+      const costCenterId = Number(req.query.costCenterId);
+      const shifts = await getUnitScheduleData(shiftDate, costCenterId);
+      res.json(shifts);
     } catch (error) {
       res
         .status(500)
