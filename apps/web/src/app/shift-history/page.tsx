@@ -1,8 +1,10 @@
 "use client";
 import { useState, FormEvent, BaseSyntheticEvent, useEffect } from "react";
 import page from "@webSrc/styles/ShiftHistory.module.css";
+import { useAuth } from "@webSrc/contexts/AuthContext";
 
 interface ShiftHistory {
+  id: number;
   employeeId: number;
   employeeName: string;
   unit: string;
@@ -14,7 +16,13 @@ interface ShiftHistory {
 export default function shiftHistory() {
   const [isLoading, setIsLoading] = useState(false);
   const [employeeId, setEmployeeId] = useState("");
-  const [employeeList, setEmployeeList] = useState<ShiftHistory[]>([]);
+  const [employeeName, setEmployeeName] = useState("");
+  const [unit, setUnit] = useState("");
+  const [date, setDate] = useState("");
+  const [shift, setShift] = useState("");
+  const [status, setStatus] = useState("");
+  const [shiftHistories, setShiftHistories] = useState<ShiftHistory[]>([]);
+  const { auth } = useAuth();
 
   const validateEmployeeId = (): boolean => {
     const trimmedEmployeeId = employeeId.trim();
@@ -27,7 +35,7 @@ export default function shiftHistory() {
     return true;
   };
 
-  const getEmployeeList = async (
+  const getShiftHistories = async (
     event: FormEvent<HTMLFormElement>
   ): Promise<void> => {
     event?.preventDefault();
@@ -48,14 +56,37 @@ export default function shiftHistory() {
         },
       }
     );
-
+    console.log("res is:");
+    console.dir(res);
     const jsonResponse: ShiftHistory[] = await res.json();
+    console.log("jsonResponse is:");
+    console.dir(jsonResponse);
     setIsLoading((prevLoad) => !prevLoad);
-    setEmployeeList((prevEmployeeList) => jsonResponse);
+    setShiftHistories((prevshiftHistories) => jsonResponse);
   };
 
   const handleEmployeeIdChange = (event: BaseSyntheticEvent): void => {
     setEmployeeId((prevEmployeeId) => event.target.value);
+  };
+
+  const handleEmployeeNameChange = (event: BaseSyntheticEvent): void => {
+    setEmployeeName((prevEmployeeName) => event.target.value);
+  };
+
+  const handleUnitChange = (event: BaseSyntheticEvent): void => {
+    setUnit((prevUnit) => event.target.value);
+  };
+
+  const handleDateChange = (event: BaseSyntheticEvent): void => {
+    setDate((prevDate) => event.target.value);
+  };
+
+  const handleShiftChange = (event: BaseSyntheticEvent): void => {
+    setShift((prevShift) => event.target.value);
+  };
+
+  const handleStatusChange = (event: BaseSyntheticEvent): void => {
+    setStatus((prevStatus) => event.target.value);
   };
 
   const parseDate = (requestedDate: string): string => {
@@ -93,6 +124,16 @@ export default function shiftHistory() {
     };
   };
 
+
+  const acceptOrDenyShift = (shiftHistoryId: number, isAccepted: boolean): void => {
+    //console.log("shiftHistoryId is:", shiftHistoryId);
+    //console.log("isAccepted is:", isAccepted);
+    auth?.socket?.emit("shift_accept", {
+      shiftHistoryId,
+      isAccepted
+    });
+  }
+
   // Initial fill of list
   useEffect(() => {
     async function initialList() {
@@ -105,8 +146,9 @@ export default function shiftHistory() {
     <>
       <div className="w-full">
         <h1 className={page.h1}>History</h1>
-        <form className={page.form} onSubmit={getEmployeeList}>
+        <form className={page.form} onSubmit={getShiftHistories}>
           <div className={page.submission}>
+            <div>
             <label className={page.label}>Employee ID</label>
             <input
               placeholder="Enter ID"
@@ -114,6 +156,57 @@ export default function shiftHistory() {
               onChange={handleEmployeeIdChange}
               className={page.input}
             ></input>
+            </div>
+            <div>
+            <label className={page.label}>Employee Name</label>
+            <input
+              placeholder="Enter Name"
+              value={employeeName}
+              onChange={handleEmployeeNameChange}
+              className={page.input}
+            ></input>
+            </div>
+
+            <div>
+            <label className={page.label}>Unit</label>
+            <input
+              placeholder="Enter Unit"
+              value={unit}
+              onChange={handleUnitChange}
+              className={page.input}
+            ></input>
+            </div>
+
+            <div>
+            <label className={page.label}>Date</label>
+            <input
+              placeholder="Enter Date"
+              value={date}
+              onChange={handleDateChange}
+              className={page.input}
+            ></input>
+            </div>
+
+            <div>
+            <label className={page.label}>Shift</label>
+            <input
+              placeholder="Enter Shift"
+              value={shift}
+              onChange={handleShiftChange}
+              className={page.input}
+            ></input>
+            </div>
+
+            <div>
+            <label className={page.label}>Status</label>
+            <input
+              placeholder="Enter Status"
+              value={status}
+              onChange={handleStatusChange}
+              className={page.input}
+            ></input>
+            </div>
+
           </div>
           <button
             className={page.button}
@@ -132,27 +225,38 @@ export default function shiftHistory() {
                 <th className={page.th}>Employee ID</th>
                 <th className={page.th}>Employee Name</th>
                 <th className={page.th}>Unit</th>
-                <th className={page.th}>Shift</th>
+                <th className={page.th}>Shift Date</th>
+                <th className={page.th}>Shift Time Block</th>
                 <th className={page.th}>Status</th>
-                <th className={page.th}>Date Requested</th>
+                <th className={page.th}>Accept/Deny</th>
               </tr>
             </thead>
             <tbody>
-              {employeeList.map((employee, i) => (
+              {shiftHistories.map((shiftHistory, i) => (
                 <tr key={i}>
-                  <td className={page.td}> {employee.employeeId} </td>
-                  <td className={page.td}> {employee.employeeName} </td>
-                  <td className={page.td}> {employee.unit} </td>
-                  <td className={page.td}> {employee.shift} </td>
-                  <td className={page.td} style={statusStyle(employee.status)}>
-                    {" "}
-                    {employee.status}{" "}
-                  </td>
+                  <td className={page.td}> {shiftHistory.employeeId} </td>
+                  <td className={page.td}> {shiftHistory.employeeName} </td>
+                  <td className={page.td}> {shiftHistory.unit} </td>
                   <td className={page.td}>
-                    {employee.dateRequested
-                      ? parseDate(employee.dateRequested)
+                    {shiftHistory.dateRequested
+                      ? parseDate(shiftHistory.dateRequested)
                       : ""}
                   </td>
+                  <td className={page.td}> {shiftHistory.shift} </td>
+                  <td className={page.td} style={statusStyle(shiftHistory.status)}>
+                    {" "}
+                    {shiftHistory.status}{" "}
+                  </td>
+                  {
+                    shiftHistory.status === "Pending" ? 
+                    (<td className={page.td}>
+                      <div className={page.buttons}>
+                        <button className={page.accept} onClick={() => { acceptOrDenyShift(shiftHistory.id, true) }}>Accept</button>
+                        <button className={page.deny} onClick={() => { acceptOrDenyShift(shiftHistory.id, false) }}>Deny</button>
+                      </div>
+                    </td>) :
+                    (<td className={page.td}></td>)
+                  }
                 </tr>
               ))}
             </tbody>

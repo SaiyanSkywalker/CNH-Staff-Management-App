@@ -40,6 +40,8 @@ const styles = StyleSheet.create({
 const Page = () => {
   const { auth } = useAuth();
   const onPressSubmit = async () => {
+    auth?.socket?.emit("shift_submission");
+
     Alert.alert(
       "Submission Successful",
       "Your request has been forwarded to your manager."

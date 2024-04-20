@@ -4,10 +4,13 @@ import axios from "axios";
 import { createContext, useContext, useState } from "react";
 import config from "web/src/config";
 import UserInformation from "@shared/src/interfaces/UserInformationAttributes";
+import { Socket } from "socket.io-client";
+import { io } from "socket.io-client";
 
 interface AuthDetails {
   authenticated: boolean;
   user: UserInformation | null;
+  socket: Socket | null | undefined;
   login: (username: string, password: string) => Promise<boolean>;
   logout: () => Promise<boolean>;
 }
@@ -25,6 +28,7 @@ export default function AuthProvider({
 }) {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [user, setUser] = useState<UserInformation>({} as UserInformation);
+  const [socket, setSocket] = useState<Socket | null | undefined>(undefined);
 
   const login = async (
     username: string,
@@ -35,6 +39,8 @@ export default function AuthProvider({
     if (userInfo) {
       setUser(userInfo);
       setIsLoggedIn(true);
+      const newSocket = io(config.apiUrl);      
+      setSocket(newSocket);
       return Promise.resolve(true);
     }
 
@@ -44,6 +50,8 @@ export default function AuthProvider({
   const logout = (): Promise<boolean> => {
     setIsLoggedIn(false);
     setUser({} as UserInformation);
+    socket?.disconnect();
+    setSocket(undefined);
     return Promise.resolve(true);
   };
 
@@ -72,6 +80,7 @@ export default function AuthProvider({
           user: user,
           login: login,
           logout: logout,
+          socket: socket,
         },
       }}
     >

@@ -51,9 +51,10 @@ export default async (config: ServerConfig) => {
 
     // Allows for quick alterations of the db model
     // when working on the server
-    await sequelize.sync(
-      config.environment.toLowerCase() === "dev" ? { alter: true } : {}
-    );
+    // await sequelize.sync(
+    //   config.environment.toLowerCase() === "dev" ? { alter: true } : {}
+    // );
+    await sequelize.sync({});
 
     // Adds default list of units and roles to db
     await createDefaultValues(Unit, DefaultUnits);
