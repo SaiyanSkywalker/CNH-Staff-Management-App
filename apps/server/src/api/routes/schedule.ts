@@ -4,6 +4,7 @@ import { UploadedFile } from "express-fileupload";
 import { validateSchedule } from "server/src/util/CsvUtils";
 import {
   getScheduleData,
+  getScheduleDataForUser,
   handleTestScheduleData,
   saveScheduleData,
 } from "../services/ScheduleEntryService";
@@ -23,6 +24,19 @@ scheduleRouter.get("/", async (req: Request, res: Response): Promise<void> => {
     res.status(500).send({ error: "Error in retrieving schedule data" });
   }
 });
+
+scheduleRouter.get(
+  "/:user",
+  async (req: Request, res: Response): Promise<void> => {
+    try {
+      const user: string = req.params.user;
+      const shifts = await getScheduleDataForUser(user);
+      res.json(shifts);
+    } catch (error) {
+      console.error("Error");
+    }
+  }
+);
 
 scheduleRouter.post("/", async (req: Request, res: Response) => {
   try {
