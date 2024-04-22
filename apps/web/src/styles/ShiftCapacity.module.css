@@ -52,6 +52,14 @@
     padding: 1.5% 6%;
 }
 
+.checkbox {
+    @apply flex flex-row justify-start items-center;
+}
+
+.checkboxLabel {
+    @apply font-bold;
+}
+
 @media (max-width <= 750px) {
     .input {
         width: 60%;

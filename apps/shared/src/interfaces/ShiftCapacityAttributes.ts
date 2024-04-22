@@ -5,5 +5,5 @@ export default interface ShiftCapacityAttributes {
   capacity: number;
   createdAt?: Date;
   updatedAt?: Date;
-  shiftDate: Date;
+  shiftDate: string;
 }

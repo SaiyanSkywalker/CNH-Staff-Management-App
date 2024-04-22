@@ -9,7 +9,15 @@ import Unit from "./Unit";
 import Role from "./Role";
 import UserInformationAttributes from "@shared/src/interfaces/UserInformationAttributes";
 
-@Table({ tableName: "UserInformation" })
+@Table({
+  tableName: "UserInformation",
+  indexes: [
+    {
+      unique: true,
+      fields: ["username", "employeeId"],
+    },
+  ],
+})
 class UserInformation extends Model<UserInformationAttributes> {
   @Column({
     primaryKey: true,
@@ -18,6 +26,7 @@ class UserInformation extends Model<UserInformationAttributes> {
     autoIncrement: true,
   })
   id!: number;
+
 
   @Column({ type: DataType.INTEGER, allowNull: false, unique: true })
   employeeId!: number; 
