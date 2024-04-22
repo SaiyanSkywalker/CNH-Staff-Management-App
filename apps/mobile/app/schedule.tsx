@@ -8,6 +8,7 @@ import axios from "axios";
 import config from "../config";
 
 import ScheduleEntryAttributes from "@shared/src/interfaces/ScheduleEntryAttributes";
+import ShiftRequestAttributes from "@shared/src/interfaces/ShiftRequestAttributes";
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -97,19 +98,12 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
 });
-
+interface DropdownOption {
+  label: string;
+  value: string;
+}
 const Page = () => {
   const { auth } = useAuth();
-  const onPressSubmit = async () => {
-    // TODO: Find a way to send shift requests to server through sockets
-    console.warn("A date has been picked: ", shiftDate);
-    auth?.socket?.emit("shift_submission");
-
-    Alert.alert(
-      "Submission Successful",
-      "Your request has been forwarded to your manager."
-    );
-  };
   const [open, setOpen] = useState<boolean>(false);
   const [selectedShiftInterval, setSelectedShiftInterval] =
     useState<string>("");
@@ -133,20 +127,7 @@ const Page = () => {
       ["19:00", "07:00"],
     ],
   };
-  const [items, setItems] = useState([
-    {
-      label: "11:00 am - 3:00 pm",
-      value: "11:00 am - 3:00 pm",
-    },
-    {
-      label: "11:30 am - 3:30 pm",
-      value: "11:30 am - 3:30 pm",
-    },
-    {
-      label: "12:00 pm - 4:00 pm",
-      value: "12:00 pm - 4:00 pm",
-    },
-  ]);
+  const [items, setItems] = useState<DropdownOption[]>([]);
   const [isDatePickerVisible, setDatePickerVisibility] =
     useState<boolean>(false);
   const [filter, setFilter] = useState<string>("4hr");
@@ -159,7 +140,27 @@ const Page = () => {
   const hideDatePicker = () => {
     setDatePickerVisibility(false);
   };
+  const handlePress = () => {
+    // TODO: Find a way to send shift requests to server through sockets
+    if (shiftDate && selectedShiftInterval) {
+      const body: ShiftRequestAttributes = {
+        user: auth?.user?.username || "",
+        shiftDate: shiftDate?.toISOString() || "",
+        shift: selectedShiftInterval,
+      };
+      auth?.socket?.emit("shift_submission", body);
 
+      Alert.alert(
+        "Submission Successful",
+        "Your request has been forwarded to your manager."
+      );
+    } else {
+      Alert.alert(
+        "Submission Failed",
+        "Please provide a shift date and shift before submitting"
+      );
+    }
+  };
   const handleConfirm = (date: Date) => {
     const midnight = new Date(new Date(date).setHours(0, 0, 0, 0));
     setShiftDate(midnight);
@@ -328,7 +329,7 @@ const Page = () => {
         onCancel={hideDatePicker}
         onChange={(shiftDate: Date) => setShiftDate(shiftDate)}
       />
-      <TouchableOpacity onPress={onPressSubmit} style={styles.submitBtn}>
+      <TouchableOpacity onPress={handlePress} style={styles.submitBtn}>
         <Text style={styles.submitText}>SUBMIT REQUEST </Text>
       </TouchableOpacity>
     </View>

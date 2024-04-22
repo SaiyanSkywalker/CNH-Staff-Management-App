@@ -1,9 +1,9 @@
 import UserSocketAttributes from "@shared/src/interfaces/UserSocketAttributes";
+import ShiftRequestAttributes from "@shared/src/interfaces/ShiftRequestAttributes";
 import { Server, Socket } from "socket.io";
 import ShiftHistory from "../models/ShiftHistory";
 import Unit from "server/src/models/Unit";
 import UserInformation from "server/src/models/UserInformation";
-
 const socketMap = new Map<string, Map<string, Socket>>();
 
 const socketHandler = (io: Server, socket: Socket) => {
@@ -28,8 +28,39 @@ const socketHandler = (io: Server, socket: Socket) => {
   });
 
   //REQUEST_INIT event
-  socket.on("shift_submission", () => {
-    console.log("shift submitted!");
+  socket.on("shift_submission", async (arg: ShiftRequestAttributes) => {
+    try {
+      console.log(arg);
+      const user: UserInformation | null = await UserInformation.findOne({
+        where: { username: arg.user },
+        include: [
+          {
+            model: Unit,
+            required: true,
+          },
+        ],
+      });
+      if (user) {
+        // console.log({
+        //   shiftTime: arg.shift,
+        //   status: "pending",
+        //   userId: user.employeeId as number,
+        //   unitId: user.unit?.id as number,
+        //   dateRequested: new Date(arg.shiftDate),
+        // });
+        const newShiftRequest = await ShiftHistory.create({
+          shiftTime: arg.shift,
+          status: "pending",
+          userId: user.employeeId as number,
+          unitId: user.unit?.id as number,
+          dateRequested: new Date(arg.shiftDate),
+        });
+        console.log(newShiftRequest.toJSON());
+        console.log("new shift request has been created");
+      }
+    } catch (error) {
+      console.log(error);
+    }
   });
 
   //REQUEST_UPDATE event

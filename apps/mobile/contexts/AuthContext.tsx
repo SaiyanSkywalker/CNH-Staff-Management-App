@@ -2,7 +2,7 @@ import axios from "axios";
 import { createContext, useContext, useState } from "react";
 import config from "../config";
 import UserInformation from "@shared/src/interfaces/UserInformationAttributes";
-import { Platform } from "react-native";
+import { Alert, Platform } from "react-native";
 import { Socket } from "socket.io-client";
 import { io } from "socket.io-client";
 import "react-native-get-random-values";
@@ -48,6 +48,9 @@ export default function AuthProvider({
       const randomUUID = uuidv4();
       console.log(randomUUID);
       const newSocket = io(config.apiUrl);
+      newSocket.on("shift_update", () => {
+        Alert.alert("the shift has been updated!!!!!")
+      })
       newSocket?.emit("add_user", { username, uuid: randomUUID });
       setSocket(newSocket);
       setUserUUID(randomUUID);
