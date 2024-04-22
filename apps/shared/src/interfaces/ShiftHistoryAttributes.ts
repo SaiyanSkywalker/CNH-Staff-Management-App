@@ -6,5 +6,5 @@ export default interface ShiftHistoryAttributes {
   unitId: number;
   createdAt?: Date;
   updatedAt?: Date;
-  dateRequested: Date;
+  dateRequested: string;
 }

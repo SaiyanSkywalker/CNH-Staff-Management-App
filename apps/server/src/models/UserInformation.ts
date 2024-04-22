@@ -27,8 +27,10 @@ class UserInformation extends Model<UserInformationAttributes> {
   })
   id!: number;
 
-  @Column({ type: DataType.INTEGER, allowNull: false })
-  employeeId!: number;
+
+  @Column({ type: DataType.INTEGER, allowNull: false, unique: true })
+  employeeId!: number; 
+
   @Column({ type: DataType.STRING, allowNull: false })
   username!: string;
 
