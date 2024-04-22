@@ -41,19 +41,12 @@ const socketHandler = (io: Server, socket: Socket) => {
         ],
       });
       if (user) {
-        // console.log({
-        //   shiftTime: arg.shift,
-        //   status: "pending",
-        //   userId: user.employeeId as number,
-        //   unitId: user.unit?.id as number,
-        //   dateRequested: new Date(arg.shiftDate),
-        // });
         const newShiftRequest = await ShiftHistory.create({
           shiftTime: arg.shift,
           status: "pending",
           userId: user.employeeId as number,
           unitId: user.unit?.id as number,
-          dateRequested: new Date(arg.shiftDate),
+          dateRequested: new Date(arg.shiftDate).toISOString(),
         });
         console.log(newShiftRequest.toJSON());
         console.log("new shift request has been created");
@@ -90,16 +83,7 @@ const socketHandler = (io: Server, socket: Socket) => {
       }
 
       let message: string = "";
-      let newDate: Date = shiftHistory?.dateRequested;
-      let month: string =
-        newDate.getMonth() + 1 < 10
-          ? "0" + String(newDate.getMonth() + 1)
-          : String(newDate.getMonth() + 1);
-      let day: string =
-        newDate.getDate() + 1 < 10
-          ? "0" + String(newDate.getDate())
-          : String(newDate.getDate());
-      let parsedDate: string = month + "/" + day + "/" + newDate.getFullYear();
+      let parsedDate: string = shiftHistory?.dateRequested;
 
       if (arg.isAccepted) {
         shiftHistory?.set("status", "Accepted");

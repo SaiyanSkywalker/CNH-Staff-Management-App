@@ -16,8 +16,7 @@ import ScheduleEntryAttributes from "@shared/src/interfaces/ScheduleEntryAttribu
   ],
 })
 class ScheduleEntry extends Model<ScheduleEntryAttributes> {
-  // Remove this column (not needed)
-  // Idea: employeeId, shiftDate, startTime, endTime, and costCenterId
+
 
   @Column({
     primaryKey: true,

@@ -14,7 +14,7 @@ const startServer = async () => {
   const server = http.createServer(app);
   const io = new Server(server, {
     cors: {
-      origin: "http://localhost:3003",
+      origin: "http://localhost:3000",
     },
     connectionStateRecovery: {
       maxDisconnectionDuration: 120000, //2 minute recovery

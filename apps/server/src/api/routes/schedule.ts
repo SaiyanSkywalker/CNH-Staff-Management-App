@@ -5,6 +5,7 @@ import { validateSchedule } from "server/src/util/CsvUtils";
 import {
   getScheduleData,
   getUnitScheduleData,
+  getScheduleDataForUser,
   handleTestScheduleData,
   saveScheduleData,
 } from "../services/ScheduleEntryService";
@@ -43,6 +44,19 @@ scheduleRouter.get(
   }
 );
 
+scheduleRouter.get(
+  "/:user",
+  async (req: Request, res: Response): Promise<void> => {
+    try {
+      const user: string = req.params.user;
+      const shifts = await getScheduleDataForUser(user);
+      res.json(shifts);
+    } catch (error) {
+      console.error("Error");
+    }
+  }
+);
+
 scheduleRouter.post("/", async (req: Request, res: Response) => {
   try {
     if (!req.files?.schedule) {
@@ -64,5 +78,4 @@ scheduleRouter.post("/", async (req: Request, res: Response) => {
     res.status(500).send({ message: `Error saving schedule data from file` });
   }
 });
-
 export default scheduleRouter;

@@ -5,6 +5,8 @@ import { Op } from "sequelize";
 import ScheduleEntry from "server/src/models/ScheduleEntry";
 import { csvToArray, csvToScheduleData } from "server/src/util/CsvUtils";
 import Unit from "server/src/models/Unit";
+import UserInformation from "server/src/models/UserInformation";
+import { error } from "console";
 
 export const getUnitScheduleData = async (
   date: string,
@@ -88,6 +90,29 @@ export const getScheduleData = async (filter: string) => {
   }
 };
 
+/**
+ * Gets all shifts that a nurse has signed up for
+ * @param username name that user uses to log in to mobile application
+ */
+export const getScheduleDataForUser = async (username: string) => {
+  try {
+    const user: UserInformation | null = await UserInformation.findOne({
+      where: { username: username },
+    });
+    if (!user) {
+      throw error;
+    }
+    const scheduleEntries: ScheduleEntryAttributes[] =
+      await ScheduleEntry.findAll({
+        where: {
+          employeeId: user.employeeId,
+        },
+      });
+    return scheduleEntries;
+  } catch (error) {
+    console.log(error);
+  }
+};
 /**
  * saves shifts to database using data from CSV file
  * @param file file containing schedule data

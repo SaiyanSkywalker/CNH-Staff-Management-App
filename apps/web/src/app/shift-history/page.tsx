@@ -2,26 +2,28 @@
 import { useState, FormEvent, BaseSyntheticEvent, useEffect } from "react";
 import page from "@webSrc/styles/ShiftHistory.module.css";
 import { useAuth } from "@webSrc/contexts/AuthContext";
-
-interface ShiftHistory {
-  id: number;
-  employeeId: number;
-  employeeName: string;
-  unit: string;
-  shift: string;
-  status: string;
-  dateRequested: string;
-}
+import { useSearchParams } from "next/navigation";
+import ShiftHistoryClient from "@shared/src/interfaces/ShiftHistoryClient";
 
 export default function shiftHistory() {
-  const [isLoading, setIsLoading] = useState(false);
-  const [employeeId, setEmployeeId] = useState("");
-  const [employeeName, setEmployeeName] = useState("");
-  const [unit, setUnit] = useState("");
-  const [date, setDate] = useState("");
-  const [shift, setShift] = useState("");
-  const [status, setStatus] = useState("");
-  const [shiftHistories, setShiftHistories] = useState<ShiftHistory[]>([]);
+  const params = useSearchParams();
+  const employeeNameQuery: string = params.get('employeeName') ?? "";
+  const employeeIdQuery: string = params.get('employeeId') ?? "";
+  const unitQuery: string = params.get('unit') ?? "";
+  const dateQuery: string = params.get('date') ?? "";
+  const shiftQuery: string = params.get('shift') ?? "";
+  const statusQuery: string = params.get('status') ?? "";
+
+  console.log(`employeeNameQuery is ${employeeNameQuery}, employeeIdQuery is ${employeeIdQuery}, unitQuery is ${unitQuery}, dateQuery is ${dateQuery}, shiftQuery is ${shiftQuery}, statusQuery is ${statusQuery}`);
+
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [employeeId, setEmployeeId] = useState<string>(employeeIdQuery);
+  const [employeeName, setEmployeeName] = useState<string>(employeeNameQuery);
+  const [unit, setUnit] = useState<string>(unitQuery);
+  const [date, setDate] = useState<string>(dateQuery);
+  const [shift, setShift] = useState<string>(shiftQuery);
+  const [status, setStatus] = useState<string>(statusQuery);
+  const [shiftHistories, setShiftHistories] = useState<ShiftHistoryClient[]>([]);
   const { auth } = useAuth();
 
   const validateEmployeeId = (): boolean => {
@@ -48,7 +50,7 @@ export default function shiftHistory() {
   const updateList = async (): Promise<void> => {
     setIsLoading((prevLoad) => !prevLoad);
     const res = await fetch(
-      "http://localhost:3003/shift-history/" + employeeId,
+      `http://localhost:3003/shift-history?employeeId=${employeeId}&employeeName=${employeeName}&unit=${unit}&date=${date}&shift=${shift}&status=${status}`,
       {
         method: "GET",
         headers: {
@@ -58,7 +60,7 @@ export default function shiftHistory() {
     );
     console.log("res is:");
     console.dir(res);
-    const jsonResponse: ShiftHistory[] = await res.json();
+    const jsonResponse: ShiftHistoryClient[] = await res.json();
     console.log("jsonResponse is:");
     console.dir(jsonResponse);
     setIsLoading((prevLoad) => !prevLoad);
@@ -78,6 +80,7 @@ export default function shiftHistory() {
   };
 
   const handleDateChange = (event: BaseSyntheticEvent): void => {
+    console.log("date is: ");
     setDate((prevDate) => event.target.value);
   };
 
@@ -87,19 +90,6 @@ export default function shiftHistory() {
 
   const handleStatusChange = (event: BaseSyntheticEvent): void => {
     setStatus((prevStatus) => event.target.value);
-  };
-
-  const parseDate = (requestedDate: string): string => {
-    let newDate = new Date(requestedDate);
-    let month =
-      newDate.getMonth() + 1 < 10
-        ? "0" + String(newDate.getMonth() + 1)
-        : String(newDate.getMonth() + 1);
-    let day =
-      newDate.getDate() + 1 < 10
-        ? "0" + String(newDate.getDate())
-        : String(newDate.getDate());
-    return month + "/" + day + "/" + newDate.getFullYear();
   };
 
   const statusStyle = (
@@ -238,9 +228,7 @@ export default function shiftHistory() {
                   <td className={page.td}> {shiftHistory.employeeName} </td>
                   <td className={page.td}> {shiftHistory.unit} </td>
                   <td className={page.td}>
-                    {shiftHistory.dateRequested
-                      ? parseDate(shiftHistory.dateRequested)
-                      : ""}
+                    {shiftHistory.dateRequested}
                   </td>
                   <td className={page.td}> {shiftHistory.shift} </td>
                   <td className={page.td} style={statusStyle(shiftHistory.status)}>

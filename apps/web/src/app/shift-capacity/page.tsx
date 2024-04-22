@@ -23,16 +23,13 @@ import {
 
 export default function shiftCapacity() {
   const [units, setUnits] = useState<UnitAttributes[]>([]);
-
   const todayDate = new Date();
   const todayDateString = todayDate.toISOString().substring(0, 10);
-
   const [capacities, setCapacities] = useState<{ [key: string]: number }>({});
-
   const [shiftIndex, setShiftIndex] = useState("0");
-  const [date, setDate] = useState(todayDateString);
-
-  const [initialLoad, setInitialLoad] = useState(false);
+  const [date, setDate] = useState<string>(todayDateString);
+  const [initialLoad, setInitialLoad] = useState<boolean>(false);
+  const [isChecked, setIsChecked] = useState<boolean>(false);
 
   const bannerContext: BannerContextProps | undefined =
     useContext(BannerContext);
@@ -41,12 +38,19 @@ export default function shiftCapacity() {
   const shifts: string[] = [
     "07:00 - 11:00",
     "07:00 - 15:00",
+    "07:00 - 19:00",
     "11:00 - 15:00",
     "11:00 - 19:00",
+    "11:00 - 23:00",
     "15:00 - 19:00",
     "15:00 - 23:00",
+    "15:00 - 03:00",
     "19:00 - 23:00",
+    "19:00 - 03:00",
+    "19:00 - 07:00",
+    "23:00 - 03:00",
     "23:00 - 07:00",
+    "23:00 - 11:00",
   ];
 
   const getUnits = async () => {
@@ -91,7 +95,13 @@ export default function shiftCapacity() {
     });
   }
 
+  function handleIsChecked() {
+    setIsChecked(prevIsChecked => !prevIsChecked);
+  }
+
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
+    console.log("date is:");
+    console.dir(date);
     try {
       event.preventDefault();
       if (Object.keys(capacities).length === 0) {
@@ -104,6 +114,7 @@ export default function shiftCapacity() {
           shiftDate: date,
           shiftTime: shifts[Number(shiftIndex)],
           capacities,
+          isDefault: isChecked
         };
         loadingContext?.showLoader();
         const res = await fetch("http://localhost:3003/shift-capacity", {
@@ -137,21 +148,25 @@ export default function shiftCapacity() {
       <form className={styles.capacity} onSubmit={onSubmit}>
         <h1 className={styles.h1}>Max Unit Capacity</h1>
         <div className={styles.grid}>
-          <div className={styles.field}>
-            <label className={styles.label} htmlFor="widget">
-              Date
-            </label>
-            <input
-              className={styles.input}
-              value={date}
-              onChange={handleDateChange}
-              min={todayDate.toISOString().substring(0, 10)}
-              name="date"
-              id="widget"
-              type="date"
-              required
-            ></input>
-          </div>
+          {!isChecked &&
+            (
+            <div className={styles.field}>
+              <label className={styles.label} htmlFor="widget">
+                Date
+              </label>
+              <input
+                className={styles.input}
+                value={date}
+                onChange={handleDateChange}
+                min={todayDate.toISOString().substring(0, 10)}
+                name="date"
+                id="widget"
+                type="date"
+                required
+              ></input>
+            </div>
+            )
+          }
           <div className={styles.field}>
             <label className={styles.label} htmlFor="shift">
               Shift
@@ -164,14 +179,9 @@ export default function shiftCapacity() {
               id="shift"
               required
             >
-              <option value="0">{shifts[0]}</option>
-              <option value="1">{shifts[1]}</option>
-              <option value="2">{shifts[2]}</option>
-              <option value="3">{shifts[3]}</option>
-              <option value="4">{shifts[4]}</option>
-              <option value="5">{shifts[5]}</option>
-              <option value="6">{shifts[6]}</option>
-              <option value="7">{shifts[7]}</option>
+              {shifts.map((shift, index) => (
+                <option value={String(index)} key={index}>{shift}</option>  
+              ))}
             </select>
           </div>
 
@@ -189,11 +199,16 @@ export default function shiftCapacity() {
               ></input>
             </div>
           ))}
+          
         </div>
         <div
           style={!initialLoad ? { alignSelf: "flex-end" } : {}}
           className={styles.submission}
         >
+          <div className={styles.checkbox}>
+              <input type='checkbox' id='default' name='default' checked={isChecked} onChange={handleIsChecked}></input>
+              <label htmlFor='default' className={styles.checkboxLabel}>Set Defaults</label>
+          </div>
           <button disabled={!initialLoad} className={styles.button}>
             Submit
           </button>
