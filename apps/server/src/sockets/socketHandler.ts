@@ -4,10 +4,13 @@ import { Server, Socket } from "socket.io";
 import ShiftHistory from "../models/ShiftHistory";
 import Unit from "server/src/models/Unit";
 import UserInformation from "server/src/models/UserInformation";
-const socketMap = new Map<string, Map<string, Socket>>();
+
+export const mobileSocketMap = new Map<string, Map<string, Socket>>();
+export const adminSocketMap = new Map<string, Map<string, Socket>>();
 
 const socketHandler = (io: Server, socket: Socket) => {
   socket.on("add_user", (arg: UserSocketAttributes) => {
+    const socketMap = arg.isAdmin ? adminSocketMap : mobileSocketMap;
     if (!socketMap.has(arg.username)) {
       socketMap.set(arg.username, new Map<string, Socket>());
     }
@@ -17,6 +20,7 @@ const socketHandler = (io: Server, socket: Socket) => {
   });
 
   socket.on("remove_user", (arg: UserSocketAttributes) => {
+    const socketMap = arg.isAdmin ? adminSocketMap : mobileSocketMap;
     if (
       socketMap.has(arg.username) &&
       socketMap.get(arg.username)?.has(arg.uuid)
@@ -105,8 +109,8 @@ const socketHandler = (io: Server, socket: Socket) => {
   socket.on(
     "update_user",
     (arg: { username: string; message: string; isAccepted: boolean }) => {
-      if (socketMap.has(arg.username)) {
-        const userMap = socketMap.get(arg.username);
+      if (mobileSocketMap.has(arg.username)) {
+        const userMap = mobileSocketMap.get(arg.username);
         for (let uuid in userMap?.keys()) {
           console.log("uuid is:", uuid);
           let userSocket = userMap.get(uuid);

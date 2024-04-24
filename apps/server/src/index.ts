@@ -21,6 +21,7 @@ const startServer = async () => {
       skipMiddlewares: true,
     },
   });
+
   const onConnection = (socket: Socket) => {
     socketHandler(io, socket);
   };
