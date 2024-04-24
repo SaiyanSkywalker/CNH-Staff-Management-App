@@ -23,8 +23,8 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        <AuthProvider>
-          <BannerContextProvider>
+        <BannerContextProvider>
+          <AuthProvider>
             <LoadingContextProvider>
               <Navbar />
               <Banner />
@@ -33,8 +33,8 @@ export default function RootLayout({
                 {children}
               </main>
             </LoadingContextProvider>
-          </BannerContextProvider>
-        </AuthProvider>
+          </AuthProvider>
+        </BannerContextProvider>
       </body>
     </html>
   );
