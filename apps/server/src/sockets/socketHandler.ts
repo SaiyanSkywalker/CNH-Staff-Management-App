@@ -62,16 +62,7 @@ const socketHandler = (io: Server, socket: Socket) => {
       }
 
       let message: string = "";
-      let newDate: Date = shiftHistory?.dateRequested;
-      let month: string =
-        newDate.getMonth() + 1 < 10
-          ? "0" + String(newDate.getMonth() + 1)
-          : String(newDate.getMonth() + 1);
-      let day: string =
-        newDate.getDate() + 1 < 10
-          ? "0" + String(newDate.getDate())
-          : String(newDate.getDate());
-      let parsedDate: string = month + "/" + day + "/" + newDate.getFullYear();
+      let parsedDate: string = shiftHistory?.dateRequested;
 
       if (arg.isAccepted) {
         shiftHistory?.set("status", "Accepted");

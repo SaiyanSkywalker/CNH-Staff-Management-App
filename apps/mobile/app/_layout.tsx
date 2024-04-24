@@ -44,6 +44,13 @@ const Layout = () => {
             title: "Schedule",
           }}
         />
+        <Drawer.Screen
+          name="calendar"
+          options={{
+            drawerLabel: "Calendar",
+            title: "Calendar",
+          }}
+        />
       </Drawer>
     </AuthProvider>
   );

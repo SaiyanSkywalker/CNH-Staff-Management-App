@@ -7,7 +7,7 @@ const Home = () => {
   return (
     <>
       <Redirect
-        href={authContext.auth?.authenticated ? `/schedule` : `/login`}
+        href={authContext.auth?.authenticated ? `/calendar` : `/login`}
       />
     </>
   );
