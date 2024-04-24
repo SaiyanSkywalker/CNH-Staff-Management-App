@@ -4,9 +4,32 @@ import ScheduleEntryAttributes from "@shared/src/interfaces/ScheduleEntryAttribu
 import { Op } from "sequelize";
 import ScheduleEntry from "server/src/models/ScheduleEntry";
 import { csvToArray, csvToScheduleData } from "server/src/util/CsvUtils";
+import Unit from "server/src/models/Unit";
 import UserInformation from "server/src/models/UserInformation";
 import { error } from "console";
 
+export const getUnitScheduleData = async (
+  date: string,
+  costCenterId: number
+) => {
+  try {
+    const unit = await Unit.findOne({
+      where: {
+        id: costCenterId,
+      },
+    });
+
+    const shifts = await ScheduleEntry.findAll({
+      where: {
+        costCenterId: unit?.laborLevelEntryId,
+        shiftDate: new Date(date),
+      },
+    });
+    return shifts;
+  } catch (error) {
+    console.log(error);
+  }
+};
 /**
  * Retrieves data about shifts from the db
  * @param filter costCenterId, used to filter shifts

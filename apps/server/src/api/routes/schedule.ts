@@ -4,6 +4,7 @@ import { UploadedFile } from "express-fileupload";
 import { validateSchedule } from "server/src/util/CsvUtils";
 import {
   getScheduleData,
+  getUnitScheduleData,
   getScheduleDataForUser,
   handleTestScheduleData,
   saveScheduleData,
@@ -13,6 +14,7 @@ import { Socket } from "socket.io";
 
 const scheduleRouter = Router();
 
+// Gets all shift data for admin portal
 scheduleRouter.get("/", async (req: Request, res: Response): Promise<void> => {
   try {
     // Change this if you want to use data from db instead
@@ -26,6 +28,23 @@ scheduleRouter.get("/", async (req: Request, res: Response): Promise<void> => {
     res.status(500).send({ error: "Error in retrieving schedule data" });
   }
 });
+
+// Gets all shifts in a day for unit
+scheduleRouter.get(
+  "/unit",
+  async (req: Request, res: Response): Promise<void> => {
+    try {
+      const shiftDate = req.query.shiftDate as string;
+      const costCenterId = Number(req.query.costCenterId);
+      const shifts = await getUnitScheduleData(shiftDate, costCenterId);
+      res.json(shifts);
+    } catch (error) {
+      res
+        .status(500)
+        .send({ error: "Error in retrieving avaialble shifts for nurse" });
+    }
+  }
+);
 
 scheduleRouter.get(
   "/:user",
@@ -70,5 +89,4 @@ scheduleRouter.post("/", async (req: Request, res: Response) => {
     res.status(500).send({ message: `Error saving schedule data from file` });
   }
 });
-
 export default scheduleRouter;

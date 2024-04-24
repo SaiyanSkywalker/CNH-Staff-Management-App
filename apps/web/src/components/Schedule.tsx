@@ -6,7 +6,6 @@ import {
   Views,
   momentLocalizer,
   DateFormatFunction,
-  DateFormat,
   DateRange,
   Culture,
   DateRangeFormatFunction,
