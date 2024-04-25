@@ -108,10 +108,10 @@ const socketHandler = (io: Server, socket: Socket) => {
         senderId: userId,
         channelId
       });
-      socket.emit("message_received", {isError: 0, message: "Success!"})
+      socket.emit("message_received", {isError: false, message: "Success!"})
     }
     catch {
-      socket.emit("message_received", {isError: 1, message: "Error occured on server!"})
+      socket.emit("message_received", {isError: true, message: "Error occured on server!"})
     }
   })
 };
