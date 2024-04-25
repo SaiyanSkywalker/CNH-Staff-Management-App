@@ -3,4 +3,5 @@ export default interface ChannelAttributes {
   name: string;
   createdAt?: Date;
   updatedAt?: Date;
+  unitRoomId?: number;
 }

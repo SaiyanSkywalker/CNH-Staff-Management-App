@@ -3,6 +3,8 @@ import { Server, Socket } from "socket.io";
 import ShiftHistory from "../models/ShiftHistory";
 import Unit from "server/src/models/Unit";
 import UserInformation from "server/src/models/UserInformation";
+import AnnouncementAttributes from "@shared/src/interfaces/AnnouncementAttributes";
+import Announcement from "../models/Announcement";
 
 const socketMap = new Map<string, Map<string, Socket>>();
 
@@ -94,6 +96,24 @@ const socketHandler = (io: Server, socket: Socket) => {
       }
     }
   );
+
+  //MESSAGE_SENT event
+  socket.on("message_sent", async (arg: AnnouncementAttributes) => {
+    try {
+      let msg: string = arg.body;
+      let userId: number = arg.senderId;
+      let channelId: number = arg.channelId;
+      await Announcement.create({
+        body: msg,
+        senderId: userId,
+        channelId
+      });
+      socket.emit("message_received", {isError: 0, message: "Success!"})
+    }
+    catch {
+      socket.emit("message_received", {isError: 1, message: "Error occured on server!"})
+    }
+  })
 };
 
 export default socketHandler;

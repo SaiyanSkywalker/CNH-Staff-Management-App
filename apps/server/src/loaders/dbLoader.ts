@@ -10,7 +10,7 @@ import Unit from "../models/Unit";
 import ServerConfig from "../interfaces/ServerConfig";
 import Role from "../models/Role";
 import DefaultRoles from "../constants/DefaultRoles";
-
+import Channel from "../models/Channel";
 
 let sequelize: Sequelize;
 
@@ -34,6 +34,21 @@ const createDefaultValues = async <T extends {}>(
     console.log(error);
   }
 };
+
+const createUnitChannels = async () => {
+  let maxId: number | undefined = await Unit.max('id');
+  let minId: number | undefined = await Unit.min('id');
+  if(!maxId || !minId) {
+    return;
+  }
+  for(let id = minId; id <= maxId; id++) {
+    let unit: Unit | null = await Unit.findOne({where: {id}});
+    if(!unit) {
+      continue;
+    }
+    await Channel.findOne({where: {unitRoomId: id}}) ?? Channel.create({unitRoomId: id, name: unit.name});
+  }
+}
 
 export default async (config: ServerConfig) => {
   try {
@@ -59,6 +74,7 @@ export default async (config: ServerConfig) => {
     // Adds default list of units and roles to db
     await createDefaultValues(Unit, DefaultUnits);
     await createDefaultValues(Role, DefaultRoles);
+    await createUnitChannels();
 
     console.log("Connection has been established successfully.");
   } catch (error) {
