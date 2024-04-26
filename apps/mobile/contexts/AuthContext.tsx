@@ -48,9 +48,14 @@ export default function AuthProvider({
       const randomUUID = uuidv4();
       console.log(randomUUID);
       const newSocket = io(config.apiUrl);
-      newSocket.on("shift_update", () => {
-        Alert.alert("the shift has been updated!!!!!")
-      })
+      newSocket.on("shift_update", (arg) => {
+        //TODO: Add a better UI indicator when the shift has been updated
+        Alert.alert(
+          arg.isAccepted
+            ? "Shift Request has been accepted"
+            : "Shift request has been rejected"
+        );
+      });
       newSocket?.emit("add_user", { username, uuid: randomUUID });
       setSocket(newSocket);
       setUserUUID(randomUUID);
@@ -75,11 +80,9 @@ export default function AuthProvider({
     isMobile: string
   ) => {
     try {
-      const androidURL = "http://10.0.2.2:3003"; // android doesn't allow you to use localhost (idk why, it's weird)
-      const url = Platform.OS === "android" ? androidURL : config.apiUrl;
       const response = await axios({
         method: "GET",
-        url: `${url}/user/?username=${username}&password=${password}&isMobile=${isMobile}`,
+        url: `${config.apiUrl}/user/?username=${username}&password=${password}&isMobile=${isMobile}`,
         responseType: "json",
       });
       const data = await response.data;

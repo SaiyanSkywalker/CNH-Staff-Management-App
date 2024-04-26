@@ -109,6 +109,7 @@ const socketHandler = (io: Server, socket: Socket) => {
   socket.on(
     "update_user",
     (arg: { username: string; message: string; isAccepted: boolean }) => {
+      //TODO: Add code that adds new shift request to ScheduleEntry table on shift acceptance
       if (mobileSocketMap.has(arg.username)) {
         const userMap = mobileSocketMap.get(arg.username);
         for (let uuid in userMap?.keys()) {
