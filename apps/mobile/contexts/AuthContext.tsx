@@ -3,9 +3,15 @@ import { createContext, useContext, useState } from "react";
 import config from "../config";
 import UserInformation from "@shared/src/interfaces/UserInformationAttributes";
 import { Platform } from "react-native";
+import { Socket } from "socket.io-client";
+import { io } from "socket.io-client";
+import "react-native-get-random-values";
+import { v4 as uuidv4 } from "uuid";
+
 interface AuthDetails {
   authenticated: boolean;
   user: UserInformation | null;
+  socket: Socket | null | undefined;
   login: (
     username: string,
     password: string,
@@ -27,6 +33,8 @@ export default function AuthProvider({
 }) {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [user, setUser] = useState<UserInformation>({} as UserInformation);
+  const [socket, setSocket] = useState<Socket | null | undefined>(undefined);
+  const [userUUID, setUserUUID] = useState<string | undefined>(undefined);
 
   const login = async (
     username: string,
@@ -37,6 +45,12 @@ export default function AuthProvider({
     if (userInfo) {
       setUser(userInfo);
       setIsLoggedIn(true);
+      const randomUUID = uuidv4();
+      console.log(randomUUID);
+      const newSocket = io(config.apiUrl);
+      newSocket?.emit("add_user", { username, uuid: randomUUID });
+      setSocket(newSocket);
+      setUserUUID(randomUUID);
       return Promise.resolve(true);
     }
 
@@ -44,8 +58,11 @@ export default function AuthProvider({
   };
 
   const logout = (): Promise<boolean> => {
+    socket?.emit("remove_user", { username: user?.username, uuid: userUUID });
     setIsLoggedIn(false);
     setUser({} as UserInformation);
+    setSocket(undefined);
+    setUserUUID(undefined);
     return Promise.resolve(true);
   };
 
@@ -79,6 +96,7 @@ export default function AuthProvider({
           user: user,
           login: login,
           logout: logout,
+          socket: socket,
         },
       }}
     >
