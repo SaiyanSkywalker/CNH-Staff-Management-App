@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { StyleSheet, Text, View } from "react-native";
 import ScheduleEntryAttributes from "@shared/src/interfaces/ScheduleEntryAttributes";
-import AuthProider, { useAuth } from "../contexts/AuthContext";
+import { useAuth } from "../contexts/AuthContext";
 import { AgendaList, CalendarProvider } from "react-native-calendars";
 import { format, parseISO } from "date-fns";
 
@@ -68,7 +68,9 @@ const CalendarPage: React.FC = () => {
   useEffect(() => {
     const getShifts = async () => {
       try {
-        const response = await axios.get(`/schedule/${user.auth?.user}`);
+        const response = await axios.get(
+          `/schedule/${user.auth?.user?.username}`
+        );
         const fetchedItems: { [date: string]: ScheduleEntryAttributes[] } = {};
 
         response.data.forEach((shift: ScheduleEntryAttributes) => {

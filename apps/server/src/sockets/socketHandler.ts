@@ -4,6 +4,8 @@ import { Server, Socket } from "socket.io";
 import ShiftHistory from "../models/ShiftHistory";
 import Unit from "server/src/models/Unit";
 import UserInformation from "server/src/models/UserInformation";
+import ScheduleEntry from "../models/ScheduleEntry";
+import { calculateDuration } from "../util/dateUtils";
 
 export const mobileSocketMap = new Map<string, Map<string, Socket>>();
 export const adminSocketMap = new Map<string, Map<string, Socket>>();
@@ -50,7 +52,7 @@ const socketHandler = (io: Server, socket: Socket) => {
           status: "pending",
           userId: user.employeeId as number,
           unitId: user.unit?.id as number,
-          dateRequested: new Date(arg.shiftDate).toISOString(),
+          dateRequested: arg.shiftDate,
         });
         console.log(newShiftRequest.toJSON());
         console.log("new shift request has been created");
@@ -90,8 +92,26 @@ const socketHandler = (io: Server, socket: Socket) => {
       let parsedDate: string = shiftHistory?.dateRequested;
 
       if (arg.isAccepted) {
+        // Set shift status
         shiftHistory?.set("status", "Accepted");
         message = `Shift accepted for ${shiftHistory?.shiftTime} on ${parsedDate}`;
+
+        // Add shift to scheduleEntry table
+        const shiftTimeTokens: string[] = shiftHistory.shiftTime.split("-");
+        const duration = calculateDuration(shiftTimeTokens);
+
+        await ScheduleEntry.create({
+          employeeId: shiftHistory.user.employeeId,
+          lastName: shiftHistory.user.lastName,
+          firstName: shiftHistory.user.firstName,
+          middleInitial: shiftHistory.user.middleInitial,
+          shiftDate: new Date(shiftHistory.dateRequested),
+          shiftType: "REG",
+          costCenterId: shiftHistory.unit.laborLevelEntryId,
+          startTime: shiftTimeTokens[0].trim(),
+          endTime: shiftTimeTokens[1].trim(),
+          duration: duration,
+        });
       } else {
         shiftHistory?.set("status", "Rejected");
         message = `Shift rejected for ${shiftHistory?.shiftTime} on ${parsedDate}`;
