@@ -2,30 +2,56 @@ import React, { useEffect, useState } from "react";
 import { StyleSheet, Text, View } from "react-native";
 import ScheduleEntryAttributes from "@shared/src/interfaces/ScheduleEntryAttributes";
 import { useAuth } from "../contexts/AuthContext";
-import { AgendaList, CalendarProvider } from "react-native-calendars";
+import {
+  AgendaList,
+  CalendarProvider,
+  DateData,
+  WeekCalendar,
+} from "react-native-calendars";
 import { format, parseISO } from "date-fns";
 
 import axios from "axios";
+import config from "../config";
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#71B7C7",
-    alignItems: "center",
-    justifyContent: "flex-start",
-    paddingTop: 50,
-  },
   header: {
     color: "#FFFFFF",
     fontSize: 24,
     fontWeight: "bold",
   },
+  container: {
+    backgroundColor: "white",
+    flex: 1,
+  },
+
+  eventCard: {
+    backgroundColor: "#fff",
+    borderBottomWidth: 1,
+    borderBottomColor: "lightgrey",
+    padding: 20,
+    justifyContent: "space-between",
+    flexDirection: "row",
+  },
+
+  shiftsHeader: {
+    fontSize: 36,
+    textAlign: "center",
+    fontWeight: "bold",
+    color: "#067496",
+    marginVertical: 20,
+    borderBottomColor: "red",
+    borderBottomWidth: 2,
+  },
+  section: {
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+  },
   calendarContainer: {
-    padding: 10,
-    backgroundColor: "#FFFFFF",
-    borderRadius: 6,
-    margin: 10,
-    width: "90%",
     shadowColor: "#000",
     shadowOffset: {
       width: 0,
@@ -35,56 +61,44 @@ const styles = StyleSheet.create({
     shadowRadius: 3.84,
     elevation: 5,
   },
-  // dayOfWeek: {
-  //   flexDirection: "row",
-  //   justifyContent: "space-between",
-  //   marginTop: 10,
-  // },
-  // dateText: {
-  //   fontSize: 18,
-  //   fontWeight: "bold",
-  // },
-  eventText: {
-    fontSize: 16,
-    color: "#333333",
-    paddingVertical: 5,
-  },
-
-  eventCard: {
-    backgroundColor: "#e7e7e7",
-    borderRadius: 6,
-    padding: 10,
-    marginVertical: 5,
+  calendarHeader: {
+    textAlign: "center",
+    margin: 20,
+    fontSize: 20,
   },
 });
 
 const CalendarPage: React.FC = () => {
-  // Gets shifts from db for a user
+  const today = new Date();
+  const markedDate = format(today, "yyyy-MM-dd");
   const user = useAuth();
-  const [items, setItems] = useState<{
+  const [shifts, setShifts] = useState<{
     [date: string]: ScheduleEntryAttributes[];
   }>({});
-
+  const [calendarHeader, setCalendarHeader] = useState<string>(
+    `${format(today, "MMM yyyy")}`
+  );
   useEffect(() => {
     const getShifts = async () => {
       try {
         const response = await axios.get(
-          `/schedule/${user.auth?.user?.username}`
+          `${config.apiUrl}/schedule/${user.auth?.user?.username}`
         );
-        const fetchedItems: { [date: string]: ScheduleEntryAttributes[] } = {};
+        const fetchedShifts: { [date: string]: ScheduleEntryAttributes[] } = {};
+        if (response.data) {
+          response.data.forEach((shift: ScheduleEntryAttributes) => {
+            const date = format(
+              parseISO(shift.shiftDate.toString()),
+              "yyyy-MM-dd"
+            );
+            if (!fetchedShifts[date]) {
+              fetchedShifts[date] = [];
+            }
+            fetchedShifts[date].push(shift);
+          });
 
-        response.data.forEach((shift: ScheduleEntryAttributes) => {
-          const date = format(
-            parseISO(shift.shiftDate.toString()),
-            "yyyy-MM-dd"
-          );
-          if (!fetchedItems[date]) {
-            fetchedItems[date] = [];
-          }
-          fetchedItems[date].push(shift);
-        });
-
-        setItems(fetchedItems);
+          setShifts(fetchedShifts);
+        }
       } catch (error) {
         console.error(error);
       }
@@ -92,34 +106,38 @@ const CalendarPage: React.FC = () => {
     getShifts();
   }, [user.auth?.user]);
 
-  const today = new Date();
-  const markedDate = format(today, "yyyy-MM-dd");
-
+  const handleDayPress = (date: DateData) => {
+    setCalendarHeader(`${format(new Date(date.dateString), "MMM yyyy")}`);
+  };
   return (
-    <CalendarProvider date={markedDate}>
+    <>
       <View style={styles.container}>
-        <AgendaList
-          sections={Object.keys(items).map((date) => ({
-            title: date,
-            data: items[date],
-          }))}
-          renderItem={({ item }) => (
-            <View style={styles.eventCard}>
-              <Text
-                style={styles.eventText}
-              >{`${item.firstName} ${item.middleInitial} ${item.lastName}`}</Text>
-              <Text
-                style={styles.eventText}
-              >{`${item.startTime} - ${item.endTime}`}</Text>
-              <Text style={styles.eventText}>{item.duration}</Text>
-              <Text style={styles.eventText}>{item.shiftType}</Text>
-              <Text style={styles.eventText}>{item.jobCode}</Text>
-            </View>
-          )}
-          sectionStyle={styles.calendarContainer}
-        />
+        <Text style={styles.calendarHeader}>{calendarHeader}</Text>
+        <CalendarProvider date={markedDate} showTodayButton>
+          <WeekCalendar firstDay={1} onDayPress={handleDayPress} />
+          <Text style={styles.shiftsHeader}>Events</Text>
+          <AgendaList
+            sections={Object.keys(shifts).map((date) => ({
+              title: date,
+              data: shifts[date],
+            }))}
+            sectionStyle={styles.calendarContainer}
+            renderItem={({ item }) => (
+              <View style={styles.eventCard}>
+                <View>
+                  <Text>{`${item.startTime} - ${item.endTime}`}</Text>
+                  <Text>Duration: {item.duration} hours</Text>
+                </View>
+                <View>
+                  <Text>Shift Type: {item.shiftType}</Text>
+                  <Text>Job Code: {item.jobCode}</Text>
+                </View>
+              </View>
+            )}
+          />
+        </CalendarProvider>
       </View>
-    </CalendarProvider>
+    </>
   );
 };
 
