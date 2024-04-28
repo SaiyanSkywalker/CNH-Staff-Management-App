@@ -1,0 +1,118 @@
+.content-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    padding-top: 1rem;
+}
+
+.announcements-wrapper {
+    display: flex;
+    flex-direction: column;
+    height: 70vh;
+    width: 100%;
+    background-color: #f5f5f5;
+    border-radius: 6px;
+    outline: #067496 solid 1px;
+    margin: 10px;
+}
+
+.announcements-input {
+    flex-direction: column;
+    padding: 1rem;
+    margin-top: auto;
+}
+
+.announcements-list {
+    flex-direction: column;
+    list-style-type: none;
+    margin-top: 10px;
+    padding: 10px;
+    height: 55vh;
+    overflow-y: auto;
+}
+
+.announcements-container li {
+    padding: 5px;
+    border-bottom: 1px solid #067496;
+    color: #067496;
+}
+
+.announcements-input form {
+    display: flex;
+    width: 100%;
+    padding: 5px;
+    margin: 5px;
+    align-content: baseline;
+}
+
+.announcements-input input {
+    width: 100%;
+    padding: 5px;
+    border-radius: 6px;
+    border: 1px solid #067496;
+    margin-top: auto;
+}
+
+.announcements-input button {
+    padding: 5px;
+    border-radius: 6px;
+    background-color: #067496;
+    color: white;
+    margin-left: 5px;
+}
+
+.announcements-container h1 {
+    text-align: center;
+    font-weight: bold;
+    font-size: 1.5rem;
+    color: #067496;
+}
+
+.new-channel-container {
+    display: flex;
+    align-items: center;
+}
+
+.new-channel-container h1 {
+    text-align: center;
+    font-weight: bold;
+    font-size: 1rem;
+    color: #067496;
+    padding-right: 5px;
+}
+
+.new-channel-container input {
+    width:fit-content;
+    padding: 5px;
+    border-radius: 6px;
+    border: 1px solid #067496;
+}
+
+.new-channel-container button {
+    padding: 5px;
+    border-radius: 6px;
+    background-color: #067496;
+    color: white;
+    margin-left: 5px;
+}
+
+.channels-container {
+    display: flex;
+    flex-direction: column;
+    padding-right: 1.25rem;
+    padding-top: 1rem;
+    width: 20%;
+    text-align: center;
+}
+
+.channels-container h1 {
+    text-align: center;
+    font-weight: bold;
+    font-size: 1.5rem;
+    color: #067496;
+ }
+
+.channels-container li {
+    color: #067496;
+}
