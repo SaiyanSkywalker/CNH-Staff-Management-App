@@ -146,6 +146,10 @@ const Page = () => {
   const hideDatePicker = () => {
     setDatePickerVisibility(false);
   };
+
+  /**
+   * Send shift request to server
+   */
   const handlePress = () => {
     if (shiftDate && selectedShiftInterval) {
       const body: ShiftRequestAttributes = {
@@ -169,11 +173,18 @@ const Page = () => {
   const handleConfirm = (date: Date) => {
     const midnight = new Date(new Date(date).setHours(0, 0, 0, 0));
     setShiftDate(midnight);
-    setFormattedDate(getDate(midnight));
+    setFormattedDate(formatDate(midnight));
     getShiftInfo(midnight);
     hideDatePicker();
   };
-  const getDate = (date: Date | null) => {
+
+  /**
+   * Formats date in format "dayOfWeek month day year"
+   * Ex. Sat Apr 27 2024
+   * @param date date (as Date object) to be formatted
+   * @returns date string
+   */
+  const formatDate = (date: Date | null): string => {
     let tempDate = date?.toString().split(" ");
 
     return tempDate
@@ -198,15 +209,23 @@ const Page = () => {
       console.log(error);
     }
   };
+  /**
+   * Determines the open shift intervals for a given day
+   * @param shiftDate day shift occurs on
+   * @param currentShifts array of assigned shifts for that day
+   * @param capacities max staff needed for shift
+   */
   const getIntervals = (
     shiftDate: Date,
     currentShifts: ScheduleEntryAttributes[],
     capacities: ShiftCapacityResponse
   ) => {
     const selectedFilters = shiftFilters[filter];
+
     const buckets: { [key: string]: ScheduleEntryAttributes[] } = {};
     selectedFilters.forEach((filter) => {
       const key = `${filter[0]} - ${filter[1]}`;
+
       // Compare shift times with selected window
       const dateString = format(shiftDate, "yyyyMMdd");
       const lowerDateBound = parse(
@@ -252,9 +271,8 @@ const Page = () => {
       });
     });
 
-    // Compare against capacities
+    // Compare # of shifts in each interval against capacities
     const result = [];
-    // console.log(defaultCapacities);
     for (let key in buckets) {
       let capacity: number;
       const hardCodedCapacity = 25;
@@ -271,6 +289,8 @@ const Page = () => {
       // console.log(`Key: ${key}`);
       // console.log(`Updated: ${updatedCapacity}`);
       // console.log(`Default: ${defaultCapacity}`);
+
+      // First go with updated capacity, else use default, else use hardcoded
       capacity = updatedCapacity || defaultCapacity || hardCodedCapacity;
       const numShifts = buckets[key].length;
       if (numShifts < capacity) {
@@ -279,10 +299,17 @@ const Page = () => {
     }
     setItems(result);
   };
+
+  /**
+   * Get the staff capacities values from db
+   * for a given date
+   * @param shiftDate day shift occurs on
+   * @returns
+   */
   const getCapacities = async (shiftDate: Date) => {
     const costCenterId = auth?.user?.unitId;
-    console.log(`DATE: ${format(shiftDate, "yyyy-MM-dd")}`);
-    console.log(costCenterId);
+    // console.log(`DATE: ${format(shiftDate, "yyyy-MM-dd")}`);
+    // console.log(costCenterId);
 
     const response = await axios.get(
       `${config.apiUrl}/shift-capacity/mobile?date=${format(
@@ -293,6 +320,10 @@ const Page = () => {
     const data: ShiftCapacityResponse = response.data;
     return data;
   };
+  /**
+   * Recalculate available shift times
+   * everytime selected interval changes
+   */
   useEffect(() => {
     if (shiftDate && capacities) {
       getIntervals(shiftDate, shifts, capacities);

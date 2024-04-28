@@ -79,35 +79,41 @@ const CalendarPage: React.FC = () => {
     `${format(today, "MMM yyyy")}`
   );
   useEffect(() => {
-    const getShifts = async () => {
-      try {
-        const response = await axios.get(
-          `${config.apiUrl}/schedule/${user.auth?.user?.username}`
-        );
-        const fetchedShifts: { [date: string]: ScheduleEntryAttributes[] } = {};
-        if (response.data) {
-          response.data.forEach((shift: ScheduleEntryAttributes) => {
-            const date = format(
-              parseISO(shift.shiftDate.toString()),
-              "yyyy-MM-dd"
-            );
-            if (!fetchedShifts[date]) {
-              fetchedShifts[date] = [];
-            }
-            fetchedShifts[date].push(shift);
-          });
-
-          setShifts(fetchedShifts);
-        }
-      } catch (error) {
-        console.error(error);
-      }
-    };
     getShifts();
   }, [user.auth?.user]);
 
   const handleDayPress = (date: DateData) => {
     setCalendarHeader(`${format(new Date(date.dateString), "MMM yyyy")}`);
+  };
+
+  /**
+   * Get all shifts for a user
+   */
+  const getShifts = async () => {
+    try {
+      const response = await axios.get(
+        `${config.apiUrl}/schedule/${user.auth?.user?.username}`
+      );
+      const fetchedShifts: { [date: string]: ScheduleEntryAttributes[] } = {};
+
+      // Create events for AgendaList
+      if (response.data) {
+        response.data.forEach((shift: ScheduleEntryAttributes) => {
+          const date = format(
+            parseISO(shift.shiftDate.toString()),
+            "yyyy-MM-dd"
+          );
+          if (!fetchedShifts[date]) {
+            fetchedShifts[date] = [];
+          }
+          fetchedShifts[date].push(shift);
+        });
+
+        setShifts(fetchedShifts);
+      }
+    } catch (error) {
+      console.error(error);
+    }
   };
   return (
     <>

@@ -6,6 +6,7 @@ import Unit from "server/src/models/Unit";
 import UserInformation from "server/src/models/UserInformation";
 import ScheduleEntry from "../models/ScheduleEntry";
 import { calculateDuration } from "../util/dateUtils";
+import ShiftHistoryAttributes from "@shared/src/interfaces/ShiftHistoryAttributes";
 
 export const mobileSocketMap = new Map<string, Map<string, Socket>>();
 export const adminSocketMap = new Map<string, Map<string, Socket>>();
@@ -121,6 +122,7 @@ const socketHandler = (io: Server, socket: Socket) => {
         username: shiftHistory?.user.username,
         message,
         isAccepted: arg.isAccepted,
+        shift: shiftHistory as ShiftHistoryAttributes,
       });
     }
   );

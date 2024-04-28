@@ -3,7 +3,13 @@ import { useAuth } from "../contexts/AuthContext";
 import { DrawerContentScrollView, DrawerItem } from "@react-navigation/drawer";
 import { CommonActions } from "@react-navigation/native";
 
-export default function CustomDrawerContent(props: any) {
+/**
+ * Contains content for app drawer, conditionally
+ * loads routes based on user login status
+ * @param props
+ * @returns
+ */
+const CustomDrawerContent = (props: any) => {
   const navigation = useNavigation<any>();
   const authContext = useAuth();
 
@@ -46,4 +52,5 @@ export default function CustomDrawerContent(props: any) {
       </DrawerContentScrollView>
     </>
   );
-}
+};
+export default CustomDrawerContent;
