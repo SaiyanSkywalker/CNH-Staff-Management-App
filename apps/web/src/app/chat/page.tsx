@@ -39,7 +39,7 @@ export default function ChatPage() {
         try {
           const response = await axios({
             method: "GET",
-            url: `${config.apiUrl}/channelRouter`,
+            url: `${config.apiUrl}/channel`,
             responseType: "json",
           });
           const data = await response.data;
@@ -55,7 +55,7 @@ export default function ChatPage() {
         try {
           const response = await axios({
             method: "GET",
-            url: `${config.apiUrl}/channelRouter/${selectedChannel?.id}`,
+            url: `${config.apiUrl}/channel/${selectedChannel?.id}`,
             responseType: "json",
           });
           const data = await response.data;
@@ -79,7 +79,7 @@ export default function ChatPage() {
 
                 loadingContext?.showLoader();
 
-                const res = await fetch("http://localhost:3003/channel", {
+                const res = await fetch(`${config.apiUrl}/channel`, {
                     method: "POST",
                     headers: {"Content-Type": "application/json"},
                     body: JSON.stringify(newChannelRequest),
