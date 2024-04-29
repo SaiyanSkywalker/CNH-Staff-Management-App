@@ -6,7 +6,9 @@ const Home = () => {
   const authContext = useAuth();
   return (
     <>
-      <Redirect href={`/chat`} />
+      <Redirect
+        href={authContext.auth?.authenticated ? `/calendar` : `/login`}
+      />
     </>
   );
 };
