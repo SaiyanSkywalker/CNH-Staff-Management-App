@@ -152,9 +152,10 @@ const Page = () => {
    */
   const handlePress = () => {
     if (shiftDate && selectedShiftInterval) {
+      const dateString: string = format(shiftDate, "MM/dd/yyyy");
       const body: ShiftRequestAttributes = {
         user: auth?.user?.username || "",
-        shiftDate: shiftDate?.toISOString() || "",
+        shiftDate: dateString || "",
         shift: selectedShiftInterval,
       };
       auth?.socket?.emit("shift_submission", body);

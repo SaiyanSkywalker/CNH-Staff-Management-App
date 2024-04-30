@@ -57,11 +57,8 @@ export default function AuthProvider({
       // Event handler for when adminn user
       // accepts shift request
       newSocket.on("shift_update", (arg: ShiftRequestUpdate) => {
-        Alert.alert(
-          `Shift request for ${arg.shift.shiftTime} on ${
-            arg.shift.dateRequested
-          } was ${arg.isAccepted ? `accepted` : `rejected`}`
-        );
+        console.log(`isAccepted: ${arg.isAccepted}`);
+        Alert.alert("Shift Request Update", `${arg.message}`);
       });
       newSocket?.emit("add_user", { username, uuid: randomUUID });
       setSocket(newSocket);

@@ -6,7 +6,6 @@ import Unit from "server/src/models/Unit";
 import UserInformation from "server/src/models/UserInformation";
 import ScheduleEntry from "../models/ScheduleEntry";
 import { calculateDuration } from "../util/dateUtils";
-import ShiftHistoryAttributes from "@shared/src/interfaces/ShiftHistoryAttributes";
 
 export const mobileSocketMap = new Map<string, Map<string, Socket>>();
 export const adminSocketMap = new Map<string, Map<string, Socket>>();
@@ -50,7 +49,7 @@ const socketHandler = (io: Server, socket: Socket) => {
       if (user) {
         const newShiftRequest = await ShiftHistory.create({
           shiftTime: arg.shift,
-          status: "pending",
+          status: "Pending",
           userId: user.employeeId as number,
           unitId: user.unit?.id as number,
           dateRequested: arg.shiftDate,
@@ -118,30 +117,21 @@ const socketHandler = (io: Server, socket: Socket) => {
         message = `Shift rejected for ${shiftHistory?.shiftTime} on ${parsedDate}`;
       }
       await shiftHistory?.save();
-      socket.emit("update_user", {
-        username: shiftHistory?.user.username,
-        message,
-        isAccepted: arg.isAccepted,
-        shift: shiftHistory as ShiftHistoryAttributes,
-      });
-    }
-  );
 
-  //REQUEST_NOTIF event.
-  socket.on(
-    "update_user",
-    (arg: { username: string; message: string; isAccepted: boolean }) => {
-      //TODO: Add code that adds new shift request to ScheduleEntry table on shift acceptance
-      if (mobileSocketMap.has(arg.username)) {
-        const userMap = mobileSocketMap.get(arg.username);
-        for (let uuid in userMap?.keys()) {
+      // Send response to mobile user
+      if (mobileSocketMap.has(shiftHistory?.user.username)) {
+        const userMap = mobileSocketMap.get(shiftHistory?.user.username);
+        userMap?.forEach((socket: Socket, uuid: string) => {
           console.log("uuid is:", uuid);
-          let userSocket = userMap.get(uuid);
-          userSocket?.emit("shift_update", {
-            message: arg.message,
+          socket?.emit("shift_update", {
             isAccepted: arg.isAccepted,
+            message: message,
           });
-        }
+        });
+      } else {
+        console.log(
+          `Mobile user: ${shiftHistory?.user.username} does not have an entry in socket map`
+        );
       }
     }
   );
