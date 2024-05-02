@@ -39,8 +39,6 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: "#067496",
     marginVertical: 20,
-    borderBottomColor: "red",
-    borderBottomWidth: 2,
   },
   section: {
     shadowColor: "#000",
