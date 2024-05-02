@@ -19,17 +19,14 @@ import config from "web/src/config";
 import { CNHEvent } from "@webSrc/interfaces/CNHEvent";
 import Modal from "@webSrc/components/EventModal";
 import styles from "@webSrc/styles/Schedule.module.css";
-
-interface Range {
-  start: Date;
-  end: Date;
-}
+import ShiftCapacityAttributes from "@shared/src/interfaces/ShiftCapacityAttributes";
+import ShiftCapacityResponse from "@shared/src/interfaces/ShiftCapacityResponse";
 const Schedule = () => {
   const localizer = momentLocalizer(moment);
   const [selectedOption, setSelectedOption] = useState<string>("");
   const [units, setUnits] = useState<UnitAttributes[]>([]);
   const [events, setEvents] = useState<any[]>([]);
-  const [monthCapacities, setmonthCapacities] = useState<any>({});
+  const [monthCapacities, setMonthCapacities] = useState<any>({});
   const [view, setView] = useState<any>(Views.DAY);
   const [selectedEvent, setSelectedEvent] = useState<CNHEvent>({} as CNHEvent);
   const [showModal, setShowModal] = useState<boolean>(false);
@@ -37,8 +34,14 @@ const Schedule = () => {
   const [schedules, setSchedules] = useState<{
     [key: string]: ScheduleEntryAttributes[];
   }>({});
+  const [defaultCapacities, setDefaultCapacities] = useState<
+    ShiftCapacityAttributes[]
+  >([]);
+  const [updatedCapacities, setUpdatedCapacities] = useState<
+    ShiftCapacityAttributes[]
+  >([]);
 
-  const defaultCapacity = 10; // TODO: change with actual capacity once shift capacity page is finished
+  const hardCodedCapacity = 25; // TODO: change with actual capacity once shift capacity page is finished
   const { views, defaultView, formats } = useMemo(() => {
     const timeGutterFormatter: DateFormatFunction = (
       date: Date,
@@ -109,6 +112,7 @@ const Schedule = () => {
     const buckets: { [key: string]: ScheduleEntryAttributes[] } = {};
     const events: any[] = [];
 
+    // Get capacites
     // Group shifts by date
     for (const costCenter in shifts) {
       const costCenterShifts = shifts[costCenter];
@@ -174,6 +178,7 @@ const Schedule = () => {
     }
     const mc: { [key: string]: number } = {};
     // Go through buckets, create events and push them to final events array
+    let capacity: number;
     for (const b in buckets) {
       const tokens = b.split(",");
       const startTime = moment(
@@ -187,8 +192,32 @@ const Schedule = () => {
       if (endTime < startTime) {
         endTime.setDate(endTime.getDate() + 1);
       }
-      // Get the lowest shift capacity for each date on the schedule
-      const capacityRatio = buckets[b].length / defaultCapacity;
+
+      // First look for updated capacity
+      const updatedCapacity = updatedCapacities.find(
+        (value: ShiftCapacityAttributes) =>
+          value.shift === `${tokens[2]} - ${tokens[3]}` &&
+          value.shiftDate ===
+            moment(tokens[1], "YYYYMMDD").format("YYYY-MM-DD") &&
+          value.laborLevelEntryId === Number(tokens[0])
+      )?.capacity;
+      if (updatedCapacity) {
+        console.log(updatedCapacity);
+      }
+      const defaultCapacity = defaultCapacities.find(
+        (shiftCapacity: ShiftCapacityAttributes) => {
+          return (
+            shiftCapacity.shift === `${tokens[2]} - ${tokens[3]}` &&
+            shiftCapacity.laborLevelEntryId === Number(tokens[0])
+          );
+        }
+      )?.capacity;
+
+      capacity = updatedCapacity || defaultCapacity || hardCodedCapacity;
+      // console.log(`Default: ${defaultCapacity}`);
+      // console.log(`updated: ${updatedCapacity}`);
+      // console.log(`Capacity ${capacity}`);
+      const capacityRatio = buckets[b].length / capacity;
       const date = moment(tokens[1], "YYYYMMDD").toDate().toString();
 
       if (!mc[date]) {
@@ -197,9 +226,7 @@ const Schedule = () => {
         mc[date] = Math.min(mc[date], capacityRatio);
       }
       const event: CNHEvent = {
-        title: `Cost Center: ${tokens[0]}, ${
-          buckets[b].length
-        }/${defaultCapacity} ${
+        title: `Cost Center: ${tokens[0]}, ${buckets[b].length}/${capacity} ${
           endTime.getDay() - startTime.getDay() != 0 ? " (Night Shift)" : ""
         }`,
         start: startTime,
@@ -208,7 +235,7 @@ const Schedule = () => {
       };
       events.push(event);
     }
-    setmonthCapacities(mc);
+    setMonthCapacities(mc);
     return events;
   };
   const handleEventSelect = (event: CNHEvent) => {
@@ -309,18 +336,28 @@ const Schedule = () => {
         url: `${config.apiUrl}/unit`,
         responseType: "json",
       });
-      const data = await response.data;
+      const data = response.data;
       setUnits(data);
     } catch (err) {
       console.error(err);
     }
   };
-
+  const getCapacities = async () => {
+    // Get default capacity
+    const response = await axios({
+      method: "GET",
+      url: `${config.apiUrl}/shift-capacity/admin/`,
+      responseType: "json",
+    });
+    const data: ShiftCapacityResponse = response.data;
+    setDefaultCapacities(data.default);
+    setUpdatedCapacities(data.updated);
+  };
   useEffect(() => {
     getUnits();
   }, []);
-
   useEffect(() => {
+    getCapacities();
     getSchedules();
   }, [units, selectedOption]);
   return (
@@ -389,7 +426,7 @@ const Schedule = () => {
           </div>
 
           <Calendar
-            className="h-[500px] overflow-scroll border-4 rounded-lg border-gray-400 shadow-lg p-12"
+            className="h-[700px] overflow-scroll border-4 rounded-lg border-gray-400 shadow-lg p-12"
             localizer={localizer}
             events={events}
             views={views}

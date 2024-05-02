@@ -4,6 +4,7 @@ export default interface UserInformationAttributes {
   username: string;
   firstName: string;
   lastName: string;
+  middleIntial?: string;
   password: string;
   roleId?: number;
   unitId?: number;

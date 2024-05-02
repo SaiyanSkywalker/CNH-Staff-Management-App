@@ -9,6 +9,9 @@ import config from "../config";
 
 import ScheduleEntryAttributes from "@shared/src/interfaces/ScheduleEntryAttributes";
 import ShiftRequestAttributes from "@shared/src/interfaces/ShiftRequestAttributes";
+import ShiftCapacityAttributes from "@shared/src/interfaces/ShiftCapacityAttributes";
+import ShiftCapacityResponse from "@shared/src/interfaces/ShiftCapacityResponse";
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -133,6 +136,9 @@ const Page = () => {
   const [filter, setFilter] = useState<string>("4hr");
   const [shiftDate, setShiftDate] = useState<Date | undefined>(undefined);
   const [formattedDate, setFormattedDate] = useState<string>("Select a date");
+  const [capacities, setCapacites] = useState<ShiftCapacityResponse>(
+    {} as ShiftCapacityResponse
+  );
   const showDatePicker = () => {
     setDatePickerVisibility(true);
   };
@@ -140,12 +146,16 @@ const Page = () => {
   const hideDatePicker = () => {
     setDatePickerVisibility(false);
   };
+
+  /**
+   * Send shift request to server
+   */
   const handlePress = () => {
-    // TODO: Find a way to send shift requests to server through sockets
     if (shiftDate && selectedShiftInterval) {
+      const dateString: string = format(shiftDate, "MM/dd/yyyy");
       const body: ShiftRequestAttributes = {
         user: auth?.user?.username || "",
-        shiftDate: shiftDate?.toISOString() || "",
+        shiftDate: dateString || "",
         shift: selectedShiftInterval,
       };
       auth?.socket?.emit("shift_submission", body);
@@ -164,11 +174,18 @@ const Page = () => {
   const handleConfirm = (date: Date) => {
     const midnight = new Date(new Date(date).setHours(0, 0, 0, 0));
     setShiftDate(midnight);
-    setFormattedDate(getDate(midnight));
-    getAllShifts(midnight);
+    setFormattedDate(formatDate(midnight));
+    getShiftInfo(midnight);
     hideDatePicker();
   };
-  const getDate = (date: Date | null) => {
+
+  /**
+   * Formats date in format "dayOfWeek month day year"
+   * Ex. Sat Apr 27 2024
+   * @param date date (as Date object) to be formatted
+   * @returns date string
+   */
+  const formatDate = (date: Date | null): string => {
     let tempDate = date?.toString().split(" ");
 
     return tempDate
@@ -176,7 +193,7 @@ const Page = () => {
       : "";
   };
 
-  const getAllShifts = async (shiftDate: Date) => {
+  const getShiftInfo = async (shiftDate: Date) => {
     try {
       if (shiftDate && auth) {
         const costCenterId = auth?.user?.unitId;
@@ -184,24 +201,32 @@ const Page = () => {
           `${config.apiUrl}/schedule/unit?shiftDate=${shiftDate}&costCenterId=${costCenterId}`
         );
         const currentShifts: ScheduleEntryAttributes[] = response.data;
-        console.log(shiftDate);
-        console.log(currentShifts.length);
+        const currentCapacities = await getCapacities(shiftDate);
         setShifts(currentShifts);
-        getIntervals(shiftDate, currentShifts);
+        setCapacites(currentCapacities);
+        getIntervals(shiftDate, currentShifts, currentCapacities);
       }
     } catch (error) {
       console.log(error);
     }
   };
+  /**
+   * Determines the open shift intervals for a given day
+   * @param shiftDate day shift occurs on
+   * @param currentShifts array of assigned shifts for that day
+   * @param capacities max staff needed for shift
+   */
   const getIntervals = (
     shiftDate: Date,
-    currentShifts: ScheduleEntryAttributes[]
+    currentShifts: ScheduleEntryAttributes[],
+    capacities: ShiftCapacityResponse
   ) => {
     const selectedFilters = shiftFilters[filter];
-    console.log(selectedFilters);
+
     const buckets: { [key: string]: ScheduleEntryAttributes[] } = {};
     selectedFilters.forEach((filter) => {
-      const key = `${filter[0]}-${filter[1]}`;
+      const key = `${filter[0]} - ${filter[1]}`;
+
       // Compare shift times with selected window
       const dateString = format(shiftDate, "yyyyMMdd");
       const lowerDateBound = parse(
@@ -247,21 +272,62 @@ const Page = () => {
       });
     });
 
-    // Compare against capacities
+    // Compare # of shifts in each interval against capacities
     const result = [];
-    const defaultCapacity = 25; // TODO: Change this to use actual capacities from db once fahid's branch is merged in
     for (let key in buckets) {
+      let capacity: number;
+      const hardCodedCapacity = 25;
+      const updatedCapacity = capacities.updated.find(
+        (c: ShiftCapacityAttributes) => {
+          return c.shift === key;
+        }
+      )?.capacity;
+      const defaultCapacity = capacities.default.find(
+        (sc: ShiftCapacityAttributes) => {
+          return sc.shift === key;
+        }
+      )?.capacity;
+      // console.log(`Key: ${key}`);
+      // console.log(`Updated: ${updatedCapacity}`);
+      // console.log(`Default: ${defaultCapacity}`);
+
+      // First go with updated capacity, else use default, else use hardcoded
+      capacity = updatedCapacity || defaultCapacity || hardCodedCapacity;
       const numShifts = buckets[key].length;
-      if (numShifts < defaultCapacity) {
+      if (numShifts < capacity) {
         result.push({ label: key, value: key });
       }
-      console.log(`key:${key} length:${numShifts}`);
     }
     setItems(result);
   };
+
+  /**
+   * Get the staff capacities values from db
+   * for a given date
+   * @param shiftDate day shift occurs on
+   * @returns
+   */
+  const getCapacities = async (shiftDate: Date) => {
+    const costCenterId = auth?.user?.unitId;
+    // console.log(`DATE: ${format(shiftDate, "yyyy-MM-dd")}`);
+    // console.log(costCenterId);
+
+    const response = await axios.get(
+      `${config.apiUrl}/shift-capacity/mobile?date=${format(
+        shiftDate,
+        "yyyy-MM-dd"
+      )}&costCenterId=${costCenterId}`
+    );
+    const data: ShiftCapacityResponse = response.data;
+    return data;
+  };
+  /**
+   * Recalculate available shift times
+   * everytime selected interval changes
+   */
   useEffect(() => {
-    if (shiftDate) {
-      getIntervals(shiftDate, shifts);
+    if (shiftDate && capacities) {
+      getIntervals(shiftDate, shifts, capacities);
     }
   }, [filter]);
 
