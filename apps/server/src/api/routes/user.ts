@@ -1,6 +1,9 @@
 import { Request, Response, Router } from "express";
 import { sequelize } from "server/src/loaders/dbLoader";
 import Role from "server/src/models/Role";
+import config from "../../config";
+
+const jwtSecretKey = config
 
 const userRouter = Router();
 
@@ -23,6 +26,11 @@ userRouter.get("/", async (req: Request, res: Response): Promise<Response> => {
         },
       },
     });
+
+    if(!user) {
+      res.status(400).send({message: "User not found"});
+    }
+
     return res.json(user);
   } catch (error) {
     return res
