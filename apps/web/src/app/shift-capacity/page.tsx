@@ -150,6 +150,20 @@ export default function shiftCapacity() {
     <div className={styles.container}>
       <form className={styles.capacity} onSubmit={onSubmit}>
         <h1 className={styles.h1}>Max Unit Capacity</h1>
+        <div className="w-[73.5%] my-3">
+          <div className={styles.checkbox}>
+            <input
+              type="checkbox"
+              id="default"
+              name="default"
+              checked={isChecked}
+              onChange={handleIsChecked}
+            ></input>
+            <label htmlFor="default" className={`${styles.checkboxLabel} ms-2`}>
+              Set Defaults
+            </label>
+          </div>
+        </div>
         <div className={styles.grid}>
           {!isChecked && (
             <div className={styles.field}>
@@ -160,7 +174,7 @@ export default function shiftCapacity() {
                 className={styles.input}
                 value={date}
                 onChange={handleDateChange}
-                // min={todayDate.toISOString().substring(0, 10)}
+                min={todayDate.toISOString().substring(0, 10)}
                 name="date"
                 id="widget"
                 type="date"
@@ -207,18 +221,6 @@ export default function shiftCapacity() {
           style={!initialLoad ? { alignSelf: "flex-end" } : {}}
           className={styles.submission}
         >
-          <div className={styles.checkbox}>
-            <input
-              type="checkbox"
-              id="default"
-              name="default"
-              checked={isChecked}
-              onChange={handleIsChecked}
-            ></input>
-            <label htmlFor="default" className={styles.checkboxLabel}>
-              Set Defaults
-            </label>
-          </div>
           <button disabled={!initialLoad} className={styles.button}>
             Submit
           </button>

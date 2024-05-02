@@ -56,8 +56,10 @@ export const postShiftCapacity = async (
 ): Promise<void> => {
   const { shiftDate, shiftTime, capacities } = shiftCapacityRequest;
   let shiftTimeStrings: string[] = parseShift(shiftTime);
-  let nextDate: string = nextDay(shiftDate);
 
+  // Add original shift time to broken down intervals
+  shiftTimeStrings.push(shiftTime);
+  let nextDate: string = nextDay(shiftDate);
   for (let unitId in capacities) {
     let currDate: string = shiftDate;
     let dayCounter = 0;
