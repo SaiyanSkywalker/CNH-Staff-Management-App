@@ -99,19 +99,19 @@ const socketHandler = (io: Server, socket: Socket) => {
 
   //MESSAGE_SENT event
   socket.on("message_sent", async (arg: AnnouncementAttributes) => {
+    let message: string = arg.body;
+    let userId: number = arg.senderId;
+    let channelId: number = arg.channelId;
     try {
-      let msg: string = arg.body;
-      let userId: number = arg.senderId;
-      let channelId: number = arg.channelId;
       await Announcement.create({
-        body: msg,
+        body: message,
         senderId: userId,
         channelId
       });
-      socket.emit("message_received", {isError: false, message: "Success!"})
+      socket.emit("message_received", {isError: false, message})
     }
     catch {
-      socket.emit("message_received", {isError: true, message: "Error occured on server!"})
+      socket.emit("message_received", {isError: true, message})
     }
   })
 };
