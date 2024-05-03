@@ -27,7 +27,7 @@ class UserInformation extends Model<UserInformationAttributes> {
   })
   id!: number;
 
-  @Column({ type: DataType.INTEGER, allowNull: false, unique: true })
+  @Column({ type: DataType.INTEGER, allowNull: false })
   employeeId!: number;
 
   @Column({ type: DataType.STRING, allowNull: false })
@@ -35,6 +35,9 @@ class UserInformation extends Model<UserInformationAttributes> {
 
   @Column({ type: DataType.STRING, allowNull: true })
   firstName!: string;
+
+  @Column({ type: DataType.STRING, allowNull: true })
+  middleInitial!: string;
 
   @Column({ type: DataType.STRING, allowNull: true })
   lastName!: string;

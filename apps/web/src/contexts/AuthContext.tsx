@@ -55,7 +55,7 @@ export default function AuthProvider({
       const newSocket = io(config.apiUrl);
       // Add new socket event for notifcations
       newSocket.on("schedule_upload_complete", () => {
-        bannerContext?.showBanner("Upload schedule complete", "false");
+        bannerContext?.showBanner("Upload schedule complete", "success");
       });
       newSocket?.emit("add_user", {
         username,

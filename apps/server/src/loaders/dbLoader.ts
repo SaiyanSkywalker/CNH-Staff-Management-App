@@ -11,7 +11,6 @@ import ServerConfig from "../interfaces/ServerConfig";
 import Role from "../models/Role";
 import DefaultRoles from "../constants/DefaultRoles";
 
-
 let sequelize: Sequelize;
 
 /**
@@ -54,7 +53,7 @@ export default async (config: ServerConfig) => {
     // await sequelize.sync(
     //   config.environment.toLowerCase() === "dev" ? { alter: true } : {}
     // );
-    await sequelize.sync({});
+    await sequelize.sync();
 
     // Adds default list of units and roles to db
     await createDefaultValues(Unit, DefaultUnits);

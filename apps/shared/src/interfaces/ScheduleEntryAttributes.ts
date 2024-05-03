@@ -3,13 +3,13 @@ export default interface ScheduleEntryAttributes {
   employeeId: number;
   lastName: string;
   firstName: string;
-  middleInitial: string;
+  middleInitial?: string;
   shiftDate: Date;
   startTime: string;
   endTime: string;
   duration: string;
   shiftType: string;
-  jobCode: string;
+  jobCode?: string;
   costCenterId: number;
   createdAt?: Date;
   updatedAt?: Date;
