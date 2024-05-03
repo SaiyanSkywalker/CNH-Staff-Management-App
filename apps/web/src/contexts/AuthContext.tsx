@@ -1,23 +1,20 @@
 "use client";
 
 import axios from "axios";
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 import config from "../config";
 import UserInformation from "@shared/src/interfaces/UserInformationAttributes";
 import { Socket } from "socket.io-client";
 import { io } from "socket.io-client";
 import { v4 as uuidv4 } from "uuid";
 import { BannerContext, BannerContextProps } from "./BannerContext";
-
+import jwt from "jsonwebtoken";
+import Cookies from "universal-cookie";
 interface AuthDetails {
   authenticated: boolean;
   user: UserInformation | null;
   socket: Socket | null | undefined;
-  login: (
-    username: string,
-    password: string,
-    isMobile: string
-  ) => Promise<boolean>;
+  login: (username: string, password: string) => Promise<boolean>;
   logout: () => Promise<boolean>;
 }
 
@@ -38,12 +35,18 @@ export default function AuthProvider({
   const [userUUID, setUserUUID] = useState<string | undefined>(undefined);
   const bannerContext: BannerContextProps | undefined =
     useContext(BannerContext);
+  const cookies = new Cookies();
   const login = async (
     username: string,
-    password: string,
-    isMobile: string
+    password: string
   ): Promise<boolean> => {
-    const userInfo = await getUser(username, password, isMobile);
+    const tokens = await getUser(username, password); // JWT token from server
+    const userInfo = jwt.decode(tokens.access) as UserInformation;
+    // Store tokens in cookie
+    cookies.set("accessToken", tokens.access, { path: "/" });
+    cookies.set("refreshToken", tokens.refresh, { path: "/" });
+
+    console.log(userInfo);
     if (userInfo) {
       setUser(userInfo);
       setIsLoggedIn(true);
@@ -69,6 +72,8 @@ export default function AuthProvider({
 
   const logout = (): Promise<boolean> => {
     socket?.emit("remove_user", { username: user?.username, uuid: userUUID });
+    cookies.remove("accessToken", { path: "/" });
+    cookies.remove("refreshToken", { path: "/" });
     setIsLoggedIn(false);
     setUser({} as UserInformation);
     setSocket(undefined);
@@ -76,17 +81,18 @@ export default function AuthProvider({
     return Promise.resolve(true);
   };
 
-  const getUser = async (
-    username: string,
-    password: string,
-    isMobile: string
-  ) => {
+  const getUser = async (username: string, password: string) => {
     try {
       const url = config.apiUrl;
       const response = await axios({
-        method: "GET",
-        url: `${url}/user/?username=${username}&password=${password}&isMobile=${isMobile}`,
+        method: "POST",
+        url: `${url}/login`,
         responseType: "json",
+        data: {
+          username: username,
+          password: password,
+          isMobile: false,
+        },
       });
       const data = await response.data;
       return data;
@@ -96,7 +102,65 @@ export default function AuthProvider({
 
     return null;
   };
+  const refreshAccessToken = async (): Promise<string | null> => {
+    try {
+      const refreshToken = cookies.get("refreshToken");
+      if (!refreshToken) return null;
 
+      // Send refresh token to server to get new access token
+      const url = config.apiUrl;
+      const response = await axios.post(`${url}/refresh`, {
+        refreshToken,
+      });
+      const { accessToken } = response.data;
+      if (accessToken) {
+        // Update access token in cookies
+        cookies.set("accessToken", accessToken, { path: "/" });
+        return accessToken;
+      }
+    } catch (error) {
+      console.error("Error refreshing access token", error);
+    }
+    return null;
+  };
+  useEffect(() => {
+    const axiosInterceptor = axios.interceptors.response.use(
+      (response) => response,
+      async (error) => {
+        const originalRequest = error.config;
+        if (
+          error.response &&
+          error.response.status === 401 &&
+          !originalRequest._retry
+        ) {
+          originalRequest._retry = true;
+          try {
+            // Attempt to refresh token
+            const refreshedToken = await refreshAccessToken();
+            if (refreshedToken) {
+              // Retry original request with new access token
+              originalRequest.headers[
+                "Authorization"
+              ] = `Bearer ${refreshedToken}`;
+              return axios(originalRequest);
+            } else {
+              // If refresh fails, logout user
+              await logout();
+            }
+          } catch (error) {
+            console.error("Error refreshing token", error);
+            // If refresh fails, logout user
+            await logout();
+          }
+        }
+        return Promise.reject(error);
+      }
+    );
+
+    return () => {
+      axios.interceptors.response.eject(axiosInterceptor);
+    };
+  }, []);
   return (
     <AuthContext.Provider
       value={{

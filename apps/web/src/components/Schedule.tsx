@@ -19,11 +19,13 @@ import config from "web/src/config";
 import { CNHEvent } from "@webSrc/interfaces/CNHEvent";
 import Modal from "@webSrc/components/EventModal";
 import styles from "@webSrc/styles/Schedule.module.css";
+import { getAccessToken } from "@webSrc/utils/token";
 
 interface Range {
   start: Date;
   end: Date;
 }
+
 const Schedule = () => {
   const localizer = momentLocalizer(moment);
   const [selectedOption, setSelectedOption] = useState<string>("");
@@ -37,7 +39,6 @@ const Schedule = () => {
   const [schedules, setSchedules] = useState<{
     [key: string]: ScheduleEntryAttributes[];
   }>({});
-
   const defaultCapacity = 10; // TODO: change with actual capacity once shift capacity page is finished
   const { views, defaultView, formats } = useMemo(() => {
     const timeGutterFormatter: DateFormatFunction = (
@@ -288,9 +289,11 @@ const Schedule = () => {
   };
   const getSchedules = async () => {
     try {
+      const accessToken = getAccessToken();
       const response = await axios({
         method: "GET",
         url: `${config.apiUrl}/schedule?costCenterId=${selectedOption}`,
+        headers: { Authorization: `Bearer ${accessToken}` },
         responseType: "json",
       });
       const data = await response.data;
@@ -304,9 +307,11 @@ const Schedule = () => {
   };
   const getUnits = async () => {
     try {
+      const accessToken = getAccessToken();
       const response = await axios({
         method: "GET",
         url: `${config.apiUrl}/unit`,
+        headers: { Authorization: `Bearer ${accessToken}` },
         responseType: "json",
       });
       const data = await response.data;
