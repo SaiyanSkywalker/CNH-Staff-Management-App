@@ -61,12 +61,11 @@ const Page = () => {
   const onPressLogin = async () => {
     if (!username || !password) {
       Alert.alert("Error", "Please enter both email and password.");
-      router.replace("/schedule");
     }
     const success = await auth?.login(username, password, "1");
     if (success) {
       Alert.alert("Login Successful", "You are now logged in.");
-      router.replace("/schedule");
+      router.replace("/calendar");
     } else {
       Alert.alert("Login Failed", "Invalid email or password.");
     }

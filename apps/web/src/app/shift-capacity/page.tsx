@@ -96,7 +96,7 @@ export default function shiftCapacity() {
   }
 
   function handleIsChecked() {
-    setIsChecked(prevIsChecked => !prevIsChecked);
+    setIsChecked((prevIsChecked) => !prevIsChecked);
   }
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
@@ -107,14 +107,14 @@ export default function shiftCapacity() {
       if (Object.keys(capacities).length === 0) {
         bannerContext?.showBanner(
           "Please define capacities for at least one unit before saving",
-          true
+          "other"
         );
       } else {
         let shiftCapacityRequest: ShiftCapacityRequest = {
           shiftDate: date,
           shiftTime: shifts[Number(shiftIndex)],
           capacities,
-          isDefault: isChecked
+          isDefault: isChecked,
         };
         loadingContext?.showLoader();
         const res = await fetch("http://localhost:3003/shift-capacity", {
@@ -128,17 +128,20 @@ export default function shiftCapacity() {
         if (res.status === 200) {
           bannerContext?.showBanner(
             "Success, Shift capacities were successfully saved",
-            false
+            "success"
           );
         } else {
-          bannerContext?.showBanner("Error in saving shift capacities", true);
+          bannerContext?.showBanner(
+            "Error in saving shift capacities",
+            "error"
+          );
         }
       }
     } catch (error) {
       loadingContext?.hideLoader();
       bannerContext?.showBanner(
         `Error in saving shift capacities + ${error}`,
-        true
+        "error"
       );
     }
   }
@@ -147,9 +150,22 @@ export default function shiftCapacity() {
     <div className={styles.container}>
       <form className={styles.capacity} onSubmit={onSubmit}>
         <h1 className={styles.h1}>Max Unit Capacity</h1>
+        <div className="w-[73.5%] my-3">
+          <div className={styles.checkbox}>
+            <input
+              type="checkbox"
+              id="default"
+              name="default"
+              checked={isChecked}
+              onChange={handleIsChecked}
+            ></input>
+            <label htmlFor="default" className={`${styles.checkboxLabel} ms-2`}>
+              Set Defaults
+            </label>
+          </div>
+        </div>
         <div className={styles.grid}>
-          {!isChecked &&
-            (
+          {!isChecked && (
             <div className={styles.field}>
               <label className={styles.label} htmlFor="widget">
                 Date
@@ -165,8 +181,7 @@ export default function shiftCapacity() {
                 required
               ></input>
             </div>
-            )
-          }
+          )}
           <div className={styles.field}>
             <label className={styles.label} htmlFor="shift">
               Shift
@@ -180,7 +195,9 @@ export default function shiftCapacity() {
               required
             >
               {shifts.map((shift, index) => (
-                <option value={String(index)} key={index}>{shift}</option>  
+                <option value={String(index)} key={index}>
+                  {shift}
+                </option>
               ))}
             </select>
           </div>
@@ -199,16 +216,11 @@ export default function shiftCapacity() {
               ></input>
             </div>
           ))}
-          
         </div>
         <div
           style={!initialLoad ? { alignSelf: "flex-end" } : {}}
           className={styles.submission}
         >
-          <div className={styles.checkbox}>
-              <input type='checkbox' id='default' name='default' checked={isChecked} onChange={handleIsChecked}></input>
-              <label htmlFor='default' className={styles.checkboxLabel}>Set Defaults</label>
-          </div>
           <button disabled={!initialLoad} className={styles.button}>
             Submit
           </button>
