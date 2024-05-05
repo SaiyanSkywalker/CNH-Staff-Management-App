@@ -14,7 +14,7 @@ channelRouter.get("/", async (req: Request, res: Response) => {
     const channels: Channel[] = await Channel.findAll({
         where: {
             unitRoomId: {
-                [Op.or]: unitId ? [null, unitId] : [null]   
+                [Op.or]: unitId ? [null, unitId] : []   
             }
         }
     });
@@ -39,7 +39,7 @@ channelRouter.get("/:id", async (req, res) => {
     if(!channel) {
         res.status(400).json({ error: "Error, room does not exist!" });
     }
-    else if(channel.unitRoomId != null && channel.unitRoomId != unitId) {
+    else if(unitId != null && channel.unitRoomId != null && channel.unitRoomId != unitId) {
         res.status(401).json({ error: "Error, room is not accessible" });
     }
     else {
@@ -68,7 +68,7 @@ channelRouter.post("/", async (req: Request, res: Response) => {
         let lowercasedName: string = name.toLowerCase();
         let channel = await Channel.findOne({
             where: {
-                name: lowercasedName
+                name: name
             }
         });
         if(channel) {
@@ -76,7 +76,7 @@ channelRouter.post("/", async (req: Request, res: Response) => {
         }
         else {
             await Channel.create({
-                name: lowercasedName,
+                name: name,
             });
             res.status(201).json({ success: "Room successfully created!" });
         }

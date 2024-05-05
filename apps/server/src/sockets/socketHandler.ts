@@ -5,6 +5,7 @@ import Unit from "server/src/models/Unit";
 import UserInformation from "server/src/models/UserInformation";
 import AnnouncementAttributes from "@shared/src/interfaces/AnnouncementAttributes";
 import Announcement from "../models/Announcement";
+import Channel from "../models/Channel";
 
 const socketMap = new Map<string, Map<string, Socket>>();
 
@@ -108,12 +109,34 @@ const socketHandler = (io: Server, socket: Socket) => {
         senderId: userId,
         channelId
       });
-      socket.emit("message_received", {isError: false, message})
+      let channel = await Channel.findOne({
+        where: {
+          id: channelId
+        }
+      });
+      if(channel) {
+        socket.to(channel.name).emit("message_subscriber", arg);
+        socket.emit("message_provider", arg);
+      }
     }
     catch {
-      socket.emit("message_received", {isError: true, message})
+      socket.emit("message_failed");
     }
   })
+
+  socket.on("join_room", (arg: {prevSelectedChannel: string, selectedChannel: string}) => {
+    console.log(`prevSelectedChannel is ${arg.prevSelectedChannel}`);
+    console.log(`selectedChannel is ${arg.selectedChannel}`);
+    if(arg.prevSelectedChannel && socket.rooms.has(arg.prevSelectedChannel)) {
+      socket.leave(arg.prevSelectedChannel);
+    }
+    socket.join(arg.selectedChannel);
+  })
+
+  socket.on("leave_room", (arg: {channelName: string}) => {
+    socket.leave(arg.channelName);
+  });
+
 };
 
 export default socketHandler;
