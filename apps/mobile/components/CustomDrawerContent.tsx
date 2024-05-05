@@ -33,8 +33,12 @@ export default function CustomDrawerContent(props: any) {
               onPress={() => navigation.navigate("index")}
             />
             <DrawerItem
-              label="Schedule"
+              label="Request Shift"
               onPress={() => navigation.navigate("schedule")}
+            />
+            <DrawerItem
+              label="Shift Calendar"
+              onPress={() => navigation.navigate("calendar")}
             />
             <DrawerItem
               label="Chat"
