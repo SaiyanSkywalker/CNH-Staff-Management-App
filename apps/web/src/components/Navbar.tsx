@@ -26,6 +26,7 @@ const Navbar = () => {
               <Link href="/shift-capacity">Adjust Staff Capacity</Link>
               <Link href="/upload">Upload Schedule</Link>
               <Link href="/shift-history">Shift History</Link>
+              <Link href="/chat">Chat</Link>
               <Link href="/" onClick={() => auth.logout()}>
                 Sign Out
               </Link>
