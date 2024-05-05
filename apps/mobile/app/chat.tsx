@@ -12,14 +12,12 @@ import { useAuth } from "../contexts/AuthContext";
 import config from "../config";
 import ChannelAttributes from "@shared/src/interfaces/ChannelAttributes";
 import AnnouncementAttributes from "@shared/src/interfaces/AnnouncementAttributes";
+import RNPickerSelect from 'react-native-picker-select';
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 10,
-  },
-  channelList: {
-    flex: 1,
   },
   messageList: {
     flex: 3,
@@ -35,15 +33,16 @@ const styles = StyleSheet.create({
     padding: 10,
     marginRight: 10,
   },
+  picker: {
+    flex: 1,
+    marginBottom: 20,
+  },
 });
 
 export default function ChatPage() {
   const [channels, setChannels] = useState<ChannelAttributes[]>([]);
-  const [selectedChannel, setSelectedChannel] =
-    useState<ChannelAttributes | null>(null);
-  const [announcements, setAnnouncements] = useState<AnnouncementAttributes[]>(
-    []
-  );
+  const [selectedChannel, setSelectedChannel] = useState<ChannelAttributes | null>(null);
+  const [announcements, setAnnouncements] = useState<AnnouncementAttributes[]>([]);
   const [message, setMessage] = useState("");
   const { auth } = useAuth();
   const mockChannels: ChannelAttributes[] = [
@@ -83,40 +82,41 @@ export default function ChatPage() {
   }, [selectedChannel]);
 
   const handleSend = async () => {
-    if (message && selectedChannel?.id && auth?.user?.id) {
-      try {
+    if (message && selectedChannel?.id && auth?.user?.id && auth?.socket) {
         const newAnnouncement: AnnouncementAttributes = {
-          body: message,
-          senderId: auth.user?.id,
-          channelId: selectedChannel.id,
-        };
-        //TODO: Send message to socket instead of db
-        const response = await axios.post(
-          `${config.apiUrl}/announcements`,
-          newAnnouncement
-        );
-        if (response.status === 200) {
-          setAnnouncements([...announcements, newAnnouncement]);
-          setMessage("");
+            body: message,
+            senderId: auth.user?.id,
+            channelId: selectedChannel.id,
         }
-      } catch (error) {
-        console.error("Failed to send message", error);
-      }
+        auth.socket.emit('message_sent', newAnnouncement);
+        //TODO: Send message to socket instead of db
+        
+        setAnnouncements([...announcements, newAnnouncement]);
+        setMessage("");
+        
     }
   };
 
   return (
     <View style={styles.container}>
       {/* TODO: Use a dropdown selector to choose between channels */}
-      <FlatList
-        data={channels}
-        keyExtractor={(item, idx) =>
-          item.id ? item.id.toString() : idx.toString()
-        }
-        renderItem={({ item }) => (
-          <Button title={item.name} onPress={() => setSelectedChannel(item)} />
-        )}
-        style={styles.channelList}
+      <RNPickerSelect
+        onValueChange={(value) => setSelectedChannel(value)}
+        items={channels.map(channel => ({ label: channel.name, value: channel.id }))}
+        style={{
+          inputIOS: {
+              marginBottom: 20, 
+              borderWidth: 1,
+              borderColor: '#ddd',
+              padding: 10,
+          },
+          inputAndroid: {
+              marginBottom: 20,
+              borderWidth: 1,
+              borderColor: '#ddd',
+              padding: 10,
+          },
+      }}
       />
       <View style={styles.messageList}>
         <FlatList
