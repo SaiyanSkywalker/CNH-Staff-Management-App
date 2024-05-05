@@ -206,9 +206,7 @@ const Schedule = () => {
             moment(tokens[1], "YYYYMMDD").format("YYYY-MM-DD") &&
           value.laborLevelEntryId === Number(tokens[0])
       )?.capacity;
-      if (updatedCapacity) {
-        console.log(updatedCapacity);
-      }
+
       const defaultCapacity = defaultCapacities.find(
         (shiftCapacity: ShiftCapacityAttributes) => {
           return (
@@ -219,9 +217,7 @@ const Schedule = () => {
       )?.capacity;
 
       capacity = updatedCapacity || defaultCapacity || hardCodedCapacity;
-      // console.log(`Default: ${defaultCapacity}`);
-      // console.log(`updated: ${updatedCapacity}`);
-      // console.log(`Capacity ${capacity}`);
+
       const capacityRatio = buckets[b].length / capacity;
       const date = moment(tokens[1], "YYYYMMDD").toDate().toString();
 
@@ -353,10 +349,12 @@ const Schedule = () => {
   };
   const getCapacities = async () => {
     // Get default capacity
+    const accessToken = getAccessToken();
     const response = await axios({
       method: "GET",
       url: `${config.apiUrl}/shift-capacity/admin/`,
       responseType: "json",
+      headers: { Authorization: `Bearer ${accessToken}` },
     });
     const data: ShiftCapacityResponse = response.data;
     setDefaultCapacities(data.default);

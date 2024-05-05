@@ -20,3 +20,5 @@ refreshRouter.get("/", (req: Request, res: Response) => {
     res.json(accessToken);
   });
 });
+
+export default refreshRouter;

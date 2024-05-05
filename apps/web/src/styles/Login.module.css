@@ -42,9 +42,10 @@
   border-radius: 20px;
   cursor: pointer;
   opacity: 1;
-  width: 80%;
+  width: 40%;
   display: block;
   margin: auto;
+  font-weight: bold;
 }
 
 .btn-login:hover {

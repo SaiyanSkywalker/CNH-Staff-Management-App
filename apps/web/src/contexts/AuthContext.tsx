@@ -36,6 +36,23 @@ export default function AuthProvider({
   const bannerContext: BannerContextProps | undefined =
     useContext(BannerContext);
   const cookies = new Cookies();
+  const loginUser = (userInfo: UserInformation) => {
+    setUser(userInfo);
+    setIsLoggedIn(true);
+    const randomUUID = uuidv4();
+    const newSocket = io(config.apiUrl);
+    // Add new socket event for notifcations
+    newSocket.on("schedule_upload_complete", () => {
+      bannerContext?.showBanner("Upload schedule complete", "success");
+    });
+    newSocket?.emit("add_user", {
+      username: userInfo.username,
+      uuid: randomUUID,
+      isAdmin: true,
+    });
+    setSocket(newSocket);
+    setUserUUID(randomUUID);
+  };
   const login = async (
     username: string,
     password: string
@@ -46,24 +63,8 @@ export default function AuthProvider({
     cookies.set("accessToken", tokens.access, { path: "/" });
     cookies.set("refreshToken", tokens.refresh, { path: "/" });
 
-    console.log(userInfo);
     if (userInfo) {
-      setUser(userInfo);
-      setIsLoggedIn(true);
-      const randomUUID = uuidv4();
-      console.log(randomUUID);
-      const newSocket = io(config.apiUrl);
-      // Add new socket event for notifcations
-      newSocket.on("schedule_upload_complete", () => {
-        bannerContext?.showBanner("Upload schedule complete", "success");
-      });
-      newSocket?.emit("add_user", {
-        username,
-        uuid: randomUUID,
-        isAdmin: true,
-      });
-      setSocket(newSocket);
-      setUserUUID(randomUUID);
+      loginUser(userInfo);
       return Promise.resolve(true);
     }
 
@@ -71,7 +72,11 @@ export default function AuthProvider({
   };
 
   const logout = (): Promise<boolean> => {
-    socket?.emit("remove_user", { username: user?.username, uuid: userUUID });
+    socket?.emit("remove_user", {
+      username: user?.username,
+      uuid: userUUID,
+      isAdmin: true,
+    });
     cookies.remove("accessToken", { path: "/" });
     cookies.remove("refreshToken", { path: "/" });
     setIsLoggedIn(false);
@@ -109,7 +114,7 @@ export default function AuthProvider({
 
       // Send refresh token to server to get new access token
       const url = config.apiUrl;
-      const response = await axios.post(`${url}/refresh`, {
+      const response = await axios.post(`${url}/refresh-token`, {
         refreshToken,
       });
       const { accessToken } = response.data;
@@ -156,7 +161,14 @@ export default function AuthProvider({
         return Promise.reject(error);
       }
     );
-
+    // Sign the user back in on refresh/navigating back to admin portal from other site
+    const refreshToken = cookies.get("refreshToken");
+    if (refreshToken) {
+      const userInfo = jwt.decode(refreshToken) as UserInformation;
+      if (userInfo) {
+        loginUser(userInfo);
+      }
+    }
     return () => {
       axios.interceptors.response.eject(axiosInterceptor);
     };

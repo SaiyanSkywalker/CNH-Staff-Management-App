@@ -22,7 +22,9 @@ const socketHandler = (io: Server, socket: Socket) => {
   });
 
   socket.on("remove_user", (arg: UserSocketAttributes) => {
+    console.log("BEFORE: REMOVE_USER!");
     const socketMap = arg.isAdmin ? adminSocketMap : mobileSocketMap;
+    console.log(socketMap);
     if (
       socketMap.has(arg.username) &&
       socketMap.get(arg.username)?.has(arg.uuid)
@@ -30,6 +32,8 @@ const socketHandler = (io: Server, socket: Socket) => {
       const userMap = socketMap.get(arg.username);
       userMap?.delete(arg.uuid);
     }
+    console.log("AFTER: REMOVE_USER!");
+    console.log(socketMap);
     socket.disconnect();
   });
 
