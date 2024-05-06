@@ -19,9 +19,13 @@ class Channel extends Model<ChannelAttributes> {
   id!: number;
   @Column
   name!: string;
-  @BelongsTo(() => Unit, { foreignKey: "unitRoomId", targetKey: "id" })
+
+  @BelongsTo(() => Unit, {
+    foreignKey: "unitRoomId",
+    targetKey: "id",
+    onDelete: "CASCADE",
+  })
   unit?: Unit;
-  
   @Column({ type: DataType.INTEGER, allowNull: true })
   unitRoomId!: number | null;
 }

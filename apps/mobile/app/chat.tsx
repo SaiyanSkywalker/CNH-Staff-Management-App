@@ -105,6 +105,7 @@ export default function ChatPage() {
         body: message,
         senderId: auth.user?.id,
         channelId: selectedChannel.id,
+        sender: null
       };
 
       //TODO: Emit event to socket

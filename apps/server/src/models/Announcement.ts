@@ -22,10 +22,10 @@ class Announcement extends Model<AnnouncementAttributes> {
   @Column({ type: DataType.STRING })
   body!: string;
 
-  @BelongsTo(() => UserInformation, { foreignKey: "senderId", targetKey: "id" })
+  @BelongsTo(() => UserInformation, { foreignKey: "senderId", targetKey: "id", onDelete: 'CASCADE' })
   sender!: UserInformation;
 
-  @BelongsTo(() => Channel, "channelId")
+  @BelongsTo(() => Channel,{ foreignKey: "channelId", targetKey: "id", onDelete: 'CASCADE' })
   channel!: Channel;
 }
 
