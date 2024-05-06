@@ -34,7 +34,7 @@ const styles = StyleSheet.create({
   },
   sendBtn: {
     padding: 15,
-    backgroundColor: "black",
+    backgroundColor: "#067496",
     borderRadius: 5,
   },
   sendBtnText: {
@@ -44,77 +44,157 @@ const styles = StyleSheet.create({
   dropdownHeader: {
     marginBottom: 20,
   },
+  announcementHeader: {
+    flex: 1,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 8,
+  },
+  announcementContainer: {
+    marginBottom: 16,
+  },
+  announcementName: { color: "#D46971", fontWeight: "600" },
+  announcementDate: {},
+  announcementBody: { color: "#067496" },
 });
 
 export default function ChatPage() {
-  const mockChannels: ChannelAttributes[] = [
-    { id: 25, name: "News" },
-    { id: 29, name: "Travel Alerts" },
-    { id: 45, name: "Other" },
-    { id: 92, name: "PICU" },
-  ];
-  const [channels, setChannels] = useState<ChannelAttributes[]>(mockChannels);
-  const [selectedId, setSelectedId] = useState<number>(-1);
+  const [channels, setChannels] = useState<ChannelAttributes[]>([]);
   const [announcements, setAnnouncements] = useState<AnnouncementAttributes[]>(
     []
   );
   const [message, setMessage] = useState("");
   const [open, setOpen] = useState<boolean>(false);
+  const [failure, setFailure] = useState<boolean>(false);
+  const [channelMap, setChannelMap] = useState<Map<string, ChannelAttributes>>(
+    new Map<string, ChannelAttributes>()
+  );
+  const [prevSelectedChannel, setPrevSelectedChannel] = useState<
+    ChannelAttributes | undefined
+  >(undefined);
+  const [selectedChannel, setSelectedChannel] = useState<
+    ChannelAttributes | undefined
+  >(undefined);
+  const [selectedChannelName, setSelectedChannelName] = useState<string>("");
   const { auth } = useAuth();
-
-  useEffect(() => {
-    const fetchChannels = async () => {
+  const fetchAnnouncements = async () => {
+    if (selectedChannel) {
       try {
-        // const response = await axios.get(`${config.apiUrl}/channel/`);
-        // setChannels(response.data);
-        setChannels(mockChannels);
+        const response = await axios({
+          method: "GET",
+          url: `${config.apiUrl}/channel/${selectedChannel?.id}`,
+          responseType: "json",
+          headers: {
+            unitId: auth?.user?.unitId,
+            roleId: auth?.user?.roleId,
+          },
+        });
+        const data = response.data;
+        if (data) {
+          auth?.socket?.emit("join_room", {
+            prevSelectedChannel: prevSelectedChannel?.name,
+            selectedChannel: selectedChannel?.name,
+          });
+          setAnnouncements(data);
+        }
+        setAnnouncements(response.data);
       } catch (error) {
-        console.error("Failed to fetch channels", error);
+        console.error("Failed to fetch announcements", error);
       }
-    };
+    }
+  };
+  const fetchChannels = async () => {
+    try {
+      const response = await axios({
+        method: "GET",
+        url: `${config.apiUrl}/channel`,
+        responseType: "json",
+        headers: { unitId: auth?.user?.unitId, roleId: auth?.user?.roleId },
+      });
+      const data: ChannelAttributes[] = await response.data;
+      if (data) {
+        setChannels(data);
+        const newChannelMap: Map<string, ChannelAttributes> = new Map<
+          string,
+          ChannelAttributes
+        >();
+        data.forEach((channel) => {
+          newChannelMap.set(channel.name, channel);
+        });
+        setChannelMap(newChannelMap);
+      }
+    } catch (error) {
+      console.error("Failed to fetch channels", error);
+    }
+  };
+
+  const handleChannelChange = (value: string | null) => {
+    if (value) {
+      setPrevSelectedChannel((prevChannel) => selectedChannel);
+      setSelectedChannel((prevChannel) => channelMap.get(value));
+    }
+  };
+  const parseAnnouncmentDate = (date: Date) => {
+    if (!date) {
+      return "";
+    }
+    const militaryHour: number = Number(date.toString().substring(16, 18));
+    const hour: number = militaryHour % 12 == 0 ? 12 : militaryHour % 12;
+    const period: string = militaryHour >= 12 ? "PM" : "AM";
+    return (
+      date.toString().substring(4, 16) +
+      hour +
+      date.toString().substring(18, 21) +
+      " " +
+      period
+    );
+  };
+  useEffect(() => {
     fetchChannels();
   }, []);
 
   useEffect(() => {
-    const fetchAnnouncements = async () => {
-      const selectedChannel: ChannelAttributes | undefined = channels.find(
-        (x) => x.id === selectedId
-      );
+    fetchAnnouncements();
+    const providerListener = (newAnnouncement: AnnouncementAttributes) => {
+      setAnnouncements((announcements) => [...announcements, newAnnouncement]);
+      setMessage("");
+    };
+    const subscriberListener = (newAnnouncement: AnnouncementAttributes) => {
+      console.log("MESSAGE SUBSCRIBER");
+      setAnnouncements((announcements) => [...announcements, newAnnouncement]);
+    };
+    const failedListener = (failedAnnouncement: AnnouncementAttributes) => {
+      setFailure(true);
+    };
+
+    auth?.socket?.on("message_provider", providerListener);
+    auth?.socket?.on("message_subscriber", subscriberListener);
+    auth?.socket?.on("message_failed", failedListener);
+
+    return () => {
+      auth?.socket?.off("message_provider", providerListener);
+      auth?.socket?.off("message_subscriber", subscriberListener);
+      auth?.socket?.off("message_failed", failedListener);
       if (selectedChannel) {
-        try {
-          // const response = await axios.get(
-          //   `${config.apiUrl}/channel/${selectedChannel.id}`
-          // );
-          // setAnnouncements(response.data);
-        } catch (error) {
-          console.error("Failed to fetch announcements", error);
-        }
+        console.log("LEAVING ROOM", selectedChannel.name);
+        auth?.socket?.emit("leave_room", { channelName: selectedChannel.name });
       }
     };
-    fetchAnnouncements();
-  }, [selectedId]);
+  }, [selectedChannel]);
 
   const handleSend = () => {
-    const selectedChannel: ChannelAttributes | undefined = channels.find(
-      (x) => x.id === selectedId
-    );
-    console.log("BEFORE SEND");
-    console.log(selectedChannel);
     if (message && selectedChannel?.id && auth?.user?.id && auth?.socket) {
       const newAnnouncement: AnnouncementAttributes = {
         body: message,
-        senderId: auth.user?.id,
-        channelId: selectedChannel.id,
-        sender: null
+        sender: auth?.user,
+        senderId: auth?.user?.id ?? 0,
+        channelId: selectedChannel.id ?? 0,
+        createdAt: new Date(),
       };
 
       //TODO: Emit event to socket
-
+      auth?.socket?.emit("message_sent", newAnnouncement);
       // Allows for duplicate messages
-      setAnnouncements((prevAnnouncements) => [
-        ...prevAnnouncements,
-        newAnnouncement,
-      ]);
       setMessage("");
     }
   };
@@ -126,17 +206,16 @@ export default function ChatPage() {
         multiple={false}
         open={open}
         setOpen={setOpen}
-        value={selectedId}
-        setValue={setSelectedId}
+        value={selectedChannelName}
+        setValue={setSelectedChannelName}
         items={channels.map((channel) => {
           return {
             label: channel.name,
-            value: channel.id,
+            value: channel.name,
           };
         })}
-        onChangeValue={(value: any) => {
-          setSelectedId(value);
-        }}
+        style={{}}
+        onChangeValue={handleChannelChange}
       />
 
       <View style={styles.messageList}>
@@ -146,7 +225,19 @@ export default function ChatPage() {
             item.id ? item.id.toString() : idx.toString()
           }
           renderItem={({ item }) => (
-            <Text>{`${item.senderId}: ${item.body}`}</Text>
+            <>
+              <View style={styles.announcementContainer}>
+                <View style={styles.announcementHeader}>
+                  <Text
+                    style={styles.announcementName}
+                  >{`${item.sender?.username}`}</Text>
+                  <Text style={styles.announcementDate}>
+                    {parseAnnouncmentDate(new Date(item.createdAt ?? ""))}
+                  </Text>
+                </View>
+                <Text style={styles.announcementBody}>{item.body}</Text>
+              </View>
+            </>
           )}
         />
       </View>
