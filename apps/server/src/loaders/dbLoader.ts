@@ -73,25 +73,6 @@ export default async (config: ServerConfig) => {
     // );
     await sequelize.sync();
     
-    /*
-    Channel.hasMany(Announcement, {
-      foreignKey: 'channelId',
-      onDelete: 'CASCADE'
-    });
-    Announcement.belongsTo(Channel);
-
-    UserInformation.hasMany(Announcement, {
-      foreignKey: 'senderId',
-      onDelete: 'CASCADE'
-    })
-    Announcement.belongsTo(UserInformation);
-    */
-
-    await Channel.sync({force: true});
-    await Announcement.sync({force: true});
-    await UserInformation.sync({force: true});
-    
-
     // Adds default list of units and roles to db
     await createDefaultValues(Unit, DefaultUnits);
     await createDefaultValues(Role, DefaultRoles);
