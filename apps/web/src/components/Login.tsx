@@ -31,10 +31,6 @@ const Login = () => {
     loadingContext?.showLoader();
     const isAuthenticated = await auth?.login(username, password, "0");
     if (isAuthenticated) {
-      bannerContext?.showBanner(
-        "User logged in!",
-        "success"
-      );
       router.replace("/schedule");
     } else {
       setError(true);
