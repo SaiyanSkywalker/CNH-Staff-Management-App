@@ -64,7 +64,7 @@ export default function ChatPage() {
           }
         } catch (err: any) {
             if(!err.response) {
-                bannerContext?.showBanner("Error, server is currently down!", true);   
+                bannerContext?.showBanner("Error, server is currently down!", "error");   
             }
             console.error(err);
         }
@@ -101,7 +101,7 @@ export default function ChatPage() {
             }
         } catch (err: any) {
             if(!err.response) {
-                bannerContext?.showBanner("Error, server is currently down!", true);   
+                bannerContext?.showBanner("Error, server is currently down!", "error");   
             }
             console.error(err);
         }
@@ -111,7 +111,7 @@ export default function ChatPage() {
         try {
             event.preventDefault();
             if (Object.keys(newChannel).length === 0) {
-                bannerContext?.showBanner("Please define the name of the channel before saving", true);
+                bannerContext?.showBanner("Please define the name of the channel before saving", "error");
             } else {
                 let newChannelRequest: ChannelAttributes = {
                     name: newChannel,
@@ -136,7 +136,7 @@ export default function ChatPage() {
 
                 if (res.status === 201) {
                     let jsonData = await res.json();
-                    bannerContext?.showBanner(`Success, the new channel ${newChannel} successfully saved`, false);
+                    bannerContext?.showBanner(`Success, the new channel ${newChannel} successfully saved`, "success");
                     setChannels(prevSelectedChannels => [...prevSelectedChannels, newChannelRequest]);
                     const newChannelMap = new Map(channelMap);
                     newChannelRequest.id = jsonData.id;
@@ -144,14 +144,14 @@ export default function ChatPage() {
                     setChannelMap(newChannelMap);
                     await getAnnouncements();
                 } else {
-                    bannerContext?.showBanner(`Error in saving the new channel ${newChannel}`, true);
+                    bannerContext?.showBanner(`Error in saving the new channel ${newChannel}`, "error");
                 }
                 
                 setNewChannel("");
             }
         } catch (error) {
             loadingContext?.hideLoader();
-            bannerContext?.showBanner(`Error in saving in saving the new channel ${newChannel} + ${error}`, true);
+            bannerContext?.showBanner(`Error in saving in saving the new channel ${newChannel} + ${error}`, "error");
 
             setNewChannel("");
         }
