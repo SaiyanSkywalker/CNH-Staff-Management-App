@@ -46,24 +46,28 @@ export default function AuthProvider({
     password: string,
     isMobile: string
   ): Promise<boolean> => {
-    const userInfo = await getUser(username, password, isMobile);
-    if (userInfo) {
-      setUser(userInfo);
-      setIsLoggedIn(true);
-      const randomUUID = uuidv4();
-      // console.log(randomUUID);
-      const newSocket = io(config.apiUrl);
+    try {
+      const userInfo = await getUser(username, password, isMobile);
+      if (userInfo) {
+        setUser(userInfo);
+        setIsLoggedIn(true);
+        const randomUUID = uuidv4();
+        // console.log(randomUUID);
+        const newSocket = io(config.apiUrl);
 
-      // Event handler for when adminn user
-      // accepts shift request
-      newSocket.on("shift_update", (arg: ShiftRequestUpdate) => {
-        console.log(`isAccepted: ${arg.isAccepted}`);
-        Alert.alert("Shift Request Update", `${arg.message}`);
-      });
-      newSocket?.emit("add_user", { username, uuid: randomUUID });
-      setSocket(newSocket);
-      setUserUUID(randomUUID);
-      return Promise.resolve(true);
+        // Event handler for when adminn user
+        // accepts shift request
+        newSocket.on("shift_update", (arg: ShiftRequestUpdate) => {
+          console.log(`isAccepted: ${arg.isAccepted}`);
+          Alert.alert("Shift Request Update", `${arg.message}`);
+        });
+        newSocket?.emit("add_user", { username, uuid: randomUUID });
+        setSocket(newSocket);
+        setUserUUID(randomUUID);
+        return Promise.resolve(true);
+      }
+    } catch (error) {
+      console.log(error);
     }
 
     return Promise.resolve(false);
