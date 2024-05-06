@@ -173,8 +173,10 @@ const socketHandler = (io: Server, socket: Socket) => {
         arg.prevSelectedChannel &&
         socket.rooms.has(arg.prevSelectedChannel)
       ) {
+        console.log(`LEFT ROOM: ${arg.prevSelectedChannel}`);
         socket.leave(arg.prevSelectedChannel);
       }
+      console.log(`JOINED ROOM: ${arg.selectedChannel}`);
       socket.join(arg.selectedChannel);
     }
   );

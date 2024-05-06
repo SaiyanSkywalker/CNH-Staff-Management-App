@@ -75,7 +75,7 @@ export default function ChatPage() {
       }
     } catch (err: any) {
       if (!err.response) {
-        bannerContext?.showBanner("Error, server is currently down!", true);
+        bannerContext?.showBanner("Error, server is currently down!", "error");
       }
       console.error(err);
     }
@@ -111,7 +111,7 @@ export default function ChatPage() {
           roleId: auth?.user?.roleId,
         },
       });
-      const data = await response.data;
+      const data = response.data;
       if (data) {
         auth?.socket?.emit("join_room", {
           prevSelectedChannel: prevSelectedChannel?.name,
@@ -121,7 +121,7 @@ export default function ChatPage() {
       }
     } catch (err: any) {
       if (!err.response) {
-        bannerContext?.showBanner("Error, server is currently down!", true);
+        bannerContext?.showBanner("Error, server is currently down!", "error");
       }
       console.error(err);
     }
@@ -133,19 +133,12 @@ export default function ChatPage() {
       if (Object.keys(newChannel).length === 0) {
         bannerContext?.showBanner(
           "Please define the name of the channel before saving",
-          true
+          "error"
         );
       } else {
         let newChannelRequest: ChannelAttributes = {
           name: newChannel,
         };
-
-        /*
-                //should remove user if they're in a channel when creating a new one
-                if(selectedChannel) {
-                    auth?.socket?.emit("leave_room", {channelName: selectedChannel.name});
-                }
-                */
 
         loadingContext?.showLoader();
 
@@ -161,7 +154,7 @@ export default function ChatPage() {
           let jsonData = await res.json();
           bannerContext?.showBanner(
             `Success, the new channel ${newChannel} successfully saved`,
-            false
+            "success"
           );
           setChannels((prevSelectedChannels) => [
             ...prevSelectedChannels,
@@ -175,7 +168,7 @@ export default function ChatPage() {
         } else {
           bannerContext?.showBanner(
             `Error in saving the new channel ${newChannel}`,
-            true
+            "error"
           );
         }
 
@@ -185,7 +178,7 @@ export default function ChatPage() {
       loadingContext?.hideLoader();
       bannerContext?.showBanner(
         `Error in saving in saving the new channel ${newChannel} + ${error}`,
-        true
+        "error"
       );
 
       setNewChannel("");
