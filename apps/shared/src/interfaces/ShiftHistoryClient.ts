@@ -1,9 +1,10 @@
 export default interface ShiftHistoryClient {
-    id,
-    employeeId,
-    employeeName,
-    unit,
-    dateRequested,
-    status,
-    shift,
+    id: number,
+    employeeId: number,
+    employeeName: string,
+    unit: string,
+    dateRequested: string,
+    status: string,
+    shift: string,
+    createdAt: Date,
 }

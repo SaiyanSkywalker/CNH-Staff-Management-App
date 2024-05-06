@@ -11,8 +11,6 @@ import ServerConfig from "../interfaces/ServerConfig";
 import Role from "../models/Role";
 import DefaultRoles from "../constants/DefaultRoles";
 import Channel from "../models/Channel";
-import Announcement from "../models/Announcement";
-import UserInformation from "../models/UserInformation";
 
 let sequelize: Sequelize;
 

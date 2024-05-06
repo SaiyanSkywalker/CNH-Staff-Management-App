@@ -66,9 +66,11 @@ const socketHandler = (io: Server, socket: Socket) => {
 
       if (arg.isAccepted) {
         shiftHistory?.set("status", "Accepted");
+        socket.emit("shift_received", {isAccepted: 1, id: shiftHistory.id});
         message = `Shift accepted for ${shiftHistory?.shiftTime} on ${parsedDate}`;
       } else {
         shiftHistory?.set("status", "Rejected");
+        socket.emit("shift_received", {isAccepted: 0, id: shiftHistory.id});
         message = `Shift rejected for ${shiftHistory?.shiftTime} on ${parsedDate}`;
       }
       await shiftHistory?.save();
