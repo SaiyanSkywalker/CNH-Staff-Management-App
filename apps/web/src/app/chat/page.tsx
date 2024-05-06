@@ -1,30 +1,3 @@
-/*
-Things to work on:
-1) Update UI to be more responsive. -> (DONE)
-2) Create message component. -> (NOT NEEDED)
-4) Change from announcement.senderId to get UserInformation with id = announcement.senderId and get name. Need to send user's name
-5) Be able to lazily load in messages when I go to the top and icon refreshes to load more? -> (NOT NEEDED)
-6) Input should be cleared at the end. -> (DONE)
-7) Need a way to update UI on message_receive -> (DONE)
-8) Change UI a bit. Make Channels a dropdown. -> (DONE)
-9) Left align all messages. -> (DONE)
-10) What if I highlight the message field red and say error was raised? -> (DONE)
-11) Says key for all child props aren't unique.
-12) Need screen directly to point at last message while navbar hasn't been scrolled. Else don't but write new message?
-13) Limit number of characters for new channel. -> 255 (DONE)
-14) Limit number of characters for new message. -> 51 (DONE)
-15) Make it so if an extremely long message takes up a line, it goes on to next line. -> (DONE)
-16) Use textarea instead of input. -> (DONE)
-17) Add date to message. -> (DONE)
-18) Once user selects a channel, make sure input can be processed. Disable textarea until channel is selected. -> (DONE)
-19) How to ensure all announcement messages are deleted when a particular channel is deleted?
-20) Make text area go to next line when reached limit for line, even if only one word. -> (DONE)
-21) Need to handle different locations and languages
-22) Test behavior when server is off. -> (DONE)
-23) Text area should not have it's size movable. -> (DONE)
-*/
-
-
 "use client";
 
 import React, {
@@ -78,9 +51,7 @@ export default function ChatPage() {
             method: "GET",
             url: `${config.apiUrl}/channel`,
             responseType: "json",
-            data: {
-                unitId: auth?.user?.unitId
-            }
+            headers: {unitId: auth?.user?.unitId, roleId: auth?.user?.roleId}
           });
           const data: ChannelAttributes[] = await response.data;
           if (data) {
@@ -104,7 +75,7 @@ export default function ChatPage() {
             return "";
         }
         const militaryHour: number = Number(date.toString().substring(16,18));
-        const hour: number = militaryHour % 12;
+        const hour: number = (militaryHour % 12) == 0 ? 12 : militaryHour % 12;
         const period: string = militaryHour >= 12 ? "PM" : "AM"; 
         return date.toString().substring(4, 16) + hour + date.toString().substring(18, 21) + " " + period;
     }
@@ -118,8 +89,9 @@ export default function ChatPage() {
                 method: "GET",
                 url: `${config.apiUrl}/channel/${selectedChannel?.id}`,
                 responseType: "json",
-                data: {
+                headers: {
                     unitId: auth?.user?.unitId,
+                    roleId: auth?.user?.roleId
                 }
             });
             const data = await response.data;
@@ -131,7 +103,6 @@ export default function ChatPage() {
             if(!err.response) {
                 bannerContext?.showBanner("Error, server is currently down!", true);   
             }
-            console.log("err is: ")
             console.error(err);
         }
     };
@@ -146,10 +117,12 @@ export default function ChatPage() {
                     name: newChannel,
                 };
 
+                /*
                 //should remove user if they're in a channel when creating a new one
                 if(selectedChannel) {
                     auth?.socket?.emit("leave_room", {channelName: selectedChannel.name});
                 }
+                */
 
                 loadingContext?.showLoader();
 
@@ -162,7 +135,13 @@ export default function ChatPage() {
                 loadingContext?.hideLoader();
 
                 if (res.status === 201) {
+                    let jsonData = await res.json();
                     bannerContext?.showBanner(`Success, the new channel ${newChannel} successfully saved`, false);
+                    setChannels(prevSelectedChannels => [...prevSelectedChannels, newChannelRequest]);
+                    const newChannelMap = new Map(channelMap);
+                    newChannelRequest.id = jsonData.id;
+                    newChannelMap.set(newChannelRequest.name, newChannelRequest);
+                    setChannelMap(newChannelMap);
                     await getAnnouncements();
                 } else {
                     bannerContext?.showBanner(`Error in saving the new channel ${newChannel}`, true);
@@ -185,16 +164,13 @@ export default function ChatPage() {
     useEffect(() => {
         getAnnouncements();
         const providerListener = (newAnnouncement: AnnouncementAttributes) => {
-            console.log("Message provider received message!")
             setAnnouncements((announcements) => [...announcements, newAnnouncement]);
             changeChatMessage("");
         };
         const subscriberListener = (newAnnouncement: AnnouncementAttributes) => {
-            console.log("Message subscriber received message!")
             setAnnouncements((announcements) => [...announcements, newAnnouncement]);
         };
         const failedListener = (failedAnnouncement: AnnouncementAttributes) => {
-            console.log("message_failed");
             setFailure(true);
         }
 
@@ -221,6 +197,7 @@ export default function ChatPage() {
 
         const newAnnouncement: AnnouncementAttributes = {
             body: message,
+            sender: auth?.user,
             senderId: auth?.user?.id ?? 0,
             channelId: selectedChannel.id ?? 0,
             createdAt: new Date(),
@@ -294,7 +271,7 @@ export default function ChatPage() {
                                         {announcements.map((announcement) => (
                                             <li key={announcement.id}>
                                                 <div className={page["announcements-info"]}>
-                                                    <h3>{announcement.senderId + " "}</h3>
+                                                    <h3>{announcement.sender?.username}&nbsp;</h3>
                                                     <small>{parseAnnouncmentDate(new Date(announcement.createdAt ?? ""))}</small>
                                                 </div>
                                                 <p>{announcement.body}</p>

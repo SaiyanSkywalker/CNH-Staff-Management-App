@@ -3,6 +3,7 @@ export default interface UserInformationAttributes {
   employeeId: number;
   username: string;
   firstName: string;
+  middleInitial?: string;
   lastName: string;
   password: string;
   roleId?: number;

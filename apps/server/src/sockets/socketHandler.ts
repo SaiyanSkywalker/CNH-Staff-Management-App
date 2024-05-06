@@ -122,7 +122,7 @@ const socketHandler = (io: Server, socket: Socket) => {
     catch {
       socket.emit("message_failed");
     }
-  })
+  });
 
   socket.on("join_room", (arg: {prevSelectedChannel: string, selectedChannel: string}) => {
     console.log(`prevSelectedChannel is ${arg.prevSelectedChannel}`);

@@ -25,10 +25,10 @@ class ShiftHistory extends Model<ShiftHistoryAttributes> {
   @Column(DataType.STRING)
   status!: string;
 
-  @BelongsTo(() => UserInformation, { targetKey: "employeeId", foreignKey: "userId" })
+  @BelongsTo(() => UserInformation, { targetKey: "employeeId", foreignKey: "userId", onDelete: "CASCADE" })
   user!: UserInformation;
 
-  @BelongsTo(() => Unit, { targetKey: "id", foreignKey: "unitId" })
+  @BelongsTo(() => Unit, { targetKey: "id", foreignKey: "unitId", onDelete: "CASCADE" })
   unit!: Unit;
 
   @Column( { type: DataType.STRING, allowNull: false })
