@@ -26,6 +26,6 @@
     "**/*.tsx",
     ".next/types/**/*.ts",
     "../server/src/constants/ScheduleData.ts"
-  ],
+, "__tests__/Upload.test.jsx"  ],
   "exclude": ["node_modules"]
 }
