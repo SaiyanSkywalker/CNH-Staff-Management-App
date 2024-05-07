@@ -28,8 +28,7 @@ const Login = () => {
   };
 
   const submitForm = async () => {
-    loadingContext?.showLoader();
-    const isAuthenticated = await auth?.login(username, password, "0");
+    const isAuthenticated = await auth?.login(username, password, "2");
     if (isAuthenticated) {
       router.replace("/schedule");
     } else {
