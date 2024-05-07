@@ -34,10 +34,7 @@ const Login = () => {
       router.replace("/schedule");
     } else {
       setError(true);
-      bannerContext?.showBanner(
-        "An error has occurred!",
-        "other"
-      );
+      bannerContext?.showBanner(`Unable to log in user ${username}`, "error");
     }
     loadingContext?.hideLoader();
   };
