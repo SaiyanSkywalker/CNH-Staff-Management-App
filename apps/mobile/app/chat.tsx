@@ -7,6 +7,7 @@ import ChannelAttributes from "@shared/src/interfaces/ChannelAttributes";
 import AnnouncementAttributes from "@shared/src/interfaces/AnnouncementAttributes";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import DropDownPicker from "react-native-dropdown-picker";
+import { v4 as uuidv4 } from "uuid";
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -156,11 +157,13 @@ export default function ChatPage() {
   useEffect(() => {
     fetchAnnouncements();
     const providerListener = (newAnnouncement: AnnouncementAttributes) => {
+      const announcementExists = announcements.some(
+        (announcement) => announcement.id === newAnnouncement.id
+      );
       setAnnouncements((announcements) => [...announcements, newAnnouncement]);
       setMessage("");
     };
     const subscriberListener = (newAnnouncement: AnnouncementAttributes) => {
-      console.log("MESSAGE SUBSCRIBER");
       setAnnouncements((announcements) => [...announcements, newAnnouncement]);
     };
     const failedListener = (failedAnnouncement: AnnouncementAttributes) => {
@@ -194,7 +197,6 @@ export default function ChatPage() {
 
       //TODO: Emit event to socket
       auth?.socket?.emit("message_sent", newAnnouncement);
-      // Allows for duplicate messages
       setMessage("");
     }
   };
@@ -222,7 +224,7 @@ export default function ChatPage() {
         <FlatList
           data={announcements}
           keyExtractor={(item, idx) =>
-            item.id ? item.id.toString() : idx.toString()
+            item.id ? item.id.toString() : uuidv4()
           }
           renderItem={({ item }) => (
             <>

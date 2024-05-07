@@ -111,7 +111,7 @@ export default function ChatPage() {
           roleId: auth?.user?.roleId,
         },
       });
-      const data = response.data;
+      const data = await response.data;
       if (data) {
         auth?.socket?.emit("join_room", {
           prevSelectedChannel: prevSelectedChannel?.name,
@@ -294,7 +294,10 @@ export default function ChatPage() {
           <div className={`flex w-full h-full`}>
             <div className={styles["channels-container"]}>
               <h1>Channels</h1>
-              <select className={styles["channels-select"]} onChange={handleOptionChange}>
+              <select
+                className={styles["channels-select"]}
+                onChange={handleOptionChange}
+              >
                 <option defaultValue={undefined}>-- Select Channel --</option>
                 {channels.map((channel) => (
                   <option key={channel.id} value={channel.name}>

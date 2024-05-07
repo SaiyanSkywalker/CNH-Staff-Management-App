@@ -10,9 +10,7 @@ import Unit from "../models/Unit";
 import ServerConfig from "../interfaces/ServerConfig";
 import Role from "../models/Role";
 import DefaultRoles from "../constants/DefaultRoles";
-
 import Channel from "../models/Channel";
-
 
 let sequelize: Sequelize;
 

@@ -23,6 +23,7 @@ const Navbar = () => {
           </Link>
           {auth?.authenticated ? (
             <div className={`${styles["links-container"]}`}>
+              <Link href="/schedule">Shift Schedule</Link>
               <Link href="/shift-capacity">Adjust Staff Capacity</Link>
               <Link href="/upload">Upload Schedule</Link>
               <Link href="/shift-history">Shift History</Link>

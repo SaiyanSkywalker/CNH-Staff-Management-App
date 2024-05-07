@@ -156,7 +156,7 @@ const socketHandler = (io: Server, socket: Socket) => {
         },
       });
       if (channel) {
-        socket.to(channel.name).emit("message_subscriber", arg);
+        socket.broadcast.to(channel.name).emit("message_subscriber", arg);
         socket.emit("message_provider", arg);
       }
     } catch {
