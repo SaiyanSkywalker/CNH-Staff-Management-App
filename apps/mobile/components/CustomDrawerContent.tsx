@@ -39,12 +39,16 @@ const CustomDrawerContent = (props: any) => {
               onPress={() => navigation.navigate("index")}
             />
             <DrawerItem
-              label="Schedule"
+              label="Request Shift"
               onPress={() => navigation.navigate("schedule")}
             />
             <DrawerItem
-              label="Calendar"
+              label="Shift Calendar"
               onPress={() => navigation.navigate("calendar")}
+            />
+            <DrawerItem
+              label="Chat"
+              onPress={() => navigation.navigate("chat")}
             />
             <DrawerItem label="Logout" onPress={() => handleLogout()} />
           </>

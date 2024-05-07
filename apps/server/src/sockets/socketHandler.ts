@@ -6,6 +6,9 @@ import Unit from "server/src/models/Unit";
 import UserInformation from "server/src/models/UserInformation";
 import ScheduleEntry from "../models/ScheduleEntry";
 import { calculateDuration } from "../util/dateUtils";
+import AnnouncementAttributes from "@shared/src/interfaces/AnnouncementAttributes";
+import Announcement from "../models/Announcement";
+import Channel from "../models/Channel";
 
 export const mobileSocketMap = new Map<string, Map<string, Socket>>();
 export const adminSocketMap = new Map<string, Map<string, Socket>>();
@@ -135,6 +138,52 @@ const socketHandler = (io: Server, socket: Socket) => {
       }
     }
   );
+
+  //MESSAGE_SENT event
+  socket.on("message_sent", async (arg: AnnouncementAttributes) => {
+    let message: string = arg.body;
+    let userId: number = arg.senderId;
+    let channelId: number = arg.channelId;
+    try {
+      await Announcement.create({
+        body: message,
+        senderId: userId,
+        channelId,
+      });
+      let channel = await Channel.findOne({
+        where: {
+          id: channelId,
+        },
+      });
+      if (channel) {
+        socket.broadcast.to(channel.name).emit("message_subscriber", arg);
+        socket.emit("message_provider", arg);
+      }
+    } catch {
+      socket.emit("message_failed");
+    }
+  });
+
+  socket.on(
+    "join_room",
+    (arg: { prevSelectedChannel: string; selectedChannel: string }) => {
+      console.log(`prevSelectedChannel is ${arg.prevSelectedChannel}`);
+      console.log(`selectedChannel is ${arg.selectedChannel}`);
+      if (
+        arg.prevSelectedChannel &&
+        socket.rooms.has(arg.prevSelectedChannel)
+      ) {
+        console.log(`LEFT ROOM: ${arg.prevSelectedChannel}`);
+        socket.leave(arg.prevSelectedChannel);
+      }
+      console.log(`JOINED ROOM: ${arg.selectedChannel}`);
+      socket.join(arg.selectedChannel);
+    }
+  );
+
+  socket.on("leave_room", (arg: { channelName: string }) => {
+    socket.leave(arg.channelName);
+  });
 };
 
 export default socketHandler;
