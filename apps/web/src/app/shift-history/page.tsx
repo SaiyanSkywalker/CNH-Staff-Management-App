@@ -4,6 +4,9 @@ import page from "@webSrc/styles/ShiftHistory.module.css";
 import { useAuth } from "@webSrc/contexts/AuthContext";
 import { useSearchParams } from "next/navigation";
 import ShiftHistoryClient from "@shared/src/interfaces/ShiftHistoryClient";
+import config from "web/src/config";
+import axios from "axios";
+import UnitAttributes from "@shared/src/interfaces/UnitAttributes";
 
 export default function shiftHistory() {
   const params = useSearchParams();
@@ -44,13 +47,30 @@ export default function shiftHistory() {
     if (!validateEmployeeId()) {
       return;
     }
-    updateList();
+    await updateList();
   };
 
   const updateList = async (): Promise<void> => {
+    let unitRequested: string = "";
+    if(auth?.user?.roleId === 3) {
+      const unitId: string = auth?.user?.roleId === 3 ? "/" + String(auth?.user?.unitId) : ""
+      const getUnit = async (unitId: string): Promise<void> => {
+        const res = await axios({
+          method: "GET",
+          url: `${config.apiUrl}/unit${unitId}`,
+          responseType: "json",
+        });
+        const nurseManagerUnits: UnitAttributes[] = res.data;
+        const nurseManagerUnit: UnitAttributes = nurseManagerUnits[0];
+        unitRequested = nurseManagerUnit.name;
+      }
+      await getUnit(unitId);
+    }
+    
+    console.log(`unitRequested is ${unitRequested}`);
     setIsLoading((prevLoad) => !prevLoad);
     const res = await fetch(
-      `http://localhost:3003/shift-history?employeeId=${employeeId}&employeeName=${employeeName}&unit=${unit}&date=${date}&shift=${shift}&status=${status}`,
+      `http://localhost:3003/shift-history?employeeId=${employeeId}&employeeName=${employeeName}&unit=${auth?.user?.roleId === 3 ? unitRequested : unit}&date=${date}&shift=${shift}&status=${status}`,
       {
         method: "GET",
         headers: {
@@ -80,7 +100,6 @@ export default function shiftHistory() {
   };
 
   const handleDateChange = (event: BaseSyntheticEvent): void => {
-    console.log("date is: ");
     setDate((prevDate) => event.target.value);
   };
 
@@ -157,15 +176,21 @@ export default function shiftHistory() {
             ></input>
             </div>
 
-            <div>
-            <label className={page.label}>Unit</label>
-            <input
-              placeholder="Enter Unit"
-              value={unit}
-              onChange={handleUnitChange}
-              className={page.input}
-            ></input>
-            </div>
+            {auth?.user?.roleId === 3 ? 
+            undefined 
+            :
+              (
+              <div>
+                <label className={page.label}>Unit</label>
+                <input
+                  placeholder="Enter Unit"
+                  value={unit}
+                  onChange={handleUnitChange}
+                  className={page.input}
+                ></input>
+              </div>
+              )
+            }
 
             <div>
             <label className={page.label}>Date</label>

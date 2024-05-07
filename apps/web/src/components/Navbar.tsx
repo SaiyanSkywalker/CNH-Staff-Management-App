@@ -24,7 +24,7 @@ const Navbar = () => {
           {auth?.authenticated ? (
             <div className={`${styles["links-container"]}`}>
               <Link href="/shift-capacity">Adjust Staff Capacity</Link>
-              <Link href="/upload">Upload Schedule</Link>
+              {auth.user?.roleId === 2 ? <Link href="/upload">Upload Schedule</Link> : undefined }
               <Link href="/shift-history">Shift History</Link>
               <Link href="/" onClick={() => auth.logout()}>
                 Sign Out

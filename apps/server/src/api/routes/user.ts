@@ -6,7 +6,7 @@ const userRouter = Router();
 
 userRouter.get("/", async (req: Request, res: Response): Promise<Response> => {
   try {
-    const roleName: string = req.query.isMobile === "1" ? "USER" : "ADMIN";
+    const roleName: string = req.query.isMobile === "1" ? "USER" : (req.query.isMobile === "2" ? "ADMIN" : "NURSEMANAGER");
     const user = await sequelize.models.UserInformation.findOne({
       where: {
         username: sequelize.where(

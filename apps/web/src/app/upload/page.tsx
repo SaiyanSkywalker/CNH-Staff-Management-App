@@ -8,6 +8,7 @@ import React, {
   MouseEvent,
   useRef,
 } from "react";
+import { useRouter } from "next/navigation";
 import styles from "../../styles/Upload.module.css";
 import {
   BannerContext,
@@ -25,6 +26,12 @@ export default function UploadPage() {
   const [currentFile, setCurrentFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const router = useRouter();
+  const { auth } = useAuth();
+
+  if(auth?.user?.roleId === 3) {
+    router.replace("/schedule");
+  }
 
   const bannerContext: BannerContextProps | undefined =
     useContext(BannerContext);

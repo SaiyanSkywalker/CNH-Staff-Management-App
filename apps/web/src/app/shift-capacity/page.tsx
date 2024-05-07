@@ -20,6 +20,7 @@ import {
   LoadingContext,
   LoadingContextProps,
 } from "@webSrc/contexts/LoadingContext";
+import { useAuth } from "@webSrc/contexts/AuthContext";
 
 export default function shiftCapacity() {
   const [units, setUnits] = useState<UnitAttributes[]>([]);
@@ -30,6 +31,7 @@ export default function shiftCapacity() {
   const [date, setDate] = useState<string>(todayDateString);
   const [initialLoad, setInitialLoad] = useState<boolean>(false);
   const [isChecked, setIsChecked] = useState<boolean>(false);
+  const { auth } = useAuth();
 
   const bannerContext: BannerContextProps | undefined =
     useContext(BannerContext);
@@ -55,9 +57,10 @@ export default function shiftCapacity() {
 
   const getUnits = async () => {
     try {
+      const unitId: string = auth?.user?.roleId === 3 ? "/" + String(auth?.user?.unitId) : ""
       const response = await axios({
         method: "GET",
-        url: `${config.apiUrl}/unit`,
+        url: `${config.apiUrl}/unit${unitId}`,
         responseType: "json",
       });
       const data = await response.data;

@@ -9,6 +9,7 @@ import Schedule from "./Schedule";
 const Login = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [role, setRole] = useState("2");
   const [error, setError] = useState(false);
   const { auth } = useAuth();
   const router = useRouter();
@@ -23,8 +24,14 @@ const Login = () => {
     setError(false);
   };
 
+  const onRoleChange = (e: ChangeEvent<HTMLSelectElement>) => {
+    console.log(`e.target.value is ${e.target.value}`);
+    setRole(e.target.value);
+    setError(false);
+  }
+
   const submitForm = async () => {
-    const isAuthenticated = await auth?.login(username, password);
+    const isAuthenticated = await auth?.login(username, password, role);
     if (isAuthenticated) {
       router.replace("/schedule");
       alert("Login successful!");
@@ -69,8 +76,14 @@ const Login = () => {
                     placeholder="password"
                     required
                   />
+                  <div>
+                  <label htmlFor="role">Role:</label>
+                  <select required id="role" defaultValue={"2"} onChange={onRoleChange}>
+                    <option value="2">Admin</option>
+                    <option value="3">Nurse Manager</option>
+                  </select>
+                  </div>
                 </div>
-
                 <button
                   className={styles["btn-login"]}
                   type="button"
