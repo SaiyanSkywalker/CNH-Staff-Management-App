@@ -99,7 +99,7 @@ const Page = () => {
         <Text style={styles.forgotText}>Forgot Password?</Text>
       </TouchableOpacity>
       <TouchableOpacity onPress={onPressLogin} style={styles.loginBtn}>
-        <Text style={styles.loginText}>LOGIN </Text>
+        <Text style={styles.loginText}>LOGIN</Text>
       </TouchableOpacity>
     </View>
   );
