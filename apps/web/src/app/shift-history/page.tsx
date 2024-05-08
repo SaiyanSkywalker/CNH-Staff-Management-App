@@ -1,10 +1,11 @@
 "use client";
-import { useState, FormEvent, BaseSyntheticEvent, useEffect } from "react";
+import { useState, FormEvent, BaseSyntheticEvent, useEffect, useContext } from "react";
 import page from "@webSrc/styles/ShiftHistory.module.css";
 import { useAuth } from "@webSrc/contexts/AuthContext";
 import { useSearchParams } from "next/navigation";
 import ShiftHistoryClient from "@shared/src/interfaces/ShiftHistoryClient";
 import AdminShiftRequestUpdate from "@shared/src/interfaces/AdminShiftRequestUpdate";
+import { BannerContext } from "@webSrc/contexts/BannerContext";
 export default function shiftHistory() {
   const params = useSearchParams();
   const employeeNameQuery: string = params.get("employeeName") ?? "";
@@ -24,6 +25,7 @@ export default function shiftHistory() {
     []
   );
   const { auth } = useAuth();
+  const bannerContext = useContext(BannerContext);
 
   const validateEmployeeId = (): boolean => {
     const trimmedEmployeeId = employeeId.trim();
@@ -136,6 +138,12 @@ export default function shiftHistory() {
       setShiftHistories(newShiftHistories);
     }
   };
+
+  const shiftRequestResponseErrorHandler = (sh: AdminShiftRequestUpdate) => {
+    const acceptedString: string = sh.isAccepted ? "accepting" : "denying";
+    bannerContext?.showBanner(`Error in ${acceptedString} shift!`, "error");
+  }
+
   // Initial fill of list
   useEffect(() => {
     async function initialList() {
@@ -147,6 +155,7 @@ export default function shiftHistory() {
   useEffect(() => {
     if (auth?.socket && shiftHistories.length > 0) {
       auth?.socket.on("shift_accept_response", shiftRequestResponseHandler);
+      auth?.socket.on("shift_accept_error", shiftRequestResponseErrorHandler);
     }
   }, [auth, shiftHistories]);
   return (

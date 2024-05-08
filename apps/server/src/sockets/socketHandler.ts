@@ -145,6 +145,9 @@ const socketHandler = (io: Server, socket: Socket) => {
         }
       } catch (error) {
         console.log(error);
+        socket.emit("shift_accept_error", {
+          isAccepted: arg.isAccepted
+        });
       }
     }
   );
