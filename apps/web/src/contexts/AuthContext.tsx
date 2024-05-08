@@ -36,6 +36,7 @@ export default function AuthProvider({
   const bannerContext: BannerContextProps | undefined =
     useContext(BannerContext);
   const cookies = new Cookies();
+
   const loginUser = (userInfo: UserInformation) => {
     setUser(userInfo);
     setIsLoggedIn(true);
@@ -53,12 +54,14 @@ export default function AuthProvider({
     setSocket(newSocket);
     setUserUUID(randomUUID);
   };
+
   const login = async (
     username: string,
     password: string
   ): Promise<boolean> => {
     const tokens = await getUser(username, password); // JWT token from server
     const userInfo = jwt.decode(tokens.access) as UserInformation;
+
     // Store tokens in cookie
     cookies.set("accessToken", tokens.access, { path: "/" });
     cookies.set("refreshToken", tokens.refresh, { path: "/" });
@@ -104,7 +107,6 @@ export default function AuthProvider({
     } catch (err) {
       console.error(err);
     }
-
     return null;
   };
   const refreshAccessToken = async (): Promise<string | null> => {
@@ -127,6 +129,28 @@ export default function AuthProvider({
       console.error("Error refreshing access token", error);
     }
     return null;
+  };
+  const refreshUser = async () => {
+    const refreshToken = cookies.get("refreshToken");
+    if (refreshToken) {
+      const userInfo = jwt.decode(refreshToken) as UserInformation;
+      if (userInfo) {
+        loginUser(userInfo);
+      }
+    }
+  };
+
+  const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+    debugger;
+    console.log(event);
+    event.preventDefault();
+    console.log("cheese");
+    socket?.emit("remove_user", {
+      username: user?.username,
+      uuid: userUUID,
+      isAdmin: true,
+    });
+    return undefined;
   };
   useEffect(() => {
     const axiosInterceptor = axios.interceptors.response.use(
@@ -162,15 +186,11 @@ export default function AuthProvider({
       }
     );
     // Sign the user back in on refresh/navigating back to admin portal from other site
-    const refreshToken = cookies.get("refreshToken");
-    if (refreshToken) {
-      const userInfo = jwt.decode(refreshToken) as UserInformation;
-      if (userInfo) {
-        loginUser(userInfo);
-      }
-    }
+    refreshUser();
+    window.addEventListener("beforeunload", handleBeforeUnload);
     return () => {
       axios.interceptors.response.eject(axiosInterceptor);
+      window.removeEventListener("beforeunload", handleBeforeUnload);
     };
   }, []);
   return (
