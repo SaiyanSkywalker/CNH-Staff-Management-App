@@ -26,7 +26,7 @@ export const calculateDuration = (interval: string[]): string => {
   const duration = end.getTime() - start.getTime();
   const hourInMilliseconds = 1000 * 60 * 60;
   const hours = Math.floor(duration / hourInMilliseconds);
-  const minutes = (duration % hourInMilliseconds) / 60;
+  const minutes = Math.floor((duration % hourInMilliseconds) / 60);
   const hourString = `${hours < 10 ? `0${hours}` : hours}`;
   const minuteString = `${minutes < 10 ? `0${minutes}` : minutes}`;
   return `${hourString}:${minuteString}`;
