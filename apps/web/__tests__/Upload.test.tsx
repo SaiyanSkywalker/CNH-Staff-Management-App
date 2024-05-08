@@ -6,7 +6,9 @@ describe("Upload", () => {
   it("renders a span", () => {
     render(<Upload />);
 
-    const span = screen.getByText("Drop file here or click to upload");
+    const span: HTMLElement = screen.getByText(
+      "Drop file here or click to upload"
+    );
 
     expect(span).toBeInTheDocument();
   });

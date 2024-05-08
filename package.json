@@ -7,6 +7,11 @@
     "apps/server",
     "apps/web"
   ],
+  "scripts": {
+    "web-test": "cd apps/web && npm run test",
+    "server-test": "cd apps/server && npm run test",
+    "mobile-test": "cd apps/mobile && npm run test"
+  },
   "dependencies": {
     "date-fns": "^3.6.0",
     "socket.io": "^4.7.4"
