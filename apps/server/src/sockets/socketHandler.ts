@@ -69,72 +69,85 @@ const socketHandler = (io: Server, socket: Socket) => {
   socket.on(
     "shift_accept",
     async (arg: { shiftHistoryId: number; isAccepted: boolean }) => {
-      console.log("arg.shiftHistoryId is:", arg.shiftHistoryId);
-      console.log("arg.isAccepted is:", arg.isAccepted);
-      const shiftHistory: ShiftHistory | null = await ShiftHistory.findOne({
-        where: {
-          id: arg.shiftHistoryId,
-        },
-        include: [
-          {
-            model: Unit,
-            required: true,
+      try {
+        console.log("arg.shiftHistoryId is:", arg.shiftHistoryId);
+        console.log("arg.isAccepted is:", arg.isAccepted);
+        const shiftHistory: ShiftHistory | null = await ShiftHistory.findOne({
+          where: {
+            id: arg.shiftHistoryId,
           },
-          {
-            model: UserInformation,
-            required: true,
-          },
-        ],
-      });
-
-      if (!shiftHistory) {
-        return;
-      }
-
-      let message: string = "";
-      let parsedDate: string = shiftHistory?.dateRequested;
-
-      if (arg.isAccepted) {
-        // Set shift status
-        shiftHistory?.set("status", "Accepted");
-        message = `Shift accepted for ${shiftHistory?.shiftTime} on ${parsedDate}`;
-
-        // Add shift to scheduleEntry table
-        const shiftTimeTokens: string[] = shiftHistory.shiftTime.split("-");
-        const duration = calculateDuration(shiftTimeTokens);
-
-        await ScheduleEntry.create({
-          employeeId: shiftHistory.user.employeeId,
-          lastName: shiftHistory.user.lastName,
-          firstName: shiftHistory.user.firstName,
-          middleInitial: shiftHistory.user.middleInitial,
-          shiftDate: new Date(shiftHistory.dateRequested),
-          shiftType: "REG",
-          costCenterId: shiftHistory.unit.laborLevelEntryId,
-          startTime: shiftTimeTokens[0].trim(),
-          endTime: shiftTimeTokens[1].trim(),
-          duration: duration,
+          include: [
+            {
+              model: Unit,
+              required: true,
+            },
+            {
+              model: UserInformation,
+              required: true,
+            },
+          ],
         });
-      } else {
-        shiftHistory?.set("status", "Rejected");
-        message = `Shift rejected for ${shiftHistory?.shiftTime} on ${parsedDate}`;
-      }
-      await shiftHistory?.save();
 
-      // Send response to mobile user
-      if (mobileSocketMap.has(shiftHistory?.user.username)) {
-        const userMap = mobileSocketMap.get(shiftHistory?.user.username);
-        userMap?.forEach((socket: Socket, uuid: string) => {
-          console.log("uuid is:", uuid);
-          socket?.emit("shift_update", {
-            isAccepted: arg.isAccepted,
-            message: message,
+        if (!shiftHistory) {
+          return;
+        }
+
+        let message: string = "";
+        let parsedDate: string = shiftHistory?.dateRequested;
+
+        if (arg.isAccepted) {
+          // Set shift status
+          shiftHistory?.set("status", "Accepted");
+          message = `Shift accepted for ${shiftHistory?.shiftTime} on ${parsedDate}`;
+
+          // Add shift to scheduleEntry table
+          const shiftTimeTokens: string[] = shiftHistory.shiftTime.split("-");
+          const duration = calculateDuration(shiftTimeTokens);
+
+          await ScheduleEntry.create({
+            employeeId: shiftHistory.user.employeeId,
+            lastName: shiftHistory.user.lastName,
+            firstName: shiftHistory.user.firstName,
+            middleInitial: shiftHistory.user.middleInitial,
+            shiftDate: new Date(shiftHistory.dateRequested),
+            shiftType: "REG",
+            costCenterId: shiftHistory.unit.laborLevelEntryId,
+            startTime: shiftTimeTokens[0].trim(),
+            endTime: shiftTimeTokens[1].trim(),
+            duration: duration,
           });
+        } else {
+          shiftHistory?.set("status", "Rejected");
+          message = `Shift rejected for ${shiftHistory?.shiftTime} on ${parsedDate}`;
+        }
+        await shiftHistory?.save();
+
+        // Send response to admin user
+        socket.emit("shift_accept_response", {
+          isAccepted: arg.isAccepted,
+          shiftHistory: shiftHistory,
         });
-      } else {
-        console.log(
-          `Mobile user: ${shiftHistory?.user.username} does not have an entry in socket map`
-        );
+
+        // Send response to mobile user
+        if (mobileSocketMap.has(shiftHistory?.user.username)) {
+          const userMap = mobileSocketMap.get(shiftHistory?.user.username);
+          userMap?.forEach((socket: Socket, uuid: string) => {
+            console.log("uuid is:", uuid);
+            socket?.emit("shift_update", {
+              isAccepted: arg.isAccepted,
+              message: message,
+            });
+          });
+        } else {
+          console.log(
+            `Mobile user: ${shiftHistory?.user.username} does not have an entry in socket map`
+          );
+        }
+      } catch (error) {
+        console.log(error);
+        socket.emit("shift_accept_error", {
+          isAccepted: arg.isAccepted
+        });
       }
     }
   );
