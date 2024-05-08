@@ -7,9 +7,14 @@ const userRouter = Router();
 userRouter.get("/", async (req: Request, res: Response): Promise<Response> => {
   try {
     const roleName: string = req.query.isMobile === "1" ? "USER" : "ADMIN";
-
     const user = await sequelize.models.UserInformation.findOne({
-      where: { username: req.query.username, password: req.query.password },
+      where: {
+        username: sequelize.where(
+          sequelize.fn("UPPER", sequelize.col("username")),
+          sequelize.fn("UPPER", req.query.username)
+        ),
+        password: req.query.password,
+      },
       include: {
         model: Role,
         where: {
@@ -17,8 +22,10 @@ userRouter.get("/", async (req: Request, res: Response): Promise<Response> => {
         },
       },
     });
+    console.log(user);
     return res.json(user);
   } catch (error) {
+    console.log(error);
     return res
       .status(500)
       .json({ error: "Error retrieving data from user table" + error });

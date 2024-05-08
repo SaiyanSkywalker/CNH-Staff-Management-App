@@ -123,9 +123,9 @@ export default function shiftHistory() {
   ): { color: string; fontWeight: string } => {
     return {
       color:
-        status === "Accepted"
+        status.toLowerCase() === "accepted"
           ? "green"
-          : status === "Pending"
+          : status.toLowerCase() === "pending"
           ? "#FFAE42"
           : "red",
       fontWeight: "bold",

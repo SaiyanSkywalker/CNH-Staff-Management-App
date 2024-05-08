@@ -2,6 +2,7 @@ import { Request, Response, Router } from "express";
 import { Op } from "sequelize";
 import Announcement from "server/src/models/Announcement";
 import Channel from "server/src/models/Channel";
+import UserInformation from "server/src/models/UserInformation";
 
 const channelRouter = Router();
 
@@ -10,12 +11,14 @@ const channelRouter = Router();
 // Send list of channels back to user or error if server error occurs
 channelRouter.get("/", async (req: Request, res: Response) => {
   try {
-    const { unitId } = req.body
+    let unitIdNum = Number(req.headers["unitid"]);
+    let roleIdNum = Number(req.headers["roleid"]);
     const channels: Channel[] = await Channel.findAll({
         where: {
-            unitRoomId: {
-                [Op.or]: unitId ? [null, unitId] : []   
-            }
+            [Op.or]: [
+                { unitRoomId: { [Op.is]: null } },
+                (roleIdNum === 2) ? { unitRoomId: { [Op.ne]: null } } : {unitRoomId: unitIdNum}
+            ]
         }
     });
     res.send(channels);
@@ -30,23 +33,25 @@ channelRouter.get("/", async (req: Request, res: Response) => {
 channelRouter.get("/:id", async (req, res) => {
   try {
     const { id } = req.params;
-    const { unitId } = req.body;
+    let unitIdNum = Number(req.headers["unitid"]);
+    let roleIdNum = Number(req.headers["roleid"]);
     let channel = await Channel.findOne({
         where: {
-            unitRoomId: id
+            id
         }
     });
     if(!channel) {
         res.status(400).json({ error: "Error, room does not exist!" });
     }
-    else if(unitId != null && channel.unitRoomId != null && channel.unitRoomId != unitId) {
+    else if(roleIdNum != 2 && (channel.unitRoomId != null && channel.unitRoomId != unitIdNum)) {
         res.status(401).json({ error: "Error, room is not accessible" });
     }
     else {
         let announcements: Announcement[] = await Announcement.findAll({
             where: {
                 channelId: id
-            }
+            },
+            include: UserInformation
         });
         announcements.sort((announcementOne: Announcement, announcementTwo: Announcement): number => {
             return announcementOne.createdAt < announcementTwo.createdAt ? -1 : 1
@@ -65,7 +70,6 @@ channelRouter.get("/:id", async (req, res) => {
 channelRouter.post("/", async (req: Request, res: Response) => {
     try {
         const { name } = req.body;
-        let lowercasedName: string = name.toLowerCase();
         let channel = await Channel.findOne({
             where: {
                 name: name
@@ -75,10 +79,10 @@ channelRouter.post("/", async (req: Request, res: Response) => {
             res.status(400).json({ error: "Error room already exists with given name!" });
         }
         else {
-            await Channel.create({
+            let newChannel = await Channel.create({
                 name: name,
             });
-            res.status(201).json({ success: "Room successfully created!" });
+            res.status(201).json({ success: "Room successfully created!", id: newChannel.id });
         }
     }
     catch (ex) {

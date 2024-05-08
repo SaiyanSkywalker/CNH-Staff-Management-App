@@ -32,6 +32,7 @@ export default function UploadPage() {
     useContext(BannerContext);
   const loadingContext: LoadingContextProps | undefined =
     useContext(LoadingContext);
+  const authContext = useAuth();
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     const inputElement: HTMLInputElement | null = fileInputRef.current;
     const containerElement: HTMLDivElement | null = containerRef.current;
@@ -75,26 +76,33 @@ export default function UploadPage() {
         if (!currentFile) {
           bannerContext.showBanner(
             "Error! File must be selected before uploading",
-            true
+            "error"
           );
         } else {
-          const formData = new FormData();
-          formData.append("schedule", currentFile);
-          loadingContext.showLoader();
-          await axios.post(`${config.apiUrl}/schedule`, formData, {
-            headers: {
-              "Content-Type": "multipart/form-data",
-            },
-          });
-          loadingContext.hideLoader();
-          bannerContext.showBanner("Success! File has been uploaded", false);
+          const user: string | undefined = authContext.auth?.user?.username;
+          const formData: FormData = new FormData();
+          if (user) {
+            formData.append("username", user);
+            formData.append("schedule", currentFile);
+            loadingContext.showLoader();
+            axios.post(`${config.apiUrl}/schedule`, formData, {
+              headers: {
+                "Content-Type": "multipart/form-data",
+              },
+            });
+            loadingContext.hideLoader();
+            bannerContext.showBanner(
+              "File upload has been started, notification will be shown once upload is complete",
+              "other"
+            );
+          }
         }
       }
     } catch (err) {
       if (bannerContext && loadingContext) {
         bannerContext.showBanner(
           "Error: Schedule data could not be saved to the database",
-          true
+          "error"
         );
         loadingContext.hideLoader();
       }
