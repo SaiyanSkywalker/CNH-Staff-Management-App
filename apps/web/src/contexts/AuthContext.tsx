@@ -140,18 +140,6 @@ export default function AuthProvider({
     }
   };
 
-  const handleBeforeUnload = (event: BeforeUnloadEvent) => {
-    debugger;
-    console.log(event);
-    event.preventDefault();
-    console.log("cheese");
-    socket?.emit("remove_user", {
-      username: user?.username,
-      uuid: userUUID,
-      isAdmin: true,
-    });
-    return undefined;
-  };
   useEffect(() => {
     const axiosInterceptor = axios.interceptors.response.use(
       (response) => response,
@@ -187,10 +175,8 @@ export default function AuthProvider({
     );
     // Sign the user back in on refresh/navigating back to admin portal from other site
     refreshUser();
-    window.addEventListener("beforeunload", handleBeforeUnload);
     return () => {
       axios.interceptors.response.eject(axiosInterceptor);
-      window.removeEventListener("beforeunload", handleBeforeUnload);
     };
   }, []);
   return (

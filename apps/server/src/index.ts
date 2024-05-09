@@ -1,9 +1,10 @@
 import express from "express";
 import config from "./config";
 import loaders from "./loaders";
-import { Server, Socket } from "socket.io";
+import { Server } from "socket.io";
 import http from "http";
 import socketHandler from "./sockets/socketHandler";
+import CNHSocket from "@shared/src/interfaces/CNHSocket";
 const app = express();
 
 const startServer = async () => {
@@ -22,7 +23,7 @@ const startServer = async () => {
     },
   });
 
-  const onConnection = (socket: Socket) => {
+  const onConnection = (socket: CNHSocket) => {
     socketHandler(io, socket);
   };
 

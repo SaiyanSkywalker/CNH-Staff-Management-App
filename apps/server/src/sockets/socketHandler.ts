@@ -6,34 +6,31 @@ import Unit from "server/src/models/Unit";
 import UserInformation from "server/src/models/UserInformation";
 import ScheduleEntry from "../models/ScheduleEntry";
 import { calculateDuration } from "../util/dateUtils";
+import CNHSocket from "@shared/src/interfaces/CNHSocket";
 
-export const mobileSocketMap = new Map<string, Map<string, Socket>>();
-export const adminSocketMap = new Map<string, Map<string, Socket>>();
+export const mobileSocketMap = new Map<string, Map<string, CNHSocket>>();
+export const adminSocketMap = new Map<string, Map<string, CNHSocket>>();
 
-const socketHandler = (io: Server, socket: Socket) => {
+const socketHandler = (io: Server, socket: CNHSocket) => {
+  socket.on("disconnect", () => {
+    if (socket.userInfo) {
+      removeUser(socket.userInfo);
+      console.log("DISCONNECTED!");
+    }
+  });
   socket.on("add_user", (arg: UserSocketAttributes) => {
     const socketMap = arg.isAdmin ? adminSocketMap : mobileSocketMap;
     if (!socketMap.has(arg.username)) {
-      socketMap.set(arg.username, new Map<string, Socket>());
+      socketMap.set(arg.username, new Map<string, CNHSocket>());
     }
     socketMap.get(arg.username)?.set(arg.uuid, socket);
     console.log("socketMap is:");
     console.dir(socketMap);
+    socket.userInfo = arg;
   });
 
   socket.on("remove_user", (arg: UserSocketAttributes) => {
-    console.log("BEFORE: REMOVE_USER!");
-    const socketMap = arg.isAdmin ? adminSocketMap : mobileSocketMap;
-    console.log(socketMap);
-    if (
-      socketMap.has(arg.username) &&
-      socketMap.get(arg.username)?.has(arg.uuid)
-    ) {
-      const userMap = socketMap.get(arg.username);
-      userMap?.delete(arg.uuid);
-    }
-    console.log("AFTER: REMOVE_USER!");
-    console.log(socketMap);
+    removeUser(arg);
     socket.disconnect();
   });
 
@@ -141,4 +138,18 @@ const socketHandler = (io: Server, socket: Socket) => {
   );
 };
 
+const removeUser = (user: UserSocketAttributes) => {
+  console.log("BEFORE: REMOVE_USER!");
+  const socketMap = user.isAdmin ? adminSocketMap : mobileSocketMap;
+  console.log(socketMap);
+  if (
+    socketMap.has(user.username) &&
+    socketMap.get(user.username)?.has(user.uuid)
+  ) {
+    const userMap = socketMap.get(user.username);
+    userMap?.delete(user.uuid);
+  }
+  console.log("AFTER: REMOVE_USER!");
+  console.log(socketMap);
+};
 export default socketHandler;
