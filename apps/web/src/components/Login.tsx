@@ -1,9 +1,12 @@
 "use client";
 
-import { useState, ChangeEvent, useEffect } from "react";
+import { useState, ChangeEvent, useContext } from "react";
 import styles from "../styles/Login.module.css";
 import { useAuth } from "@webSrc/contexts/AuthContext";
 import { useRouter } from "next/navigation";
+import Schedule from "./Schedule";
+import { BannerContext } from "@webSrc/contexts/BannerContext";
+import { LoadingContext } from "@webSrc/contexts/LoadingContext";
 
 const Login = () => {
   const [username, setUsername] = useState("");
@@ -11,6 +14,8 @@ const Login = () => {
   const [error, setError] = useState(false);
   const { auth } = useAuth();
   const router = useRouter();
+  const bannerContext = useContext(BannerContext);
+  const loadingContext = useContext(LoadingContext);
 
   const onUsernameChange = (e: ChangeEvent<HTMLInputElement>) => {
     setUsername(e.target.value);
@@ -27,20 +32,16 @@ const Login = () => {
       const isAuthenticated = await auth?.login(username, password);
       if (isAuthenticated) {
         router.replace("/schedule");
-        alert("Login successful!");
       } else {
         setError(true);
-        alert("Invalid username or password. Please try again.");
+        bannerContext?.showBanner(`Unable to log in user ${username}`, "error");
       }
+      loadingContext?.hideLoader();
     } catch (error) {
       console.log(error);
     }
   };
-  useEffect(() => {
-    // if (auth?.authenticated) {
-    //   redirect("/schedule");
-    // }
-  }, []);
+
   return (
     <>
       <div className="min-h-screen items-center justify-between p-24">

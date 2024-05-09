@@ -1,5 +1,5 @@
 "use client";
-import { useState, FormEvent, BaseSyntheticEvent, useEffect } from "react";
+import { useState, FormEvent, BaseSyntheticEvent, useEffect, useContext } from "react";
 import page from "@webSrc/styles/ShiftHistory.module.css";
 import { useAuth } from "@webSrc/contexts/AuthContext";
 import { useSearchParams } from "next/navigation";
@@ -7,8 +7,10 @@ import ShiftHistoryClient from "@shared/src/interfaces/ShiftHistoryClient";
 import AuthWrapper from "@webSrc/components/ProtectedRoute";
 import axios from "axios";
 import { getAccessToken } from "@webSrc/utils/token";
-
+import AdminShiftRequestUpdate from "@shared/src/interfaces/AdminShiftRequestUpdate";
+import { BannerContext } from "@webSrc/contexts/BannerContext";
 const Page = () => {
+
   const params = useSearchParams();
   const employeeNameQuery: string = params.get("employeeName") ?? "";
   const employeeIdQuery: string = params.get("employeeId") ?? "";
@@ -27,6 +29,7 @@ const Page = () => {
     []
   );
   const { auth } = useAuth();
+  const bannerContext = useContext(BannerContext);
 
   const validateEmployeeId = (): boolean => {
     const trimmedEmployeeId = employeeId.trim();
@@ -66,7 +69,7 @@ const Page = () => {
     console.log("jsonResponse is:");
     console.dir(jsonResponse);
     setIsLoading((prevLoad) => !prevLoad);
-    setShiftHistories((prevshiftHistories) => jsonResponse);
+    setShiftHistories(jsonResponse);
   };
 
   const handleEmployeeIdChange = (event: BaseSyntheticEvent): void => {
@@ -126,6 +129,29 @@ const Page = () => {
     });
   };
 
+  // Updates the UI based on if shift is accepted or rejected (based on socket response)
+  const shiftRequestResponseHandler = (sh: AdminShiftRequestUpdate) => {
+    const newShiftHistories = shiftHistories.map(
+      (shiftHistory: ShiftHistoryClient) => {
+        if (shiftHistory.id === sh.shiftHistory.id) {
+          return {
+            ...shiftHistory,
+            status: sh.isAccepted ? "Accepted" : "Rejected",
+          };
+        }
+        return shiftHistory;
+      }
+    );
+    if (newShiftHistories.length > 0) {
+      setShiftHistories(newShiftHistories);
+    }
+  };
+
+  const shiftRequestResponseErrorHandler = (sh: AdminShiftRequestUpdate) => {
+    const acceptedString: string = sh.isAccepted ? "accepting" : "denying";
+    bannerContext?.showBanner(`Error in ${acceptedString} shift!`, "error");
+  }
+
   // Initial fill of list
   useEffect(() => {
     async function initialList() {
@@ -134,6 +160,12 @@ const Page = () => {
     initialList();
   }, []);
 
+  useEffect(() => {
+    if (auth?.socket && shiftHistories.length > 0) {
+      auth?.socket.on("shift_accept_response", shiftRequestResponseHandler);
+      auth?.socket.on("shift_accept_error", shiftRequestResponseErrorHandler);
+    }
+  }, [auth, shiftHistories]);
   return (
     <>
       <div className="w-full">

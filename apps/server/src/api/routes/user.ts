@@ -22,8 +22,10 @@ userRouter.get("/", async (req: Request, res: Response): Promise<Response> => {
         },
       },
     });
+    console.log(user);
     return res.json(user);
   } catch (error) {
+    console.log(error);
     return res
       .status(500)
       .json({ error: "Error retrieving data from user table" + error });

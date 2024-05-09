@@ -18,7 +18,7 @@ class ShiftCapacity extends Model<ShiftCapacityAttributes> {
   })
   id!: number;
 
-  @BelongsTo(() => Unit, { targetKey: "id", foreignKey: "unitId" })
+  @BelongsTo(() => Unit, { targetKey: "id", foreignKey: "unitId", onDelete: "CASCADE" })
   unit!: Unit;
 
   @Column(DataType.STRING)

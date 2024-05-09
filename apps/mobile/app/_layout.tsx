@@ -38,6 +38,13 @@ const Layout = () => {
           }}
         />
         <Drawer.Screen
+          name="chat"
+          options={{
+            drawerLabel: "Chat",
+            title: "Chat",
+          }}
+        />
+        <Drawer.Screen
           name="schedule"
           options={{
             drawerLabel: "Schedule",
