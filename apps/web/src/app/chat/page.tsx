@@ -21,7 +21,8 @@ import {
 import AnnouncementAttributes from "@shared/src/interfaces/AnnouncementAttributes";
 import ChannelAttributes from "@shared/src/interfaces/ChannelAttributes";
 import { useAuth } from "@webSrc/contexts/AuthContext";
-
+import { getAccessToken } from "@webSrc/utils/token";
+import { v4 as uuidv4 } from "uuid";
 export default function ChatPage() {
   const [channels, setChannels] = useState<ChannelAttributes[]>([]);
   const [channelMap, setChannelMap] = useState<Map<string, ChannelAttributes>>(
@@ -55,11 +56,16 @@ export default function ChatPage() {
 
   const getChannels = async () => {
     try {
+      const accessToken = getAccessToken();
       const response = await axios({
         method: "GET",
         url: `${config.apiUrl}/channel`,
         responseType: "json",
-        headers: { unitId: auth?.user?.unitId, roleId: auth?.user?.roleId },
+        headers: {
+          unitId: auth?.user?.unitId,
+          roleId: auth?.user?.roleId,
+          Authorization: `Bearer ${accessToken}`,
+        },
       });
       const data: ChannelAttributes[] = await response.data;
       if (data) {
@@ -102,6 +108,7 @@ export default function ChatPage() {
       if (!selectedChannel) {
         return;
       }
+      const accessToken = getAccessToken();
       const response = await axios({
         method: "GET",
         url: `${config.apiUrl}/channel/${selectedChannel?.id}`,
@@ -109,6 +116,7 @@ export default function ChatPage() {
         headers: {
           unitId: auth?.user?.unitId,
           roleId: auth?.user?.roleId,
+          Authorization: `Bearer ${accessToken}`,
         },
       });
       const data = await response.data;
@@ -141,10 +149,13 @@ export default function ChatPage() {
         };
 
         loadingContext?.showLoader();
-
+        const accessToken = getAccessToken();
         const res = await fetch(`${config.apiUrl}/channel`, {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${accessToken}`,
+          },
           body: JSON.stringify(newChannelRequest),
         });
 
@@ -300,7 +311,7 @@ export default function ChatPage() {
               >
                 <option defaultValue={undefined}>-- Select Channel --</option>
                 {channels.map((channel) => (
-                  <option key={channel.id} value={channel.name}>
+                  <option key={uuidv4()} value={channel.name}>
                     {channel.name}
                   </option>
                 ))}

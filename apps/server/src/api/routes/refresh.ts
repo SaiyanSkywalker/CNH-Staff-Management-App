@@ -3,9 +3,8 @@ import jwt from "jsonwebtoken";
 import config from "server/src/config";
 const refreshRouter = Router();
 
-refreshRouter.get("/", (req: Request, res: Response) => {
+refreshRouter.post("/", (req: Request, res: Response) => {
   const refreshtoken = req.body.refreshtoken;
-
   if (!refreshtoken) {
     return res.sendStatus(401);
   }

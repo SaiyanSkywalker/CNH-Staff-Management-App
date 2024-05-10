@@ -203,7 +203,6 @@ export default function ChatPage() {
         createdAt: new Date(),
       };
 
-      //TODO: Emit event to socket
       auth?.socket?.emit("message_sent", newAnnouncement);
       setMessage("");
     }

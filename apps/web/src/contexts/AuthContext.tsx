@@ -61,7 +61,6 @@ export default function AuthProvider({
   ): Promise<boolean> => {
     const tokens = await getUser(username, password); // JWT token from server
     const userInfo = jwt.decode(tokens.access) as UserInformation;
-
     // Store tokens in cookie
     cookies.set("accessToken", tokens.access, { path: "/" });
     cookies.set("refreshToken", tokens.refresh, { path: "/" });
