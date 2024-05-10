@@ -4,7 +4,7 @@
 
 .form {
   @apply flex flex-col justify-around items-center;
-  background-color: #E2F6FF;
+  background-color: #e2f6ff;
   border: 2px solid black;
   padding: 5px;
 }
@@ -52,7 +52,7 @@
 
 .table {
   @apply border-collapse;
-  margin-top: 50px;
+  margin: 50px 0px;
   width: 80%;
   max-width: 1200px;
 }
