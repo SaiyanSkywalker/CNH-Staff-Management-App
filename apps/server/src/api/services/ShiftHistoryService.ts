@@ -39,6 +39,7 @@ export const getShiftHistory = async (shiftHistoryQuery: ShiftHistoryQuery): Pro
         dateRequested: shiftHistory.dateRequested,
         status: shiftHistory.status,
         shift: shiftHistory.shiftTime,
+        createdAt: shiftHistory.createdAt
       };
     });
 
@@ -50,6 +51,17 @@ export const getShiftHistory = async (shiftHistoryQuery: ShiftHistoryQuery): Pro
         }
       }
       shiftHistoryObjects = matchingNames;
+    }
+
+    if(shiftHistoryQuery.createdAt != undefined) {
+      let createdAtDate: Date = new Date(Number(shiftHistoryQuery?.createdAt?.substring(6, 10)), Number(shiftHistoryQuery?.createdAt?.substring(0, 2))-1, Number(shiftHistoryQuery?.createdAt?.substring(3, 5))); 
+      let matchingDates: ShiftHistoryClient[] = [];
+      for(let shiftHistoryObject of shiftHistoryObjects) {
+        if(shiftHistoryObject.createdAt.getDay() === createdAtDate.getDay() && shiftHistoryObject.createdAt.getMonth() === createdAtDate.getMonth() && shiftHistoryObject.createdAt.getFullYear() === createdAtDate.getFullYear()) {
+          matchingDates.push(shiftHistoryObject);
+        }
+      }
+      shiftHistoryObjects = matchingDates;
     }
   } catch (error) {
     console.log(error);
