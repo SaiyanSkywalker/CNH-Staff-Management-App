@@ -42,7 +42,7 @@ export default function AuthProvider({
     setIsLoggedIn(true);
     const randomUUID = uuidv4();
     const newSocket = io(config.apiUrl);
-    // Add new socket event for notifcations
+
     newSocket.on("schedule_upload_complete", () => {
       bannerContext?.showBanner("Upload schedule complete", "success");
     });
@@ -140,7 +140,11 @@ export default function AuthProvider({
   };
 
   useEffect(() => {
-    const axiosInterceptor = axios.interceptors.response.use(
+    /**
+     * Intercepts any unauthorized (status 401) Axios response
+     * and attempts to resend request with new access token
+     */
+    const interceptor = axios.interceptors.response.use(
       (response) => response,
       async (error) => {
         const originalRequest = error.config;
@@ -151,31 +155,28 @@ export default function AuthProvider({
         ) {
           originalRequest._retry = true;
           try {
-            // Attempt to refresh token
             const refreshedToken = await refreshAccessToken();
             if (refreshedToken) {
-              // Retry original request with new access token
               originalRequest.headers[
                 "Authorization"
               ] = `Bearer ${refreshedToken}`;
               return axios(originalRequest);
             } else {
-              // If refresh fails, logout user
               await logout();
             }
           } catch (error) {
             console.error("Error refreshing token", error);
-            // If refresh fails, logout user
             await logout();
           }
         }
         return Promise.reject(error);
       }
     );
+
     // Sign the user back in on refresh/navigating back to admin portal from other site
     refreshUser();
     return () => {
-      axios.interceptors.response.eject(axiosInterceptor);
+      axios.interceptors.response.eject(interceptor);
     };
   }, []);
   return (
