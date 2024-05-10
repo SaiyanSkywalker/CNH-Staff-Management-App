@@ -20,13 +20,11 @@ import {
   LoadingContextProps,
 } from "@webSrc/contexts/LoadingContext";
 import { useAuth } from "@webSrc/contexts/AuthContext";
-import Schedule from "@webSrc/components/Schedule";
 
 export default function UploadPage() {
   const [currentFile, setCurrentFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const { auth } = useAuth();
 
   const bannerContext: BannerContextProps | undefined =
     useContext(BannerContext);
@@ -125,10 +123,7 @@ export default function UploadPage() {
 
   return (
     <>
-      {auth?.authenticated ? (
-        <Schedule/>
-      ) :
-      (<section className="h-full w-full flex justify-center items-center pt-32">
+      <section className="h-full w-full flex justify-center items-center pt-32">
         <div className="flex flex-col items-center">
           <div
             className={`${styles["drop-zone"]}`}
@@ -164,7 +159,7 @@ export default function UploadPage() {
             Upload File
           </button>
         </div>
-      </section>)}
+      </section>
     </>
   );
 }
