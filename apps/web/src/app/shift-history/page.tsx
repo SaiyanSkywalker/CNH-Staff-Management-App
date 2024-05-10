@@ -15,14 +15,37 @@ const Page = () => {
   const employeeNameQuery: string = params.get("employeeName") ?? "";
   const employeeIdQuery: string = params.get("employeeId") ?? "";
   const unitQuery: string = params.get("unit") ?? "";
-  const dateQuery: string = params.get("date") ?? "";
+  const shiftDateQuery: string = params.get("shiftDate") ?? "";
+  const requestedDateQuery: string = params.get("requestedDate") ?? "";
   const shiftQuery: string = params.get("shift") ?? "";
   const statusQuery: string = params.get("status") ?? "";
+
+  const shifts: string[] = [
+    "07:00 - 11:00",
+    "07:00 - 15:00",
+    "07:00 - 19:00",
+    "11:00 - 15:00",
+    "11:00 - 19:00",
+    "11:00 - 23:00",
+    "15:00 - 19:00",
+    "15:00 - 23:00",
+    "15:00 - 03:00",
+    "19:00 - 23:00",
+    "19:00 - 03:00",
+    "19:00 - 07:00",
+    "23:00 - 03:00",
+    "23:00 - 07:00",
+    "23:00 - 11:00",
+  ];
+
+  console.log(`employeeNameQuery is ${employeeNameQuery}, employeeIdQuery is ${employeeIdQuery}, unitQuery is ${unitQuery}, shiftDateQuery is ${shiftDateQuery}, shiftQuery is ${shiftQuery}, statusQuery is ${statusQuery}`);
+
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [employeeId, setEmployeeId] = useState<string>(employeeIdQuery);
   const [employeeName, setEmployeeName] = useState<string>(employeeNameQuery);
   const [unit, setUnit] = useState<string>(unitQuery);
-  const [date, setDate] = useState<string>(dateQuery);
+  const [shiftDate, setShiftDate] = useState<string>(shiftDateQuery);
+  const [requestedDate, setRequestedDate] = useState<string>(requestedDateQuery);
   const [shift, setShift] = useState<string>(shiftQuery);
   const [status, setStatus] = useState<string>(statusQuery);
   const [shiftHistories, setShiftHistories] = useState<ShiftHistoryClient[]>(
@@ -55,7 +78,7 @@ const Page = () => {
   const updateList = async (): Promise<void> => {
     setIsLoading((prevLoad) => !prevLoad);
     const res = await axios(
-      `http://localhost:3003/shift-history?employeeId=${employeeId}&employeeName=${employeeName}&unit=${unit}&date=${date}&shift=${shift}&status=${status}`,
+      `http://localhost:3003/shift-history?employeeId=${employeeId}&employeeName=${employeeName}&unit=${unit}&requestedDate=${requestedDate}&shiftDate=${shiftDate}&shift=${shift}&status=${status}`,
       {
         method: "GET",
         headers: {
@@ -69,7 +92,7 @@ const Page = () => {
     console.log("jsonResponse is:");
     console.dir(jsonResponse);
     setIsLoading((prevLoad) => !prevLoad);
-    setShiftHistories(jsonResponse);
+    setShiftHistories((prevshiftHistories) => jsonResponse);
   };
 
   const handleEmployeeIdChange = (event: BaseSyntheticEvent): void => {
@@ -84,9 +107,12 @@ const Page = () => {
     setUnit((prevUnit) => event.target.value);
   };
 
-  const handleDateChange = (event: BaseSyntheticEvent): void => {
-    console.log("date is: ");
-    setDate((prevDate) => event.target.value);
+  const handleShiftDateChange = (event: BaseSyntheticEvent): void => {
+    setShiftDate((prevDate) => event.target.value);
+  };
+
+  const handleRequestedDateChange = (event: BaseSyntheticEvent): void => {
+    setRequestedDate((prevDate) => event.target.value);
   };
 
   const handleShiftChange = (event: BaseSyntheticEvent): void => {
@@ -127,7 +153,7 @@ const Page = () => {
       shiftHistoryId,
       isAccepted,
     });
-  };
+  }
 
   // Updates the UI based on if shift is accepted or rejected (based on socket response)
   const shiftRequestResponseHandler = (sh: AdminShiftRequestUpdate) => {
@@ -151,6 +177,8 @@ const Page = () => {
     const acceptedString: string = sh.isAccepted ? "accepting" : "denying";
     bannerContext?.showBanner(`Error in ${acceptedString} shift!`, "error");
   }
+
+  const parseDate = (date: Date) => date.toString().substring(5,7) + "/" + date.toString().substring(8,10) + "/" + date.toString().substring(0,4);
 
   // Initial fill of list
   useEffect(() => {
@@ -202,33 +230,51 @@ const Page = () => {
             </div>
 
             <div>
-              <label className={page.label}>Date</label>
-              <input
-                placeholder="Enter Date"
-                value={date}
-                onChange={handleDateChange}
+            <label className={page.label}>Requested Date</label>            
+            <input 
+                value={requestedDate}
+                onChange={handleRequestedDateChange}
+                type="date"
                 className={page.input}
-              ></input>
+            ></input>
             </div>
 
             <div>
-              <label className={page.label}>Shift</label>
-              <input
-                placeholder="Enter Shift"
-                value={shift}
-                onChange={handleShiftChange}
+            <label className={page.label}>Shift Date</label>            
+            <input 
+                value={shiftDate}
+                onChange={handleShiftDateChange}
+                name="date"
+                id="widget"
+                type="date"
                 className={page.input}
-              ></input>
+            ></input>
             </div>
 
             <div>
-              <label className={page.label}>Status</label>
-              <input
-                placeholder="Enter Status"
-                value={status}
-                onChange={handleStatusChange}
-                className={page.input}
-              ></input>
+            <label className={page.label}>Shift</label>
+            <select
+              onChange={handleShiftChange}
+              name="shift"
+              id="shift"
+              defaultValue={""}
+              className={page.input}
+            >
+              <option value={""}>--Select An Option--</option>
+              {shifts.map((shift, index) => (
+                <option value={shift}>{shift}</option>  
+              ))}
+            </select>
+            </div>
+
+            <div>
+            <label className={page.label} htmlFor="statuses">Status</label>
+            <select id="statuses" onChange={handleStatusChange} defaultValue={""} className={page.input}>
+              <option value="">--Select An Option--</option>
+              <option value="Accepted">Accepted</option>
+              <option value="Rejected">Rejected</option>
+              <option value="Pending">Pending</option>
+            </select>
             </div>
           </div>
           <button
@@ -248,6 +294,7 @@ const Page = () => {
                 <th className={page.th}>Employee ID</th>
                 <th className={page.th}>Employee Name</th>
                 <th className={page.th}>Unit</th>
+                <th className={page.th}>Requested Date</th>
                 <th className={page.th}>Shift Date</th>
                 <th className={page.th}>Shift Time Block</th>
                 <th className={page.th}>Status</th>
@@ -260,7 +307,10 @@ const Page = () => {
                   <td className={page.td}> {shiftHistory.employeeId} </td>
                   <td className={page.td}> {shiftHistory.employeeName} </td>
                   <td className={page.td}> {shiftHistory.unit} </td>
-                  <td className={page.td}>{shiftHistory.dateRequested}</td>
+                  <td className={page.td}> {parseDate(shiftHistory.createdAt)/*shiftHistory.createdAt.substring(5,7) + "/" + shiftHistory.createdAt.substring(8,10) + "/" + shiftHistory.createdAt.substring(0,4)*/} </td>
+                  <td className={page.td}>
+                    {shiftHistory.dateRequested}
+                  </td>
                   <td className={page.td}> {shiftHistory.shift} </td>
                   <td
                     className={page.td}

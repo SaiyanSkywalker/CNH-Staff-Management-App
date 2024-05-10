@@ -5,4 +5,5 @@ export default interface ShiftHistoryQuery {
     dateRequested?: string;
     shift?: string;
     status?: string;
+    createdAt?: string;
 }
