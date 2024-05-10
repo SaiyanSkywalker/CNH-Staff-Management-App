@@ -18,10 +18,13 @@ const scheduleRouter = Router();
 scheduleRouter.get("/", async (req: Request, res: Response): Promise<void> => {
   try {
     // Change this if you want to use data from db instead
-    const isTest = config.environment.toLowerCase() === "dev";
-    const scheduleData = isTest
-      ? handleTestScheduleData(req.query.costCenterId as string)
-      : await getScheduleData(req.query.costCenterId as string);
+    // const isTest = config.environment.toLowerCase() === "dev";
+    // const scheduleData = isTest
+    //   ? handleTestScheduleData(req.query.costCenterId as string)
+    //   : await getScheduleData(req.query.costCenterId as string);
+    const scheduleData = await getScheduleData(
+      req.query.costCenterId as string
+    );
     res.json(scheduleData);
   } catch (err) {
     console.error("Error in retrieving schedule data:", err);
