@@ -8,6 +8,8 @@
     "apps/web"
   ],
   "dependencies": {
+    "date-fns": "^3.6.0",
+    "react-native-picker-select": "^9.1.3",
     "socket.io": "^4.7.4"
   },
   "devDependencies": {

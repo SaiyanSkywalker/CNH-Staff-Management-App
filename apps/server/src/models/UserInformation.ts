@@ -27,9 +27,8 @@ class UserInformation extends Model<UserInformationAttributes> {
   })
   id!: number;
 
-
-  @Column({ type: DataType.INTEGER, allowNull: false, unique: true })
-  employeeId!: number; 
+  @Column({ type: DataType.INTEGER, allowNull: false })
+  employeeId!: number;
 
   @Column({ type: DataType.STRING, allowNull: false })
   username!: string;
@@ -38,14 +37,17 @@ class UserInformation extends Model<UserInformationAttributes> {
   firstName!: string;
 
   @Column({ type: DataType.STRING, allowNull: true })
+  middleInitial!: string;
+
+  @Column({ type: DataType.STRING, allowNull: true })
   lastName!: string;
 
   @Column({ type: DataType.STRING, allowNull: false })
   password!: string;
 
-  @BelongsTo(() => Unit, { foreignKey: "unitId", targetKey: "id" })
+  @BelongsTo(() => Unit, { foreignKey: "unitId", targetKey: "id", onDelete: "SET NULL" })
   unit?: Unit;
-  @BelongsTo(() => Role, { foreignKey: "roleId", targetKey: "id" })
+  @BelongsTo(() => Role, { foreignKey: "roleId", targetKey: "id", onDelete: "SET NULL" })
   role?: Role;
 }
 export default UserInformation;

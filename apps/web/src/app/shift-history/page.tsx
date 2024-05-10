@@ -4,17 +4,17 @@ import page from "@webSrc/styles/ShiftHistory.module.css";
 import { useAuth } from "@webSrc/contexts/AuthContext";
 import { useSearchParams } from "next/navigation";
 import ShiftHistoryClient from "@shared/src/interfaces/ShiftHistoryClient";
+import AdminShiftRequestUpdate from "@shared/src/interfaces/AdminShiftRequestUpdate";
 import { BannerContext } from "@webSrc/contexts/BannerContext";
-
 export default function shiftHistory() {
   const params = useSearchParams();
-  const employeeNameQuery: string = params.get('employeeName') ?? "";
-  const employeeIdQuery: string = params.get('employeeId') ?? "";
-  const unitQuery: string = params.get('unit') ?? "";
-  const shiftDateQuery: string = params.get('shiftDate') ?? "";
-  const requestedDateQuery: string = params.get('requestedDate') ?? "";
-  const shiftQuery: string = params.get('shift') ?? "";
-  const statusQuery: string = params.get('status') ?? "";
+  const employeeNameQuery: string = params.get("employeeName") ?? "";
+  const employeeIdQuery: string = params.get("employeeId") ?? "";
+  const unitQuery: string = params.get("unit") ?? "";
+  const shiftDateQuery: string = params.get("shiftDate") ?? "";
+  const requestedDateQuery: string = params.get("requestedDate") ?? "";
+  const shiftQuery: string = params.get("shift") ?? "";
+  const statusQuery: string = params.get("status") ?? "";
 
   const shifts: string[] = [
     "07:00 - 11:00",
@@ -44,7 +44,9 @@ export default function shiftHistory() {
   const [requestedDate, setRequestedDate] = useState<string>(requestedDateQuery);
   const [shift, setShift] = useState<string>(shiftQuery);
   const [status, setStatus] = useState<string>(statusQuery);
-  const [shiftHistories, setShiftHistories] = useState<ShiftHistoryClient[]>([]);
+  const [shiftHistories, setShiftHistories] = useState<ShiftHistoryClient[]>(
+    []
+  );
   const { auth } = useAuth();
   const bannerContext = useContext(BannerContext);
 
@@ -118,9 +120,9 @@ export default function shiftHistory() {
   ): { color: string; fontWeight: string } => {
     return {
       color:
-        status === "Accepted"
+        status.toLowerCase() === "accepted"
           ? "green"
-          : status === "Pending"
+          : status.toLowerCase() === "pending"
           ? "#FFAE42"
           : "red",
       fontWeight: "bold",
@@ -135,11 +137,13 @@ export default function shiftHistory() {
     };
   };
 
-
-  const acceptOrDenyShift = (shiftHistoryId: number, isAccepted: boolean): void => {
+  const acceptOrDenyShift = (
+    shiftHistoryId: number,
+    isAccepted: boolean
+  ): void => {
     auth?.socket?.emit("shift_accept", {
       shiftHistoryId,
-      isAccepted
+      isAccepted,
     });
   }
 
@@ -189,32 +193,32 @@ export default function shiftHistory() {
         <form className={page.form} onSubmit={getShiftHistories}>
           <div className={page.submission}>
             <div>
-            <label className={page.label}>Employee ID</label>
-            <input
-              placeholder="Enter ID"
-              value={employeeId}
-              onChange={handleEmployeeIdChange}
-              className={page.input}
-            ></input>
+              <label className={page.label}>Employee ID</label>
+              <input
+                placeholder="Enter ID"
+                value={employeeId}
+                onChange={handleEmployeeIdChange}
+                className={page.input}
+              ></input>
             </div>
             <div>
-            <label className={page.label}>Employee Name</label>
-            <input
-              placeholder="Enter Name"
-              value={employeeName}
-              onChange={handleEmployeeNameChange}
-              className={page.input}
-            ></input>
+              <label className={page.label}>Employee Name</label>
+              <input
+                placeholder="Enter Name"
+                value={employeeName}
+                onChange={handleEmployeeNameChange}
+                className={page.input}
+              ></input>
             </div>
 
             <div>
-            <label className={page.label}>Unit</label>
-            <input
-              placeholder="Enter Unit"
-              value={unit}
-              onChange={handleUnitChange}
-              className={page.input}
-            ></input>
+              <label className={page.label}>Unit</label>
+              <input
+                placeholder="Enter Unit"
+                value={unit}
+                onChange={handleUnitChange}
+                className={page.input}
+              ></input>
             </div>
 
             <div>
@@ -264,7 +268,6 @@ export default function shiftHistory() {
               <option value="Pending">Pending</option>
             </select>
             </div>
-
           </div>
           <button
             className={page.button}
@@ -301,20 +304,37 @@ export default function shiftHistory() {
                     {shiftHistory.dateRequested}
                   </td>
                   <td className={page.td}> {shiftHistory.shift} </td>
-                  <td className={page.td} style={statusStyle(shiftHistory.status)}>
+                  <td
+                    className={page.td}
+                    style={statusStyle(shiftHistory.status)}
+                  >
                     {" "}
                     {shiftHistory.status}{" "}
                   </td>
-                  {
-                    shiftHistory.status === "Pending" ? 
-                    (<td className={page.td}>
+                  {shiftHistory.status === "Pending" ? (
+                    <td className={page.td}>
                       <div className={page.buttons}>
-                        <button className={page.accept} onClick={() => { acceptOrDenyShift(shiftHistory.id, true) }}>Accept</button>
-                        <button className={page.deny} onClick={() => { acceptOrDenyShift(shiftHistory.id, false) }}>Deny</button>
+                        <button
+                          className={page.accept}
+                          onClick={() => {
+                            acceptOrDenyShift(shiftHistory.id, true);
+                          }}
+                        >
+                          Accept
+                        </button>
+                        <button
+                          className={page.deny}
+                          onClick={() => {
+                            acceptOrDenyShift(shiftHistory.id, false);
+                          }}
+                        >
+                          Deny
+                        </button>
                       </div>
-                    </td>) :
-                    (<td className={page.td}></td>)
-                  }
+                    </td>
+                  ) : (
+                    <td className={page.td}></td>
+                  )}
                 </tr>
               ))}
             </tbody>

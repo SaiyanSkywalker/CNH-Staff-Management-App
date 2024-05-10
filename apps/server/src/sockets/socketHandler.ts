@@ -1,16 +1,21 @@
 import UserSocketAttributes from "@shared/src/interfaces/UserSocketAttributes";
+import ShiftRequestAttributes from "@shared/src/interfaces/ShiftRequestAttributes";
 import { Server, Socket } from "socket.io";
 import ShiftHistory from "../models/ShiftHistory";
 import Unit from "server/src/models/Unit";
 import UserInformation from "server/src/models/UserInformation";
+import ScheduleEntry from "../models/ScheduleEntry";
+import { calculateDuration } from "../util/dateUtils";
 import AnnouncementAttributes from "@shared/src/interfaces/AnnouncementAttributes";
 import Announcement from "../models/Announcement";
 import Channel from "../models/Channel";
 
-const socketMap = new Map<string, Map<string, Socket>>();
+export const mobileSocketMap = new Map<string, Map<string, Socket>>();
+export const adminSocketMap = new Map<string, Map<string, Socket>>();
 
 const socketHandler = (io: Server, socket: Socket) => {
   socket.on("add_user", (arg: UserSocketAttributes) => {
+    const socketMap = arg.isAdmin ? adminSocketMap : mobileSocketMap;
     if (!socketMap.has(arg.username)) {
       socketMap.set(arg.username, new Map<string, Socket>());
     }
@@ -20,6 +25,7 @@ const socketHandler = (io: Server, socket: Socket) => {
   });
 
   socket.on("remove_user", (arg: UserSocketAttributes) => {
+    const socketMap = arg.isAdmin ? adminSocketMap : mobileSocketMap;
     if (
       socketMap.has(arg.username) &&
       socketMap.get(arg.username)?.has(arg.uuid)
@@ -31,8 +37,32 @@ const socketHandler = (io: Server, socket: Socket) => {
   });
 
   //REQUEST_INIT event
-  socket.on("shift_submission", () => {
-    console.log("shift submitted!");
+  socket.on("shift_submission", async (arg: ShiftRequestAttributes) => {
+    try {
+      console.log(arg);
+      const user: UserInformation | null = await UserInformation.findOne({
+        where: { username: arg.user },
+        include: [
+          {
+            model: Unit,
+            required: true,
+          },
+        ],
+      });
+      if (user) {
+        const newShiftRequest = await ShiftHistory.create({
+          shiftTime: arg.shift,
+          status: "Pending",
+          userId: user.employeeId as number,
+          unitId: user.unit?.id as number,
+          dateRequested: arg.shiftDate,
+        });
+        console.log(newShiftRequest.toJSON());
+        console.log("new shift request has been created");
+      }
+    } catch (error) {
+      console.log(error);
+    }
   });
 
   //REQUEST_UPDATE event
@@ -122,24 +152,6 @@ const socketHandler = (io: Server, socket: Socket) => {
     }
   );
 
-  //REQUEST_NOTIF event.
-  socket.on(
-    "update_user",
-    (arg: { username: string; message: string; isAccepted: boolean }) => {
-      if (socketMap.has(arg.username)) {
-        const userMap = socketMap.get(arg.username);
-        for (let uuid in userMap?.keys()) {
-          console.log("uuid is:", uuid);
-          let userSocket = userMap.get(uuid);
-          userSocket?.emit("shift_update", {
-            message: arg.message,
-            isAccepted: arg.isAccepted,
-          });
-        }
-      }
-    }
-  );
-
   //MESSAGE_SENT event
   socket.on("message_sent", async (arg: AnnouncementAttributes) => {
     let message: string = arg.body;
@@ -149,36 +161,42 @@ const socketHandler = (io: Server, socket: Socket) => {
       await Announcement.create({
         body: message,
         senderId: userId,
-        channelId
+        channelId,
       });
       let channel = await Channel.findOne({
         where: {
-          id: channelId
-        }
+          id: channelId,
+        },
       });
-      if(channel) {
-        socket.to(channel.name).emit("message_subscriber", arg);
+      if (channel) {
+        socket.broadcast.to(channel.name).emit("message_subscriber", arg);
         socket.emit("message_provider", arg);
       }
-    }
-    catch {
+    } catch {
       socket.emit("message_failed");
     }
-  })
-
-  socket.on("join_room", (arg: {prevSelectedChannel: string, selectedChannel: string}) => {
-    console.log(`prevSelectedChannel is ${arg.prevSelectedChannel}`);
-    console.log(`selectedChannel is ${arg.selectedChannel}`);
-    if(arg.prevSelectedChannel && socket.rooms.has(arg.prevSelectedChannel)) {
-      socket.leave(arg.prevSelectedChannel);
-    }
-    socket.join(arg.selectedChannel);
-  })
-
-  socket.on("leave_room", (arg: {channelName: string}) => {
-    socket.leave(arg.channelName);
   });
 
+  socket.on(
+    "join_room",
+    (arg: { prevSelectedChannel: string; selectedChannel: string }) => {
+      console.log(`prevSelectedChannel is ${arg.prevSelectedChannel}`);
+      console.log(`selectedChannel is ${arg.selectedChannel}`);
+      if (
+        arg.prevSelectedChannel &&
+        socket.rooms.has(arg.prevSelectedChannel)
+      ) {
+        console.log(`LEFT ROOM: ${arg.prevSelectedChannel}`);
+        socket.leave(arg.prevSelectedChannel);
+      }
+      console.log(`JOINED ROOM: ${arg.selectedChannel}`);
+      socket.join(arg.selectedChannel);
+    }
+  );
+
+  socket.on("leave_room", (arg: { channelName: string }) => {
+    socket.leave(arg.channelName);
+  });
 };
 
 export default socketHandler;

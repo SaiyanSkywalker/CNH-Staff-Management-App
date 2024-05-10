@@ -10,12 +10,16 @@ const Banner = () => {
   const bannerContext: BannerContextProps | undefined =
     useContext(BannerContext);
 
+  const bannerColors: { [key: string]: string } = {
+    success: "bg-green-500",
+    error: "bg-red-500",
+    other: "bg-yellow-500",
+  };
   if (!bannerContext) {
     return null;
   }
-
-  const { isError, isVisible, hideBanner, bannerText } = bannerContext;
-  const bannerClassName = isError ? "bg-red-500" : "bg-green-500";
+  const { status, isVisible, hideBanner, bannerText } = bannerContext;
+  const bannerClassName = bannerColors[status] || "bg-yellow-500";
   const textColor = "text-white";
   return (
     <>

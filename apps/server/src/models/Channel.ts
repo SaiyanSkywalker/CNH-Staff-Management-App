@@ -1,4 +1,10 @@
-import { Column, DataType, Model, Table, BelongsTo } from "sequelize-typescript";
+import {
+  BelongsTo,
+  Column,
+  DataType,
+  Model,
+  Table,
+} from "sequelize-typescript";
 import ChannelAttributes from "@shared/src/interfaces/ChannelAttributes";
 import Unit from "./Unit";
 
@@ -13,9 +19,14 @@ class Channel extends Model<ChannelAttributes> {
   id!: number;
   @Column
   name!: string;
-  @BelongsTo(() => Unit, { foreignKey: "unitRoomId", targetKey: "id" })
+
+  @BelongsTo(() => Unit, {
+    foreignKey: "unitRoomId",
+    targetKey: "id",
+    onDelete: "CASCADE",
+  })
   unit?: Unit;
   @Column({ type: DataType.INTEGER, allowNull: true })
-  unitRoomId!: number;
+  unitRoomId!: number | null;
 }
 export default Channel;

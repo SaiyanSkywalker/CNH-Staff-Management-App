@@ -6,9 +6,9 @@ type BannerContextProviderProps = {
 };
 export interface BannerContextProps {
   bannerText: string;
-  isError: boolean;
+  status: string;
   isVisible: boolean;
-  showBanner: (text: string, isError?: boolean) => void;
+  showBanner: (bannerText: string, status: string) => void;
   hideBanner: () => void;
 }
 
@@ -20,12 +20,12 @@ export const BannerContextProvider = ({
   children,
 }: BannerContextProviderProps) => {
   const [bannerText, setBannerText] = useState<string>("");
-  const [isError, setIsError] = useState<boolean>(false);
+  const [status, setStatus] = useState<string>("");
   const [isVisible, setIsVisible] = useState<boolean>(false);
 
-  const showBanner = (text: string, isError: boolean = false) => {
-    setBannerText(text);
-    setIsError(isError);
+  const showBanner = (bannerText: string, status: string = "other") => {
+    setBannerText(bannerText);
+    setStatus(status);
     setIsVisible(true);
   };
   const hideBanner = (): void => {
@@ -34,7 +34,7 @@ export const BannerContextProvider = ({
 
   const BannerContextValue: BannerContextProps = {
     bannerText,
-    isError,
+    status,
     isVisible,
     showBanner,
     hideBanner,
