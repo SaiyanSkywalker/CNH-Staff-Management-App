@@ -1,10 +1,9 @@
 "use client";
 
-import { useState, ChangeEvent, useContext } from "react";
+import { useState, ChangeEvent, useContext, useEffect } from "react";
 import styles from "../styles/Login.module.css";
 import { useAuth } from "@webSrc/contexts/AuthContext";
 import { useRouter } from "next/navigation";
-import Schedule from "./Schedule";
 import { BannerContext } from "@webSrc/contexts/BannerContext";
 import { LoadingContext } from "@webSrc/contexts/LoadingContext";
 
@@ -12,6 +11,7 @@ const Login = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState(false);
+  const [isButtonDisabled, setIsButtonDisabled] = useState<boolean>(true);
   const { auth } = useAuth();
   const router = useRouter();
   const bannerContext = useContext(BannerContext);
@@ -19,74 +19,80 @@ const Login = () => {
 
   const onUsernameChange = (e: ChangeEvent<HTMLInputElement>) => {
     setUsername(e.target.value);
-    setError(false);
   };
 
   const onPasswordChange = (e: ChangeEvent<HTMLInputElement>) => {
     setPassword(e.target.value);
-    setError(false);
   };
 
   const submitForm = async () => {
-    const isAuthenticated = await auth?.login(username, password, "2");
-    if (isAuthenticated) {
-      router.replace("/schedule");
-    } else {
-      setError(true);
-      bannerContext?.showBanner(`Unable to log in user ${username}`, "error");
+    try {
+      loadingContext?.showLoader();
+      const isAuthenticated = await auth?.login(username, password);
+      if (isAuthenticated) {
+        router.replace("/schedule");
+      } else {
+        setError(true);
+        bannerContext?.showBanner(`Unable to log in user ${username}`, "error");
+      }
+      loadingContext?.hideLoader();
+    } catch (error) {
+      console.log(error);
     }
-    loadingContext?.hideLoader();
   };
-
+  useEffect(() => {
+    setError(false);
+    setIsButtonDisabled(!username || !password);
+  }, [username, password]);
   return (
     <>
-      {auth?.authenticated ? (
-        <Schedule />
-      ) : (
-        <div className="min-h-screen items-center justify-between p-24">
-          <div className="center-container">
-            <div className={styles["login-container"]}>
-              <h2 className="font-semibold text-center text-3xl p-3">
-                Welcome!
-              </h2>
-              <form>
-                <div
-                  className={[
-                    styles[error ? "error" : ""],
-                    styles["inputs-container"],
-                  ].join(" ")}
-                >
-                  <label htmlFor="username">Username:</label>
-                  <input
-                    type="username"
-                    onChange={onUsernameChange}
-                    name="username"
-                    placeholder="username"
-                    required
-                  />
+      <div className="min-h-screen items-center justify-between p-24">
+        <div className="center-container">
+          <div className={styles["login-container"]}>
+            <h2 className="font-semibold text-center text-3xl p-3">Welcome!</h2>
+            <form>
+              <div
+                className={[
+                  styles[error ? "error" : ""],
+                  styles["inputs-container"],
+                ].join(" ")}
+              >
+                <label htmlFor="username">Username:</label>
+                <input
+                  type="username"
+                  onChange={onUsernameChange}
+                  name="username"
+                  placeholder="Enter your username"
+                  required
+                />
 
-                  <label htmlFor="password">Password:</label>
-                  <input
-                    type="password"
-                    onChange={onPasswordChange}
-                    name="password"
-                    placeholder="password"
-                    required
-                  />
-                </div>
-
+                <label htmlFor="password">Password:</label>
+                <input
+                  type="password"
+                  onChange={onPasswordChange}
+                  name="password"
+                  placeholder="Enter your password"
+                  required
+                />
+              </div>
+              <div className="my-10">
                 <button
-                  className={styles["btn-login"]}
+                  className={`${
+                    isButtonDisabled
+                      ? `${styles["btn-login-disabled"]}`
+                      : `${styles["btn-login-enabled"]}`
+                  } ${styles["btn-login"]}`}
                   type="button"
                   onClick={submitForm}
+                  disabled={isButtonDisabled}
                 >
                   Login
                 </button>
-              </form>
-            </div>
+              </div>
+            </form>
           </div>
         </div>
-      )}
+      </div>
     </>
   );
 };

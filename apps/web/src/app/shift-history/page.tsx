@@ -1,12 +1,22 @@
 "use client";
-import { useState, FormEvent, BaseSyntheticEvent, useEffect, useContext } from "react";
+import {
+  useState,
+  FormEvent,
+  BaseSyntheticEvent,
+  useEffect,
+  useContext,
+} from "react";
 import page from "@webSrc/styles/ShiftHistory.module.css";
 import { useAuth } from "@webSrc/contexts/AuthContext";
 import { useSearchParams } from "next/navigation";
 import ShiftHistoryClient from "@shared/src/interfaces/ShiftHistoryClient";
+import AuthWrapper from "@webSrc/components/ProtectedRoute";
+import axios from "axios";
+import { getAccessToken } from "@webSrc/utils/token";
 import AdminShiftRequestUpdate from "@shared/src/interfaces/AdminShiftRequestUpdate";
 import { BannerContext } from "@webSrc/contexts/BannerContext";
-export default function shiftHistory() {
+import { v4 as uuid4 } from "uuid";
+const Page = () => {
   const params = useSearchParams();
   const employeeNameQuery: string = params.get("employeeName") ?? "";
   const employeeIdQuery: string = params.get("employeeId") ?? "";
@@ -34,14 +44,17 @@ export default function shiftHistory() {
     "23:00 - 11:00",
   ];
 
-  console.log(`employeeNameQuery is ${employeeNameQuery}, employeeIdQuery is ${employeeIdQuery}, unitQuery is ${unitQuery}, shiftDateQuery is ${shiftDateQuery}, shiftQuery is ${shiftQuery}, statusQuery is ${statusQuery}`);
+  // console.log(
+  //   `employeeNameQuery is ${employeeNameQuery}, employeeIdQuery is ${employeeIdQuery}, unitQuery is ${unitQuery}, shiftDateQuery is ${shiftDateQuery}, shiftQuery is ${shiftQuery}, statusQuery is ${statusQuery}`
+  // );
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [employeeId, setEmployeeId] = useState<string>(employeeIdQuery);
   const [employeeName, setEmployeeName] = useState<string>(employeeNameQuery);
   const [unit, setUnit] = useState<string>(unitQuery);
   const [shiftDate, setShiftDate] = useState<string>(shiftDateQuery);
-  const [requestedDate, setRequestedDate] = useState<string>(requestedDateQuery);
+  const [requestedDate, setRequestedDate] =
+    useState<string>(requestedDateQuery);
   const [shift, setShift] = useState<string>(shiftQuery);
   const [status, setStatus] = useState<string>(statusQuery);
   const [shiftHistories, setShiftHistories] = useState<ShiftHistoryClient[]>(
@@ -72,19 +85,27 @@ export default function shiftHistory() {
   };
 
   const updateList = async (): Promise<void> => {
-    setIsLoading((prevLoad) => !prevLoad);
-    const res = await fetch(
-      `http://localhost:3003/shift-history?employeeId=${employeeId}&employeeName=${employeeName}&unit=${unit}&requestedDate=${requestedDate}&shiftDate=${shiftDate}&shift=${shift}&status=${status}`,
-      {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      }
-    );
-    const jsonResponse: ShiftHistoryClient[] = await res.json();
-    setIsLoading((prevLoad) => !prevLoad);
-    setShiftHistories((prevshiftHistories) => jsonResponse);
+    try {
+      setIsLoading((prevLoad) => !prevLoad);
+      const res = await axios(
+        `http://localhost:3003/shift-history?employeeId=${employeeId}&employeeName=${employeeName}&unit=${unit}&requestedDate=${requestedDate}&shiftDate=${shiftDate}&shift=${shift}&status=${status}`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${getAccessToken()}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      const jsonResponse: ShiftHistoryClient[] = res.data;
+      // console.log("jsonResponse is:");
+      // console.dir(jsonResponse);
+      setIsLoading((prevLoad) => !prevLoad);
+      setShiftHistories((prevshiftHistories) => jsonResponse);
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   const handleEmployeeIdChange = (event: BaseSyntheticEvent): void => {
@@ -145,7 +166,7 @@ export default function shiftHistory() {
       shiftHistoryId,
       isAccepted,
     });
-  }
+  };
 
   // Updates the UI based on if shift is accepted or rejected (based on socket response)
   const shiftRequestResponseHandler = (sh: AdminShiftRequestUpdate) => {
@@ -168,9 +189,14 @@ export default function shiftHistory() {
   const shiftRequestResponseErrorHandler = (sh: AdminShiftRequestUpdate) => {
     const acceptedString: string = sh.isAccepted ? "accepting" : "denying";
     bannerContext?.showBanner(`Error in ${acceptedString} shift!`, "error");
-  }
+  };
 
-  const parseDate = (date: Date) => date.toString().substring(5,7) + "/" + date.toString().substring(8,10) + "/" + date.toString().substring(0,4);
+  const parseDate = (date: Date) =>
+    date.toString().substring(5, 7) +
+    "/" +
+    date.toString().substring(8, 10) +
+    "/" +
+    date.toString().substring(0, 4);
 
   // Initial fill of list
   useEffect(() => {
@@ -222,51 +248,60 @@ export default function shiftHistory() {
             </div>
 
             <div>
-            <label className={page.label}>Requested Date</label>            
-            <input 
+              <label className={page.label}>Requested Date</label>
+              <input
                 value={requestedDate}
                 onChange={handleRequestedDateChange}
                 type="date"
                 className={page.input}
-            ></input>
+              ></input>
             </div>
 
             <div>
-            <label className={page.label}>Shift Date</label>            
-            <input 
+              <label className={page.label}>Shift Date</label>
+              <input
                 value={shiftDate}
                 onChange={handleShiftDateChange}
                 name="date"
                 id="widget"
                 type="date"
                 className={page.input}
-            ></input>
+              ></input>
             </div>
 
             <div>
-            <label className={page.label}>Shift</label>
-            <select
-              onChange={handleShiftChange}
-              name="shift"
-              id="shift"
-              defaultValue={""}
-              className={page.input}
-            >
-              <option value={""}>--Select An Option--</option>
-              {shifts.map((shift, index) => (
-                <option value={shift}>{shift}</option>  
-              ))}
-            </select>
+              <label className={page.label}>Shift</label>
+              <select
+                onChange={handleShiftChange}
+                name="shift"
+                id="shift"
+                defaultValue={""}
+                className={page.input}
+              >
+                <option value={""}>--Select An Option--</option>
+                {shifts.map((shift, index) => (
+                  <option key={uuid4()} value={shift}>
+                    {shift}
+                  </option>
+                ))}
+              </select>
             </div>
 
             <div>
-            <label className={page.label} htmlFor="statuses">Status</label>
-            <select id="statuses" onChange={handleStatusChange} defaultValue={""} className={page.input}>
-              <option value="">--Select An Option--</option>
-              <option value="Accepted">Accepted</option>
-              <option value="Rejected">Rejected</option>
-              <option value="Pending">Pending</option>
-            </select>
+              <label className={page.label} htmlFor="statuses">
+                Status
+              </label>
+              <select
+                id="statuses"
+                onChange={handleStatusChange}
+                defaultValue={""}
+                className={page.input}
+              >
+                <option value="">--Select An Option--</option>
+                <option value="Accepted">Accepted</option>
+                <option value="Rejected">Rejected</option>
+                <option value="Pending">Pending</option>
+              </select>
             </div>
           </div>
           <button
@@ -295,14 +330,19 @@ export default function shiftHistory() {
             </thead>
             <tbody>
               {shiftHistories.map((shiftHistory, i) => (
-                <tr key={i}>
+                <tr key={uuid4()}>
                   <td className={page.td}> {shiftHistory.employeeId} </td>
                   <td className={page.td}> {shiftHistory.employeeName} </td>
                   <td className={page.td}> {shiftHistory.unit} </td>
-                  <td className={page.td}> {parseDate(shiftHistory.createdAt)/*shiftHistory.createdAt.substring(5,7) + "/" + shiftHistory.createdAt.substring(8,10) + "/" + shiftHistory.createdAt.substring(0,4)*/} </td>
                   <td className={page.td}>
-                    {shiftHistory.dateRequested}
+                    {" "}
+                    {
+                      parseDate(
+                        shiftHistory.createdAt
+                      ) /*shiftHistory.createdAt.substring(5,7) + "/" + shiftHistory.createdAt.substring(8,10) + "/" + shiftHistory.createdAt.substring(0,4)*/
+                    }{" "}
                   </td>
+                  <td className={page.td}>{shiftHistory.dateRequested}</td>
                   <td className={page.td}> {shiftHistory.shift} </td>
                   <td
                     className={page.td}
@@ -343,4 +383,6 @@ export default function shiftHistory() {
       </div>
     </>
   );
-}
+};
+
+export default AuthWrapper(Page);

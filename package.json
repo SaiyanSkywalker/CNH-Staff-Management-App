@@ -8,9 +8,11 @@
     "apps/web"
   ],
   "dependencies": {
+    "@types/jsonwebtoken": "^9.0.6",
     "date-fns": "^3.6.0",
-    "react-native-picker-select": "^9.1.3",
-    "socket.io": "^4.7.4"
+    "jsonwebtoken": "^9.0.2",
+    "socket.io": "^4.7.4",
+    "universal-cookie": "^7.1.4"
   },
   "devDependencies": {
     "@types/uuid": "^9.0.8"

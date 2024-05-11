@@ -8,6 +8,7 @@ import AnnouncementAttributes from "@shared/src/interfaces/AnnouncementAttribute
 import { TouchableOpacity } from "react-native-gesture-handler";
 import DropDownPicker from "react-native-dropdown-picker";
 import { v4 as uuidv4 } from "uuid";
+import { getToken } from "../utils/token";
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -81,6 +82,7 @@ export default function ChatPage() {
   const fetchAnnouncements = async () => {
     if (selectedChannel) {
       try {
+        const accessToken = await getToken("accessToken");
         const response = await axios({
           method: "GET",
           url: `${config.apiUrl}/channel/${selectedChannel?.id}`,
@@ -88,6 +90,7 @@ export default function ChatPage() {
           headers: {
             unitId: auth?.user?.unitId,
             roleId: auth?.user?.roleId,
+            Authorization: `Bearer: ${accessToken}`,
           },
         });
         const data = response.data;
@@ -106,11 +109,16 @@ export default function ChatPage() {
   };
   const fetchChannels = async () => {
     try {
+      const accessToken = await getToken("accessToken");
       const response = await axios({
         method: "GET",
         url: `${config.apiUrl}/channel`,
         responseType: "json",
-        headers: { unitId: auth?.user?.unitId, roleId: auth?.user?.roleId },
+        headers: {
+          unitId: auth?.user?.unitId,
+          roleId: auth?.user?.roleId,
+          Authorization: `Bearer: ${accessToken}`,
+        },
       });
       const data: ChannelAttributes[] = await response.data;
       if (data) {
@@ -195,7 +203,6 @@ export default function ChatPage() {
         createdAt: new Date(),
       };
 
-      //TODO: Emit event to socket
       auth?.socket?.emit("message_sent", newAnnouncement);
       setMessage("");
     }
