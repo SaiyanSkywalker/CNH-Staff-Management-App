@@ -7,6 +7,7 @@ import React, {
   DragEvent,
   MouseEvent,
   useRef,
+  useEffect,
 } from "react";
 import { useRouter } from "next/navigation";
 import styles from "../../styles/Upload.module.css";
@@ -31,9 +32,11 @@ const Page = () => {
   const router = useRouter();
   const { auth } = useAuth();
 
-  if(auth?.user?.roleId === 3) {
-    router.replace("/schedule");
-  }
+  useEffect(() => {
+    if (auth?.user?.roleId === 3) {
+      router.replace("/schedule");
+    }
+  }, []);
 
   const bannerContext: BannerContextProps | undefined =
     useContext(BannerContext);

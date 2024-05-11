@@ -12,7 +12,7 @@ export default function ProtectedRoute(Component: any) {
       if (!auth?.authenticated) {
         router.replace("/login");
       }
-    }, [auth, router]);
+    }, []);
     // return auth?.authenticated ? <Component {...props} /> : null;
     return <Component {...props} />;
   };
