@@ -9,4 +9,6 @@ export default interface ServerConfig {
   dbDialect: Dialect;
   dbConnectionString: string;
   jwtSecretKey: string;
+  accessTokenLifetime: string;
+  refreshTokenLifetime: string;
 }

@@ -35,7 +35,6 @@ const Login = () => {
         setError(true);
         bannerContext?.showBanner(`Unable to log in user ${username}`, "error");
       }
-      debugger;
       loadingContext?.hideLoader();
     } catch (error) {
       console.log(error);

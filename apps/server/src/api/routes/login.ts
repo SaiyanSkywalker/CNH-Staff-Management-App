@@ -3,10 +3,7 @@ import { sequelize } from "server/src/loaders/dbLoader";
 import Role from "server/src/models/Role";
 import config from "../../config";
 import Unit from "server/src/models/Unit";
-import {
-  createAccessToken,
-  createRefreshToken,
-} from "server/src/middleware/jwt";
+import { createToken } from "server/src/middleware/jwt";
 const loginRouter = Router();
 
 loginRouter.post(
@@ -14,7 +11,6 @@ loginRouter.post(
   async (req: Request, res: Response): Promise<Response> => {
     try {
       const roleName: string = req.body.isMobile ? "USER" : "ADMIN";
-      console.log(roleName);
       // search for user in db
       const user = await sequelize.models.UserInformation.findOne({
         where: {
@@ -40,13 +36,15 @@ loginRouter.post(
       }
 
       // if user is found, create JWT tokens
-      const accessToken = createAccessToken(
+      const accessToken = createToken(
         user?.get({ plain: true }),
-        config.jwtSecretKey
+        config.jwtSecretKey,
+        config.accessTokenLifetime
       );
-      const refreshToken = createRefreshToken(
+      const refreshToken = createToken(
         user?.get({ plain: true }),
-        config.jwtSecretKey
+        config.jwtSecretKey,
+        config.refreshTokenLifetime
       );
 
       return res.json({ access: accessToken, refresh: refreshToken });

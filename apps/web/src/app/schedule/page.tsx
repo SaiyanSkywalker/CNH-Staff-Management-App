@@ -331,7 +331,7 @@ const Page = () => {
         setEvents(buildEvents(data, shiftFilter));
       }
     } catch (err) {
-      console.error(err);
+      // console.error(err);
     }
   };
   const getUnits = async () => {
@@ -346,21 +346,26 @@ const Page = () => {
       const data = response.data;
       setUnits(data);
     } catch (err) {
-      console.error(err);
+      // console.error(err);
     }
   };
   const getCapacities = async () => {
-    // Get default capacity
-    const accessToken = getAccessToken();
-    const response = await axios({
-      method: "GET",
-      url: `${config.apiUrl}/shift-capacity/admin/`,
-      responseType: "json",
-      headers: { Authorization: `Bearer ${accessToken}` },
-    });
-    const data: ShiftCapacityResponse = response.data;
-    setDefaultCapacities(data.default);
-    setUpdatedCapacities(data.updated);
+    try {
+      // Get default capacity
+      const accessToken = getAccessToken();
+      const response = await axios({
+        method: "GET",
+        url: `${config.apiUrl}/shift-capacity/admin/`,
+        responseType: "json",
+        headers: { Authorization: `Bearer ${accessToken}` },
+      });
+      const data: ShiftCapacityResponse = response.data;
+      setDefaultCapacities(data.default);
+      setUpdatedCapacities(data.updated);
+    } catch (error) {
+      // console.error(error)
+    }
+    
   };
   useEffect(() => {
     getUnits();

@@ -23,7 +23,9 @@ import ChannelAttributes from "@shared/src/interfaces/ChannelAttributes";
 import { useAuth } from "@webSrc/contexts/AuthContext";
 import { getAccessToken } from "@webSrc/utils/token";
 import { v4 as uuidv4 } from "uuid";
-export default function ChatPage() {
+import ProtectedRoute from "@webSrc/components/ProtectedRoute";
+
+const Page = () => {
   const [channels, setChannels] = useState<ChannelAttributes[]>([]);
   const [channelMap, setChannelMap] = useState<Map<string, ChannelAttributes>>(
     new Map<string, ChannelAttributes>()
@@ -83,7 +85,7 @@ export default function ChatPage() {
       if (!err.response) {
         bannerContext?.showBanner("Error, server is currently down!", "error");
       }
-      console.error(err);
+      // console.error(err);
     }
   };
 
@@ -131,7 +133,7 @@ export default function ChatPage() {
       if (!err.response) {
         bannerContext?.showBanner("Error, server is currently down!", "error");
       }
-      console.error(err);
+      // console.error(err);
     }
   };
 
@@ -377,4 +379,6 @@ export default function ChatPage() {
       </section>
     </>
   );
-}
+};
+
+export default ProtectedRoute(Page);

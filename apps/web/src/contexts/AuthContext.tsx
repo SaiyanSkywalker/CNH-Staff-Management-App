@@ -9,6 +9,7 @@ import { io } from "socket.io-client";
 import { v4 as uuidv4 } from "uuid";
 import { BannerContext, BannerContextProps } from "./BannerContext";
 import jwt from "jsonwebtoken";
+import { jwtDecode, JwtPayload } from "jwt-decode";
 import Cookies from "universal-cookie";
 interface AuthDetails {
   authenticated: boolean;
@@ -16,6 +17,10 @@ interface AuthDetails {
   socket: Socket | null | undefined;
   login: (username: string, password: string) => Promise<boolean>;
   logout: () => Promise<boolean>;
+}
+
+interface CustomJWTPayload extends JwtPayload {
+  user?: UserInformation;
 }
 
 interface IAuthContext {
@@ -61,15 +66,27 @@ export default function AuthProvider({
   ): Promise<boolean> => {
     try {
       const tokens = await getUser(username, password); // JWT token from server
-      const userInfo = jwt.decode(tokens.access) as UserInformation;
-      // Store tokens in cookie
-      cookies.set("accessToken", tokens.access, { path: "/" });
-      cookies.set("refreshToken", tokens.refresh, { path: "/" });
+      const accessToken: CustomJWTPayload = jwtDecode(tokens.access);
+      const refreshToken: CustomJWTPayload = jwtDecode(tokens.refresh);
+      const user: UserInformation | undefined = accessToken.user;
 
-      if (userInfo) {
-        loginUser(userInfo);
+      if (user) {
+        cookies.set("accessToken", tokens.access, {
+          path: "/",
+          expires: accessToken.exp
+            ? new Date(accessToken.exp * 1000)
+            : new Date(60 * 1000),
+        });
+        cookies.set("refreshToken", tokens.refresh, {
+          path: "/",
+          expires: refreshToken.exp
+            ? new Date(refreshToken.exp * 1000)
+            : new Date(259200 * 1000),
+        });
+        loginUser(user);
         return true;
       }
+
       return false;
     } catch (error) {
       return false;
@@ -114,30 +131,43 @@ export default function AuthProvider({
     try {
       const refreshToken = cookies.get("refreshToken");
       if (!refreshToken) return null;
-
+      const decodedToken: CustomJWTPayload = jwtDecode(refreshToken);
       // Send refresh token to server to get new access token
       const url = config.apiUrl;
       const response = await axios.post(`${url}/refresh-token`, {
-        refreshToken,
+        refreshToken: refreshToken,
+        user: decodedToken.user,
       });
-      const { accessToken } = response.data;
+      const accessToken = jwtDecode(response.data);
       if (accessToken) {
         // Update access token in cookies
-        cookies.set("accessToken", accessToken, { path: "/" });
-        return accessToken;
+        cookies.set("accessToken", response.data, {
+          path: "/",
+          expires: accessToken.exp
+            ? new Date(accessToken.exp * 1000)
+            : new Date(60 * 1000),
+        });
+        return response.data;
       }
     } catch (error) {
       console.error("Error refreshing access token", error);
     }
     return null;
   };
-  const refreshUser = async () => {
-    const refreshToken = cookies.get("refreshToken");
-    if (refreshToken) {
-      const userInfo = jwt.decode(refreshToken) as UserInformation;
-      if (userInfo) {
-        loginUser(userInfo);
+  const refreshUser = async (): Promise<void> => {
+    try {
+      const refreshToken: string = cookies.get("refreshToken");
+      if (refreshToken) {
+        const decodedToken: CustomJWTPayload = jwtDecode(refreshToken);
+        const userInfo = decodedToken.user;
+        if (userInfo) {
+          loginUser(userInfo);
+          return;
+        }
       }
+      await logout();
+    } catch (error) {
+      console.error(error);
     }
   };
 
@@ -152,7 +182,7 @@ export default function AuthProvider({
         const originalRequest = error.config;
         if (
           error.response &&
-          error.response.status === 401 &&
+          (error.response.status === 401 || error.response.status === 403) &&
           !originalRequest._retry
         ) {
           originalRequest._retry = true;

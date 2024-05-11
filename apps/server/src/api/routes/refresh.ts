@@ -4,17 +4,18 @@ import config from "server/src/config";
 const refreshRouter = Router();
 
 refreshRouter.post("/", (req: Request, res: Response) => {
-  const refreshtoken = req.body.refreshtoken;
-  if (!refreshtoken) {
+  const refreshToken = req.body.refreshToken;
+  const user = req.body.user;
+
+  if (!refreshToken) {
     return res.sendStatus(401);
   }
-
-  jwt.verify(refreshtoken, config.jwtSecretKey, (err: any, user: any) => {
+  jwt.verify(refreshToken, config.jwtSecretKey, (err: any) => {
     if (err) {
       return res.sendStatus(403);
     }
-    const accessToken = jwt.sign({ user: {} }, config.jwtSecretKey, {
-      expiresIn: "1hr",
+    const accessToken = jwt.sign({ user: user }, config.jwtSecretKey, {
+      expiresIn: "15s",
     });
     res.json(accessToken);
   });

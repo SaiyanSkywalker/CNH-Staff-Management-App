@@ -41,16 +41,10 @@ export const verifyToken = (
   });
 };
 
-
-export const createAccessToken = (
+export const createToken = (
   user: UserInformation,
-  secret: string
+  secret: string,
+  lifetime: string
 ): string => {
-  return jwt.sign(user, secret, { expiresIn: "15m" });
-};
-export const createRefreshToken = (
-  user: UserInformation,
-  secret: string
-): string => {
-  return jwt.sign(user, secret, { expiresIn: "3d" });
+  return jwt.sign({ user: user }, secret, { expiresIn: lifetime });
 };
