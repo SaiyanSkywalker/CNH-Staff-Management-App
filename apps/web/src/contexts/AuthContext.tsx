@@ -59,18 +59,21 @@ export default function AuthProvider({
     username: string,
     password: string
   ): Promise<boolean> => {
-    const tokens = await getUser(username, password); // JWT token from server
-    const userInfo = jwt.decode(tokens.access) as UserInformation;
-    // Store tokens in cookie
-    cookies.set("accessToken", tokens.access, { path: "/" });
-    cookies.set("refreshToken", tokens.refresh, { path: "/" });
+    try {
+      const tokens = await getUser(username, password); // JWT token from server
+      const userInfo = jwt.decode(tokens.access) as UserInformation;
+      // Store tokens in cookie
+      cookies.set("accessToken", tokens.access, { path: "/" });
+      cookies.set("refreshToken", tokens.refresh, { path: "/" });
 
-    if (userInfo) {
-      loginUser(userInfo);
-      return Promise.resolve(true);
+      if (userInfo) {
+        loginUser(userInfo);
+        return true;
+      }
+      return false;
+    } catch (error) {
+      return false;
     }
-
-    return Promise.resolve(false);
   };
 
   const logout = (): Promise<boolean> => {
@@ -106,7 +109,6 @@ export default function AuthProvider({
     } catch (err) {
       console.error(err);
     }
-    return null;
   };
   const refreshAccessToken = async (): Promise<string | null> => {
     try {

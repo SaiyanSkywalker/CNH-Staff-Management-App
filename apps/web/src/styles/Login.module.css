@@ -35,12 +35,11 @@
 }
 
 .btn-login {
-  background-color: #067496 !important;
+  background-color: #067496;
   color: white;
   padding: 10px;
   border: none;
   border-radius: 20px;
-  cursor: pointer;
   opacity: 1;
   width: 40%;
   display: block;
@@ -48,6 +47,13 @@
   font-weight: bold;
 }
 
+.btn-login-enabled {
+  cursor: pointer;
+}
+.btn-login-disabled {
+  cursor: not-allowed;
+  background-color: #989d9e !important;
+}
 .btn-login:hover {
   opacity: 0.7;
 }
