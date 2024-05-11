@@ -25,6 +25,10 @@ const config: ServerConfig = {
   dbPassword: process.env.DB_PASSWORD || "password",
   dbDialect: parseDialect(process.env.DB_DIALECT || "oracle"),
   dbConnectionString: process.env.DB_CONNECTION_STRING || "connectionString",
+  jwtSecretKey:
+    process.env.JWT_SECRET_KEY || "KfkHPnsWoblwyotkcsKDevVDhQYnv14Z09l+jGMiggs",
+  accessTokenLifetime: process.env.ACCESS_TOKEN_LIFETIME || "1hr",
+  refreshTokenLifetime: process.env.REFRESH_TOKEN_LIFETIME || "3d",
 };
 
 export default config;

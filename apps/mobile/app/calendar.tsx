@@ -12,6 +12,7 @@ import { format, parseISO } from "date-fns";
 
 import axios from "axios";
 import config from "../config";
+import { getToken } from "../utils/token";
 
 const styles = StyleSheet.create({
   header: {
@@ -89,8 +90,14 @@ const CalendarPage: React.FC = () => {
    */
   const getShifts = async () => {
     try {
+      const accessToken = await getToken("accessToken");
       const response = await axios.get(
-        `${config.apiUrl}/schedule/${user.auth?.user?.username}`
+        `${config.apiUrl}/schedule/${user.auth?.user?.username}`,
+        {
+          headers: {
+            Authorization: `Bearer: ${accessToken}`,
+          },
+        }
       );
       const fetchedShifts: { [date: string]: ScheduleEntryAttributes[] } = {};
 

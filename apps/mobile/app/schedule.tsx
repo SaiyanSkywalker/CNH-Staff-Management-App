@@ -11,6 +11,7 @@ import ScheduleEntryAttributes from "@shared/src/interfaces/ScheduleEntryAttribu
 import ShiftRequestAttributes from "@shared/src/interfaces/ShiftRequestAttributes";
 import ShiftCapacityAttributes from "@shared/src/interfaces/ShiftCapacityAttributes";
 import ShiftCapacityResponse from "@shared/src/interfaces/ShiftCapacityResponse";
+import { getToken } from "../utils/token";
 
 const styles = StyleSheet.create({
   container: {
@@ -196,9 +197,15 @@ const Page = () => {
   const getShiftInfo = async (shiftDate: Date) => {
     try {
       if (shiftDate && auth) {
+        const accessToken = await getToken("accessToken");
         const costCenterId = auth?.user?.unitId;
         const response = await axios.get(
-          `${config.apiUrl}/schedule/unit?shiftDate=${shiftDate}&costCenterId=${costCenterId}`
+          `${config.apiUrl}/schedule/unit?shiftDate=${shiftDate}&costCenterId=${costCenterId}`,
+          {
+            headers: {
+              Authorization: `Bearer: ${accessToken}`,
+            },
+          }
         );
         const currentShifts: ScheduleEntryAttributes[] = response.data;
         const currentCapacities = await getCapacities(shiftDate);
@@ -311,12 +318,17 @@ const Page = () => {
     const costCenterId = auth?.user?.unitId;
     // console.log(`DATE: ${format(shiftDate, "yyyy-MM-dd")}`);
     // console.log(costCenterId);
-
+    const accessToken = await getToken("accessToken");
     const response = await axios.get(
       `${config.apiUrl}/shift-capacity/mobile?date=${format(
         shiftDate,
         "yyyy-MM-dd"
-      )}&costCenterId=${costCenterId}`
+      )}&costCenterId=${costCenterId}`,
+      {
+        headers: {
+          Authorization: `Bearer: ${accessToken}`,
+        },
+      }
     );
     const data: ShiftCapacityResponse = response.data;
     return data;

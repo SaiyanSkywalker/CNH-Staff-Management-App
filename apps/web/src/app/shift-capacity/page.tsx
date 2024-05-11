@@ -21,8 +21,10 @@ import {
   LoadingContextProps,
 } from "@webSrc/contexts/LoadingContext";
 import { useAuth } from "@webSrc/contexts/AuthContext";
+import ProtectedRoute from "@webSrc/components/ProtectedRoute";
+import { getAccessToken } from "@webSrc/utils/token";
 
-export default function shiftCapacity() {
+const ShiftCapacity = () => {
   const [units, setUnits] = useState<UnitAttributes[]>([]);
   const todayDate = new Date();
   const todayDateString = todayDate.toISOString().substring(0, 10);
@@ -62,6 +64,7 @@ export default function shiftCapacity() {
         method: "GET",
         url: `${config.apiUrl}/unit${unitId}`,
         responseType: "json",
+        headers: { Authorization: `Bearer ${getAccessToken()}` },
       });
       const data = await response.data;
       setInitialLoad(true);
@@ -120,10 +123,11 @@ export default function shiftCapacity() {
           isDefault: isChecked,
         };
         loadingContext?.showLoader();
-        const res = await fetch("http://localhost:3003/shift-capacity", {
+        const res = await fetch(`${config.apiUrl}/shift-capacity`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
+            Authorization: `Bearer ${getAccessToken()}`,
           },
           body: JSON.stringify(shiftCapacityRequest),
         });
@@ -231,4 +235,6 @@ export default function shiftCapacity() {
       </form>
     </div>
   );
-}
+};
+
+export default ProtectedRoute(ShiftCapacity);
