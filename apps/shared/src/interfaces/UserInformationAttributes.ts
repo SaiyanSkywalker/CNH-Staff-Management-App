@@ -1,3 +1,6 @@
+import RoleAttributes from "./RoleAttributes";
+import UnitAttributes from "./UnitAttributes";
+
 export default interface UserInformationAttributes {
   id?: number;
   employeeId: number;
@@ -8,7 +11,9 @@ export default interface UserInformationAttributes {
   middleIntial?: string;
   password: string;
   roleId?: number;
+  role?: RoleAttributes;
   unitId?: number;
+  unit?: UnitAttributes;
   createdAt?: Date;
   updatedAt?: Date;
 }

@@ -16,3 +16,11 @@ export const getToken = async (
     console.log(error);
   }
 };
+
+export const removeToken = async (key: string): Promise<void> => {
+  try {
+    await SecureStore.deleteItemAsync(key);
+  } catch (error) {
+    console.log(error);
+  }
+};

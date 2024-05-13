@@ -26,6 +26,7 @@ import { getAccessToken } from "@webSrc/utils/token";
 import ShiftCapacityAttributes from "@shared/src/interfaces/ShiftCapacityAttributes";
 import ShiftCapacityResponse from "@shared/src/interfaces/ShiftCapacityResponse";
 import ProtectedRoute from "@webSrc/components/ProtectedRoute";
+import { useAuth } from "@webSrc/contexts/AuthContext";
 
 const Page = () => {
   const localizer = momentLocalizer(moment);
@@ -49,6 +50,9 @@ const Page = () => {
   >([]);
 
   const hardCodedCapacity = 25;
+  const { auth } = useAuth();
+  const isNurseManager: boolean = auth?.user?.roleId === 3;
+
   const { views, defaultView, formats } = useMemo(() => {
     const timeGutterFormatter: DateFormatFunction = (
       date: Date,
@@ -321,7 +325,11 @@ const Page = () => {
       const accessToken = getAccessToken();
       const response = await axios({
         method: "GET",
-        url: `${config.apiUrl}/schedule?costCenterId=${selectedOption}`,
+        url: `${config.apiUrl}/schedule?costCenterId=${
+          !isNurseManager
+            ? selectedOption
+            : `${auth?.user?.unit?.laborLevelEntryId}`
+        }`,
         headers: { Authorization: `Bearer ${accessToken}` },
         responseType: "json",
       });
@@ -343,8 +351,13 @@ const Page = () => {
         headers: { Authorization: `Bearer ${accessToken}` },
         responseType: "json",
       });
-      const data = response.data;
-      setUnits(data);
+      let data: UnitAttributes[] | undefined = response.data;
+      if (data) {
+        if (isNurseManager) {
+          data = data.filter((x) => x.id === auth?.user?.unitId);
+        }
+        setUnits(data);
+      }
     } catch (err) {
       // console.error(err);
     }
@@ -365,7 +378,6 @@ const Page = () => {
     } catch (error) {
       // console.error(error)
     }
-    
   };
   useEffect(() => {
     getUnits();
@@ -379,7 +391,7 @@ const Page = () => {
       <h1 className="text-4xl p-8 font-bold text-center">Schedule</h1>
       <div className="pt-4 flex justify-center items-center w-full">
         <div className="flex flex-col w-full">
-          <div className="flex justify-between align-center">
+          <div className="flex justify-between align-center mb-8">
             <div>
               <label htmlFor="units" className="block mb-2 font-semibold">
                 Choose Shift Filter:
@@ -418,24 +430,30 @@ const Page = () => {
                 </div>
               </form>
             </div>
-            <div className="self-end mb-8">
-              <label htmlFor="units" className="block mb-2 font-semibold">
-                Select Cost Center:
-              </label>
-              <select
-                id="unit-select"
-                name="units"
-                defaultValue={""}
-                onChange={handleSelectChange}
-                className={`w-[200px] p-4 text-md border border-nuetral-500 rounded cursor-pointer bg-transparent`}
-              >
-                <option value="">All</option>
-                {units.map((unit, idx) => (
-                  <option key={idx} value={unit["laborLevelEntryId"]}>
-                    {unit["name"]}
-                  </option>
-                ))}
-              </select>
+            <div className="self-end">
+              {!isNurseManager ? (
+                <>
+                  <label htmlFor="units" className="block mb-2 font-semibold">
+                    Select Cost Center:
+                  </label>
+                  <select
+                    id="unit-select"
+                    name="units"
+                    defaultValue={""}
+                    onChange={handleSelectChange}
+                    className={`w-[200px] p-4 text-md border border-nuetral-500 rounded cursor-pointer bg-transparent`}
+                  >
+                    <option value="">All</option>
+                    {units.map((unit, idx) => (
+                      <option key={idx} value={unit["laborLevelEntryId"]}>
+                        {unit["name"]}
+                      </option>
+                    ))}
+                  </select>
+                </>
+              ) : (
+                <></>
+              )}
             </div>
           </div>
 

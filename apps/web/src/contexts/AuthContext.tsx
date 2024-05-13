@@ -4,13 +4,14 @@ import axios from "axios";
 import { createContext, useContext, useEffect, useState } from "react";
 import config from "../config";
 import UserInformation from "@shared/src/interfaces/UserInformationAttributes";
+import CustomJWTPayload from "@shared/src/interfaces/CustomJWTPayload";
 import { Socket } from "socket.io-client";
 import { io } from "socket.io-client";
 import { v4 as uuidv4 } from "uuid";
 import { BannerContext, BannerContextProps } from "./BannerContext";
-import jwt from "jsonwebtoken";
 import { jwtDecode, JwtPayload } from "jwt-decode";
 import Cookies from "universal-cookie";
+// import CustomJWTPayload from
 interface AuthDetails {
   authenticated: boolean;
   user: UserInformation | null;
@@ -19,9 +20,6 @@ interface AuthDetails {
   logout: () => Promise<boolean>;
 }
 
-interface CustomJWTPayload extends JwtPayload {
-  user?: UserInformation;
-}
 
 interface IAuthContext {
   auth: AuthDetails;

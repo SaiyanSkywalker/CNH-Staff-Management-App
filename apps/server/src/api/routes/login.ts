@@ -10,7 +10,13 @@ loginRouter.post(
   "/",
   async (req: Request, res: Response): Promise<Response> => {
     try {
-      const roleName: string = req.body.isMobile === "1" ? "USER" : (req.body.isMobile === "2" ? "ADMIN" : "NURSEMANAGER");
+      console.log("HIT /LOGIN");
+      const roleName: string =
+        req.body.isMobile === "1"
+          ? "USER"
+          : req.body.isMobile === "2"
+          ? "ADMIN"
+          : "NURSEMANAGER";
       // search for user in db
       const user = await sequelize.models.UserInformation.findOne({
         where: {

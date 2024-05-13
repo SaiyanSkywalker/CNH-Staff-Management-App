@@ -33,7 +33,6 @@ const socketHandler = (io: Server, socket: CNHSocket) => {
   });
 
   socket.on("remove_user", (arg: UserSocketAttributes) => {
-    removeUser(arg);
     socket.disconnect();
   });
 
