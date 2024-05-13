@@ -1,4 +1,3 @@
-import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "../styles/globals.css";
 import Navbar from "../components/Navbar";
@@ -7,7 +6,7 @@ import { BannerContextProvider } from "@webSrc/contexts/BannerContext";
 import AuthProvider from "@webSrc/contexts/AuthContext";
 import Loading from "@webSrc/components/Loading";
 import { LoadingContextProvider } from "@webSrc/contexts/LoadingContext";
-
+import { Metadata } from "next";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
@@ -15,11 +14,7 @@ export const metadata: Metadata = {
   description: "Admin portal for CNH Staff Management system",
 };
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+const RootLayout = ({ children }: { children: React.ReactNode }) => {
   return (
     <html lang="en">
       <body className={inter.className}>
@@ -38,4 +33,5 @@ export default function RootLayout({
       </body>
     </html>
   );
-}
+};
+export default RootLayout;

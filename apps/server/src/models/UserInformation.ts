@@ -45,9 +45,9 @@ class UserInformation extends Model<UserInformationAttributes> {
   @Column({ type: DataType.STRING, allowNull: false })
   password!: string;
 
-  @BelongsTo(() => Unit, { foreignKey: "unitId", targetKey: "id" })
+  @BelongsTo(() => Unit, { foreignKey: "unitId", targetKey: "id", onDelete: "SET NULL" })
   unit?: Unit;
-  @BelongsTo(() => Role, { foreignKey: "roleId", targetKey: "id" })
+  @BelongsTo(() => Role, { foreignKey: "roleId", targetKey: "id", onDelete: "SET NULL" })
   role?: Role;
 }
 export default UserInformation;

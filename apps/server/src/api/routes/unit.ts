@@ -14,4 +14,18 @@ unitRouter.get("/", async (req: Request, res: Response) => {
   }
 });
 
+unitRouter.get("/:id", async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const units = await sequelize.models.Unit.findAll({
+      where: { id }
+    });
+    res.json(units);
+  } catch (error) {
+    res
+      .status(500)
+      .json({ error: "Error retrieving data from Unit table" + error });
+  }
+});
+
 export default unitRouter;

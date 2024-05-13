@@ -7,7 +7,9 @@ import React, {
   DragEvent,
   MouseEvent,
   useRef,
+  useEffect,
 } from "react";
+import { useRouter } from "next/navigation";
 import styles from "../../styles/Upload.module.css";
 import {
   BannerContext,
@@ -20,11 +22,21 @@ import {
   LoadingContextProps,
 } from "@webSrc/contexts/LoadingContext";
 import { useAuth } from "@webSrc/contexts/AuthContext";
+import AuthWrapper from "@webSrc/components/ProtectedRoute";
+import { getAccessToken } from "@webSrc/utils/token";
 
-export default function UploadPage() {
+const Page = () => {
   const [currentFile, setCurrentFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const router = useRouter();
+  const { auth } = useAuth();
+
+  useEffect(() => {
+    if (auth?.user?.roleId === 3) {
+      router.replace("/schedule");
+    }
+  }, []);
 
   const bannerContext: BannerContextProps | undefined =
     useContext(BannerContext);
@@ -86,6 +98,7 @@ export default function UploadPage() {
             axios.post(`${config.apiUrl}/schedule`, formData, {
               headers: {
                 "Content-Type": "multipart/form-data",
+                Authorization: `Bearer: ${getAccessToken()}`,
               },
             });
             loadingContext.hideLoader();
@@ -162,4 +175,5 @@ export default function UploadPage() {
       </section>
     </>
   );
-}
+};
+export default AuthWrapper(Page);
