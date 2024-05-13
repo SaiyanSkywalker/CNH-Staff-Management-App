@@ -33,7 +33,6 @@ const socketHandler = (io: Server, socket: CNHSocket) => {
   });
 
   socket.on("remove_user", (arg: UserSocketAttributes) => {
-    removeUser(arg);
     socket.disconnect();
   });
 
@@ -100,23 +99,6 @@ const socketHandler = (io: Server, socket: CNHSocket) => {
           // Set shift status
           shiftHistory?.set("status", "Accepted");
           message = `Shift accepted for ${shiftHistory?.shiftTime} on ${parsedDate}`;
-
-          // Add shift to scheduleEntry table
-          const shiftTimeTokens: string[] = shiftHistory.shiftTime.split("-");
-          const duration = calculateDuration(shiftTimeTokens);
-
-          await ScheduleEntry.create({
-            employeeId: shiftHistory.user.employeeId,
-            lastName: shiftHistory.user.lastName,
-            firstName: shiftHistory.user.firstName,
-            middleInitial: shiftHistory.user.middleInitial,
-            shiftDate: new Date(shiftHistory.dateRequested),
-            shiftType: "REG",
-            costCenterId: shiftHistory.unit.laborLevelEntryId,
-            startTime: shiftTimeTokens[0].trim(),
-            endTime: shiftTimeTokens[1].trim(),
-            duration: duration,
-          });
         } else {
           shiftHistory?.set("status", "Rejected");
           message = `Shift rejected for ${shiftHistory?.shiftTime} on ${parsedDate}`;

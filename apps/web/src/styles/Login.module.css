@@ -3,13 +3,12 @@
   padding: 20px;
   border-radius: 8px;
   width: 500px;
-  height: 400px;
+  max-height: 500px;
   margin: 0 auto; /* Center horizontally */
   background-color: #f8f8f8; /* Add a light background color */
 }
 
 .inputs-container {
-  margin-bottom: 10px;
   width: 100%;
 }
 
@@ -56,4 +55,12 @@
 }
 .btn-login:hover {
   opacity: 0.7;
+}
+
+.role-select {
+  padding: 10px;
+  background: white;
+  outline: 2px solid #067496;
+  border-radius: 20px;
+  width: 100%;
 }

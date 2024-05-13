@@ -10,6 +10,7 @@ import { LoadingContext } from "@webSrc/contexts/LoadingContext";
 const Login = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [role, setRole] = useState("");
   const [error, setError] = useState(false);
   const [isButtonDisabled, setIsButtonDisabled] = useState<boolean>(true);
   const { auth } = useAuth();
@@ -19,16 +20,24 @@ const Login = () => {
 
   const onUsernameChange = (e: ChangeEvent<HTMLInputElement>) => {
     setUsername(e.target.value);
+    setError(false);
   };
 
   const onPasswordChange = (e: ChangeEvent<HTMLInputElement>) => {
     setPassword(e.target.value);
+    setError(false);
+  };
+
+  const onRoleChange = (e: ChangeEvent<HTMLSelectElement>) => {
+    console.log(`e.target.value is ${e.target.value}`);
+    setRole(e.target.value);
+    setError(false);
   };
 
   const submitForm = async () => {
     try {
       loadingContext?.showLoader();
-      const isAuthenticated = await auth?.login(username, password);
+      const isAuthenticated = await auth?.login(username, password, role);
       if (isAuthenticated) {
         router.replace("/schedule");
       } else {
@@ -42,8 +51,8 @@ const Login = () => {
   };
   useEffect(() => {
     setError(false);
-    setIsButtonDisabled(!username || !password);
-  }, [username, password]);
+    setIsButtonDisabled(!username || !password || !role);
+  }, [username, password, role]);
   return (
     <>
       <div className="min-h-screen items-center justify-between p-24">
@@ -75,7 +84,29 @@ const Login = () => {
                   required
                 />
               </div>
-              <div className="my-10">
+              <div className="mb-10">
+                <div className="mb-5">
+                  <label className="block py-2.5" htmlFor="role">
+                    Role:
+                  </label>
+                  <select
+                    required
+                    id="role"
+                    className={`${styles["role-select"]}`}
+                    defaultValue={""}
+                    onChange={onRoleChange}
+                  >
+                    <option className={`ms-2`} value="">
+                      Select a role
+                    </option>
+                    <option className={`ms-2`} value="2">
+                      Admin
+                    </option>
+                    <option className={`ms-2`} value="3">
+                      Nurse Manager
+                    </option>
+                  </select>
+                </div>
                 <button
                   className={`${
                     isButtonDisabled

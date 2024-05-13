@@ -20,6 +20,7 @@ import {
   LoadingContext,
   LoadingContextProps,
 } from "@webSrc/contexts/LoadingContext";
+import { useAuth } from "@webSrc/contexts/AuthContext";
 import ProtectedRoute from "@webSrc/components/ProtectedRoute";
 import { getAccessToken } from "@webSrc/utils/token";
 
@@ -32,6 +33,7 @@ const ShiftCapacity = () => {
   const [date, setDate] = useState<string>(todayDateString);
   const [initialLoad, setInitialLoad] = useState<boolean>(false);
   const [isChecked, setIsChecked] = useState<boolean>(false);
+  const { auth } = useAuth();
 
   const bannerContext: BannerContextProps | undefined =
     useContext(BannerContext);
@@ -57,9 +59,10 @@ const ShiftCapacity = () => {
 
   const getUnits = async () => {
     try {
+      const unitId: string = auth?.user?.roleId === 3 ? "/" + String(auth?.user?.unitId) : ""
       const response = await axios({
         method: "GET",
-        url: `${config.apiUrl}/unit`,
+        url: `${config.apiUrl}/unit${unitId}`,
         responseType: "json",
         headers: { Authorization: `Bearer ${getAccessToken()}` },
       });

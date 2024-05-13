@@ -3,13 +3,14 @@ import "core-js/stable/atob";
 import { createContext, useContext, useEffect, useState } from "react";
 import config from "../config";
 import UserInformation from "@shared/src/interfaces/UserInformationAttributes";
+import CustomJWTPayload from "@shared/src/interfaces/CustomJWTPayload";
 import { Alert } from "react-native";
 import { Socket } from "socket.io-client";
 import { io } from "socket.io-client";
 import "react-native-get-random-values";
 import { v4 as uuidv4 } from "uuid";
 import ShiftRequestUpdate from "@shared/src/interfaces/ShiftRequestUpdate";
-import { getToken, setToken } from "../utils/token";
+import { getToken, removeToken, setToken } from "../utils/token";
 import { jwtDecode } from "jwt-decode";
 interface AuthDetails {
   authenticated: boolean;
@@ -28,7 +29,7 @@ interface IAuthContext {
 }
 
 const AuthContext = createContext<Partial<IAuthContext>>({});
-
+export const useAuth = () => useContext(AuthContext);
 /**
  * Handles login/logout authentication
  *
@@ -45,21 +46,23 @@ export default function AuthProvider({
   const [userUUID, setUserUUID] = useState<string | undefined>(undefined);
   const login = async (
     username: string,
-    password: string
+    password: string,
+    isMobile: string
   ): Promise<boolean> => {
-    const tokens = await getUser(username, password);
-    // store tokens
-    setToken("accessToken", tokens.access);
-    setToken("refreshToken", tokens.refresh);
+    const tokens = await getUser(username, password, isMobile);
+    if (tokens) {
+      // store tokens
+      setToken("accessToken", tokens.access);
+      setToken("refreshToken", tokens.refresh);
 
-    const userInfo = jwtDecode(tokens.access) as UserInformation;
-
-    if (userInfo) {
-      loginUser(userInfo);
-      return Promise.resolve(true);
+      const decodedToken: CustomJWTPayload = jwtDecode(tokens.access);
+      const userInfo: UserInformation | undefined = decodedToken.user;
+      if (userInfo) {
+        loginUser(userInfo);
+        return true;
+      }
     }
-
-    return Promise.resolve(false);
+    return false;
   };
   const loginUser = (userInfo: UserInformation) => {
     setUser(userInfo);
@@ -85,13 +88,15 @@ export default function AuthProvider({
    * Logs out user, removes them from socket map
    * @returns
    */
-  const logout = (): Promise<boolean> => {
+  const logout = async (): Promise<boolean> => {
     socket?.emit("remove_user", { username: user?.username, uuid: userUUID });
+    removeToken("accessToken");
+    removeToken("refreshToken");
     setIsLoggedIn(false);
     setUser({} as UserInformation);
     setSocket(undefined);
     setUserUUID(undefined);
-    return Promise.resolve(true);
+    return true;
   };
 
   /**
@@ -100,7 +105,11 @@ export default function AuthProvider({
    * @param password
    * @returns
    */
-  const getUser = async (username: string, password: string) => {
+  const getUser = async (
+    username: string,
+    password: string,
+    isMobile: string
+  ) => {
     try {
       const url = config.apiUrl;
       const response = await axios({
@@ -110,7 +119,7 @@ export default function AuthProvider({
         data: {
           username: username,
           password: password,
-          isMobile: true,
+          isMobile,
         },
       });
       const data = await response.data;
@@ -162,26 +171,22 @@ export default function AuthProvider({
         const originalRequest = error.config;
         if (
           error.response &&
-          error.response.status === 401 &&
+          (error.response.status === 401 || error.response.status === 403) &&
           !originalRequest._retry
         ) {
           originalRequest._retry = true;
           try {
-            // Attempt to refresh token
             const refreshedToken = await refreshAccessToken();
             if (refreshedToken) {
-              // Retry original request with new access token
               originalRequest.headers[
                 "Authorization"
               ] = `Bearer ${refreshedToken}`;
               return axios(originalRequest);
             } else {
-              // If refresh fails, logout user
               await logout();
             }
           } catch (error) {
             console.error("Error refreshing token", error);
-            // If refresh fails, logout user
             await logout();
           }
         }
@@ -210,5 +215,3 @@ export default function AuthProvider({
     </AuthContext.Provider>
   );
 }
-
-export const useAuth = () => useContext(AuthContext);

@@ -4,24 +4,22 @@ import axios from "axios";
 import { createContext, useContext, useEffect, useState } from "react";
 import config from "../config";
 import UserInformation from "@shared/src/interfaces/UserInformationAttributes";
+import CustomJWTPayload from "@shared/src/interfaces/CustomJWTPayload";
 import { Socket } from "socket.io-client";
 import { io } from "socket.io-client";
 import { v4 as uuidv4 } from "uuid";
 import { BannerContext, BannerContextProps } from "./BannerContext";
-import jwt from "jsonwebtoken";
 import { jwtDecode, JwtPayload } from "jwt-decode";
 import Cookies from "universal-cookie";
+// import CustomJWTPayload from
 interface AuthDetails {
   authenticated: boolean;
   user: UserInformation | null;
   socket: Socket | null | undefined;
-  login: (username: string, password: string) => Promise<boolean>;
+  login: (username: string, password: string, role: string) => Promise<boolean>;
   logout: () => Promise<boolean>;
 }
 
-interface CustomJWTPayload extends JwtPayload {
-  user?: UserInformation;
-}
 
 interface IAuthContext {
   auth: AuthDetails;
@@ -62,10 +60,11 @@ export default function AuthProvider({
 
   const login = async (
     username: string,
-    password: string
+    password: string,
+    role: string
   ): Promise<boolean> => {
     try {
-      const tokens = await getUser(username, password); // JWT token from server
+      const tokens = await getUser(username, password, role); // JWT token from server
       const accessToken: CustomJWTPayload = jwtDecode(tokens.access);
       const refreshToken: CustomJWTPayload = jwtDecode(tokens.refresh);
       const user: UserInformation | undefined = accessToken.user;
@@ -108,7 +107,7 @@ export default function AuthProvider({
     return Promise.resolve(true);
   };
 
-  const getUser = async (username: string, password: string) => {
+  const getUser = async (username: string, password: string, role: string) => {
     try {
       const url = config.apiUrl;
       const response = await axios({
@@ -118,7 +117,7 @@ export default function AuthProvider({
         data: {
           username: username,
           password: password,
-          isMobile: false,
+          isMobile: role,
         },
       });
       const data = await response.data;
