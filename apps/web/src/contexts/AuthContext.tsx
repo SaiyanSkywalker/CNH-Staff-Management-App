@@ -20,7 +20,6 @@ interface AuthDetails {
   logout: () => Promise<boolean>;
 }
 
-
 interface IAuthContext {
   auth: AuthDetails;
 }
