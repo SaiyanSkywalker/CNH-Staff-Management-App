@@ -6,7 +6,7 @@ import { UploadedFile } from "express-fileupload";
 test("csvToArray splits data in csv file to an array", () => {
     let content: string="Col1,Col2\n1,2\n3,4";
     let strings: string[][] = csvToArray(content);
-    console.log(strings);
+    //console.log(strings);
     expect(strings).toStrictEqual([['1','2'], ['3','4']]);
 });
 
