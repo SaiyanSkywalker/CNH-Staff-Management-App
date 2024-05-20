@@ -7,6 +7,7 @@ import {
   getUnitScheduleData,
   getScheduleDataForUser,
   saveScheduleData,
+  handleTestScheduleData,
 } from "../services/ScheduleEntryService";
 import { adminSocketMap } from "server/src/sockets/socketHandler";
 import { Socket } from "socket.io";
@@ -16,11 +17,13 @@ const scheduleRouter = Router();
 // Gets all shift data for admin portal
 scheduleRouter.get("/", async (req: Request, res: Response): Promise<void> => {
   try {
-    // Uncomment code below if you want to use data from db instead
-    // const scheduleData = handleTestScheduleData(req.query.costCenterId as string)
-    const scheduleData = await getScheduleData(
+    const scheduleData = handleTestScheduleData(
       req.query.costCenterId as string
     );
+    // Uncomment code below if you want to use data from db instead
+    // const scheduleData = await getScheduleData(
+    //   req.query.costCenterId as string
+    // );
     res.json(scheduleData);
   } catch (err) {
     console.error("Error in retrieving schedule data:", err);

@@ -10,7 +10,6 @@ export default function ProtectedRoute(Component: any) {
     const router = useRouter();
     const pathname = usePathname();
     useEffect(() => {
-      debugger;
       console.log(pathname);
       if (!auth?.authenticated) {
         router.replace("/login");

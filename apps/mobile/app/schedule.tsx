@@ -214,7 +214,7 @@ const Page = () => {
         getIntervals(shiftDate, currentShifts, currentCapacities);
       }
     } catch (error) {
-      console.log(error);
+      // console.log(error);
     }
   };
   /**

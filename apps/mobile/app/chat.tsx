@@ -187,7 +187,6 @@ export default function ChatPage() {
       auth?.socket?.off("message_subscriber", subscriberListener);
       auth?.socket?.off("message_failed", failedListener);
       if (selectedChannel) {
-        console.log("LEAVING ROOM", selectedChannel.name);
         auth?.socket?.emit("leave_room", { channelName: selectedChannel.name });
       }
     };
