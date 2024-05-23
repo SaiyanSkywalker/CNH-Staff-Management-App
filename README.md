@@ -1,60 +1,123 @@
-
 # CNH Staff Management App
 
-  
 
 ## Description
 
+This is the monorepo for the Drexel University senior design project, Staffing For Nurses. The repo was created using the npm [workspaces](https://docs.npmjs.com/cli/v8/using-npm/workspaces) package and contains the source code for the mobile app, admin web app, and server faciliating between the two aforementioned apps.
+
+The projects are located in the following directories:
+	- Web (Admin portal): `apps/web`
+	- Mobile app: `apps/mobile`
+	- Server: `apps/server`
+
   
 
-This is the monorepo for the Drexel University senior design project Staffing For Nurses. The repo was created using the npm [workspaces](https://docs.npmjs.com/cli/v8/using-npm/workspaces) package and contains the source code for the mobile app, admin web app, and server faciliating between the two aforementioned apps.
+  
+
+## Installation/Execution
 
   
 
-## Getting Started
+1. If this is the first time starting the project, run `npm i` from root directory of this repository to install all necessary dependencies for the 3 projects
 
-  
-1. If this is the first time starting the project, run `npm i` to install all npm packages between the three apps
- 
 2. Start the mobile app by running the following commands:
 
 
-- `cd apps/mobile`
+	1.  `cd apps/mobile`
 
--  `npm run android` - to start the app on an Android emulator
+	  
 
--  `npm run ios` - to start the app on an iOS emulator
+	2. `npm run android` - to start the app on an Android emulator
+
+	  
+
+	3.  `npm run ios` - to start the app on an iOS emulator
+
 
   
 
-**Note**: These commands are ran with the assumption that you have already set up emulation in Android Studio/XCode. If you need any help with this, please refer to this [link](https://reactnative.dev/docs/environment-setup?guide=native).
+  
+
+**Note**: These commands are ran with the assumption that you have already set up emulators in Android Studio/XCode. If you need any help with this, please refer to this [link](https://reactnative.dev/docs/environment-setup?guide=native).
+
+  
 
   
 
 3. Start the web app by running the following commands:
 
-  
+	1. `cd apps/web`
 
--  `cd apps/web`
+	  
 
-  
+	  
 
--  `npm run dev`
-
-  
-
-4. Start the server by running the following commands:
+	2.  `npm run dev`
 
   
 
--  `cd apps/server`
+  
+
+4. Start the server project by running the following commands:  
+
+	1. `cd apps/server`
+
+	  
+
+	  
+
+	2. `npm run dev`
 
   
 
--  `npm run dev`
-
   
-  
+## Testing
+To run unit tests run the following commands (from the root directory):
+	- `npm run web-tests`: to run tests under the web project
+	- `npm run mobile-tests`: to run tests under the mobile project
+	- `npm run server-tests`: to run tests under the server project
 
 ## Development Notes
-- When doing work for the mobile app or admin portal, make sure to first start the server project before the starting mobile or web projects. This prevents your calls to the server from failing and that you'll always be connected to the database.
+
+- When doing work for the mobile app or admin portal, make sure to first start the **server** project before the starting mobile **or** web projects. This will prevent your API calls to the server will failing.
+- Before starting the `server` project for the first time, make sure that you create `.env` file in the `apps/server` directory to read all the necessary environment variables to get the server up and running. Look at the section `Example .env file` for more details on what the `.env`  file should look like.
+
+## Database
+Database connections are handled in the server project upon startup using a series of environment variables that are set in a `.env` file found in the root directory of the server project (`apps/server`).
+Environment variables used in database setup are prefixed with the characters "DB".
+### Example .env file
+```
+SERVER_PORT=3003
+
+ENVIRONMENT=dev
+
+JWT_SECRET_KEY="secret_key"
+
+ACCESS_TOKEN_LIFETIME='1hr' 
+
+REFRESH_TOKEN_LIFETIME='3d'
+
+DB=cnh_staff_management
+
+DB_USER=admin
+
+DB_PASSWORD=Cnh_nurses24
+
+DB_DIALECT=oracle
+
+DB_CONNECTION_STRING=connection_string
+```
+**Environment Variables**
+- SERVER_PORT: Port number for the server. Useful for running the project locally on a single machine, may be unnecessary once project is moved into CNH infrastructure
+
+- ENVIRONMENT: Environment project is ran in
+- JWT_SECRET_KEY: secret used to encrypt JWT tokens
+- ACCESS_TOKEN_LIFETIME: lifetime of access token 
+- REFRESH_TOKEN_LIFETIME: lifetime of refresh token
+- DB: name of database used with server
+- DB_USER: database username
+- DB_PASSWORD: database password
+- DB_DIALECT: Flavor of SQL used by the database (Oracle, postgres, mysql, etc.)
+- DB_CONNECTION_STRING: Connection string used to connect to database
+
+**NOTE:** more information about how to connect to Sequelize can be found [here](https://sequelize.org/docs/v6/getting-started/)
