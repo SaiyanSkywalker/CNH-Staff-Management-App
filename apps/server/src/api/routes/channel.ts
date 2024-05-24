@@ -13,15 +13,40 @@ channelRouter.get("/", async (req: Request, res: Response) => {
   try {
     let unitIdNum = Number(req.headers["unitid"]);
     let roleIdNum = Number(req.headers["roleid"]);
-    const channels: Channel[] = await Channel.findAll({
+
+    console.log(`unitIdNum is ${unitIdNum}, roleIdNum is ${roleIdNum}`);
+
+    if(isNaN(roleIdNum)) {
+        res.status(401).json({error: "Error user needs a role defined!"});
+        return;
+    }
+
+    if(isNaN(unitIdNum) && req.headers["unitid"] !== undefined && req.headers["unitid"] !== null) {
+        res.status(401).json({error: "Unit needs to be a numeric-value!"});
+        return;
+    }
+
+    if(roleIdNum === 2) {
+        let channels = await Channel.findAll();
+        //console.log(`channel is ${channels}`)
+        res.status(200).send(channels);
+        return;
+    }
+
+    let createdChannels: Channel[] = await Channel.findAll({
         where: {
-            [Op.or]: [
-                { unitRoomId: { [Op.is]: null } },
-                (roleIdNum === 2) ? { unitRoomId: { [Op.ne]: null } } : {unitRoomId: unitIdNum}
-            ]
+            unitRoomId: null
         }
     });
-    res.send(channels);
+    
+    let unitChannel: Channel[] = await Channel.findAll({
+        where: {
+            unitRoomId: unitIdNum
+        }
+    });
+
+    let channels = [...unitChannel, ...createdChannels]
+    res.status(200).send(channels);
   } catch (ex) {
     res.status(500).json({ error: "Error occurred on server!" });
   }

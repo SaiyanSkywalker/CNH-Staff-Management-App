@@ -2,6 +2,7 @@ import request from 'supertest';
 import express from 'express';
 //import app from 'server/src';
 import channelRouter from 'server/src/api/routes/channel';
+import ChannelAttributes from '@shared/src/interfaces/ChannelAttributes';
 
 // Override the original models with mocks
 jest.mock('server/src/models/Channel', () => {
@@ -25,57 +26,6 @@ app.use(express.json());
 app.use('/channel', channelRouter);
 
 describe('GET /channel', () => {
-    /*
-    it('should return all rooms for an Admin', async () => {
-        const body = {
-            name: 'nonExistingUser'
-        };
-        const response = await request(app)
-        .post('/channel')
-        .send(body);
-        expect(response.status).toBe(201);
-    });
-
-    it('should return room corresponding to all unit of employee and all other non-unit channels', async () => {
-        const body = {
-            name: 'existingUser'
-        };
-        const response = await request(app)
-        .post('/channel')
-        .send(body);
-        expect(response.status).toBe(400);
-    });
-
-    it('should return room corresponding to all unit of nurse manager and all other non-unit channels', async () => {
-        const body = {
-            name: 'existingUser'
-        };
-        const response = await request(app)
-        .post('/channel')
-        .send(body);
-        expect(response.status).toBe(400);
-    });
-
-    it('should return room corresponding to all unit of employee and all other non-unit channels', async () => {
-        const body = {
-            name: 'existingUser'
-        };
-        const response = await request(app)
-        .post('/channel')
-        .send(body);
-        expect(response.status).toBe(400);
-    });
-
-    it('should return room corresponding to all unit of nurse manager and all other non-unit channels', async () => {
-        const body = {
-            name: 'existingUser'
-        };
-        const response = await request(app)
-        .post('/channel')
-        .send(body);
-        expect(response.status).toBe(400);
-    });
-    */
 
     it('get channel with non-numeric id', async () => {
         const response = await request(app)
@@ -83,6 +33,185 @@ describe('GET /channel', () => {
         .set('unitid', '1')
         .set('roleid', '2');
         expect(response.status).toBe(400);
+    });
+
+    it('should return unauthorized if no role is defined', async () => {
+        const response = await request(app)
+        .get('/channel')
+        .set('unitid', '2');
+        expect(response.status).toBe(401);
+    });
+
+    it('should return error if unit is not numeric', async () => {
+        const response = await request(app)
+        .get('/channel')
+        .set('unitid', 'da35j')
+        .set('roleid', '2');
+        expect(response.status).toBe(401);
+    });
+
+    it('should return error if unit is not numeric', async () => {
+        const response = await request(app)
+        .get('/channel')
+        .set('unitid', '3')
+        .set('roleid', 'da35j');
+        expect(response.status).toBe(401);
+    });
+
+
+    it('should return all rooms for an Admin', async () => {
+        const response = await request(app)
+        .get('/channel')
+        .set('unitid', '2')
+        .set('roleid', '2');
+        let expectedChannels: ChannelAttributes[] = [
+            {
+                id: 10,
+                name: 'Non-undefined channel',
+                unitRoomId: null
+            },
+            {
+                id: 20,
+                name: 'Two Non-undefined channel',
+                unitRoomId: null
+            },
+            {
+                id: 30,
+                name: 'Unit Channel',
+                unitRoomId: 3
+            },
+            {
+                id: 40,
+                name: 'Unit Two Channel',
+                unitRoomId: 4
+            }
+        ];
+        expect(response.status).toBe(200);
+        expect(response.body).toStrictEqual(expectedChannels);
+    });
+
+    it('should return all rooms for an Admin with no unit', async () => {
+        const response = await request(app)
+        .get('/channel')
+        .set('roleid', '2');
+        let expectedChannels: ChannelAttributes[] = [
+            {
+                id: 10,
+                name: 'Non-undefined channel',
+                unitRoomId: null
+            },
+            {
+                id: 20,
+                name: 'Two Non-undefined channel',
+                unitRoomId: null
+            },
+            {
+                id: 30,
+                name: 'Unit Channel',
+                unitRoomId: 3
+            },
+            {
+                id: 40,
+                name: 'Unit Two Channel',
+                unitRoomId: 4
+            }
+        ];
+        expect(response.status).toBe(200);
+        expect(response.body).toStrictEqual(expectedChannels);
+    });
+    
+    it('should return room corresponding to all non-unit channels and no unit channels for employee with a unit which no channel exists for', async () => {
+        const response = await request(app)
+        .get('/channel')
+        .set('unitid', '2')
+        .set('roleid', '3');
+        let expectedChannels: ChannelAttributes[] = [
+            {
+                id: 10,
+                name: 'Non-undefined channel',
+                unitRoomId: null
+            },
+            {
+                id: 20,
+                name: 'Two Non-undefined channel',
+                unitRoomId: null
+            }
+        ];
+        expect(response.status).toBe(200);
+        expect(response.body).toStrictEqual(expectedChannels);
+    });
+    
+    it('should return room corresponding to unit of employee and all other non-unit channels', async () => {
+        const response = await request(app)
+        .get('/channel')
+        .set('unitid', '4')
+        .set('roleid', '3');
+        let expectedChannels: ChannelAttributes[] = [
+            {
+                id: 40,
+                name: 'Unit Two Channel',
+                unitRoomId: 4
+            },
+            {
+                id: 10,
+                name: 'Non-undefined channel',
+                unitRoomId: null
+            },
+            {
+                id: 20,
+                name: 'Two Non-undefined channel',
+                unitRoomId: null
+            }
+        ];
+        expect(response.status).toBe(200);
+        expect(response.body).toStrictEqual(expectedChannels);
+    });
+
+    it('should return room corresponding to all non-unit channels and no unit channels for nurse manager with a unit which no channel exists for', async () => {
+        const response = await request(app)
+        .get('/channel')
+        .set('unitid', '1')
+        .set('roleid', '3');
+        let expectedChannels: ChannelAttributes[] = [
+            {
+                id: 10,
+                name: 'Non-undefined channel',
+                unitRoomId: null
+            },
+            {
+                id: 20,
+                name: 'Two Non-undefined channel',
+                unitRoomId: null
+            }
+        ];
+        expect(response.status).toBe(200);
+        expect(response.body).toStrictEqual(expectedChannels);
+    });
+    
+    it('should return room corresponding to unit of nurse manager and all other non-unit channels', async () => {
+        const response = await request(app)
+        .get('/channel')
+        .set('unitid', '3')
+        .set('roleid', '3');
+        let expectedChannels: ChannelAttributes[] = [
+            {
+                id: 30,
+                name: 'Unit Channel',
+                unitRoomId: 3
+            },
+            {
+                id: 10,
+                name: 'Non-undefined channel',
+                unitRoomId: null
+            },
+            {
+                id: 20,
+                name: 'Two Non-undefined channel',
+                unitRoomId: null
+            }
+        ];
+        expect(response.status).toBe(200);
+        expect(response.body).toStrictEqual(expectedChannels);
     });
 
     it('get channel for an employee looking for a non-unit channel', async() => {
