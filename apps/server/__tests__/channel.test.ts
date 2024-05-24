@@ -1,27 +1,172 @@
-import request from "supertest";
-import app from "server/src";
+import request from 'supertest';
+import express from 'express';
+//import app from 'server/src';
+import channelRouter from 'server/src/api/routes/channel';
 
-
-describe("channel tests", () => {
-    jest.useFakeTimers();
-    let bearerToken: string;
-
-    beforeEach(() => {
-        jest.useFakeTimers();
-        bearerToken = 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiZW1wbG95ZWVJZCI6LTEsInVzZXJuYW1lIjoia2VycmlrIiwiZmlyc3ROYW1lIjoiS2VycmlseW4iLCJsYXN0TmFtZSI6Iktlbm5lZHkiLCJwYXNzd29yZCI6IjEyMzQiLCJjcmVhdGVkQXQiOiIyMDI0LTA0LTE5VDEwOjE4OjE1LjA0OFoiLCJ1cGRhdGVkQXQiOiIyMDI0LTA0LTE5VDEwOjE4OjE1LjA0OFoiLCJ1bml0SWQiOjIsInJvbGVJZCI6Miwicm9sZSI6eyJpZCI6MiwibmFtZSI6IkFETUlOIiwiY3JlYXRlZEF0IjoiMjAyNC0wNC0xOVQxMDoxODoxNS4wMDFaIiwidXBkYXRlZEF0IjoiMjAyNC0wNC0xOVQxMDoxODoxNS4wMDFaIn0sImlhdCI6MTcxNDczNzY5MH0.Cw-4oKWYInyeDjR70LQVw9XQt4oLQk4WbVCdy0XRAz8';
-    });
-
-    test("server-side-error", async () => {
-        const response = await request(app).get('/channel').set('Authorization', bearerToken);
-        //console.log(`response.status is ${response.status}`);
-        expect(response.status).toBe(500);
-    });
-    
-    /*
-    test("get-channel-invalid-body", async () => {
-        const response = await request(app).get('/channel').set('Authorization', bearerToken);
-        console.log(`response.status is ${response.status}`);
-    });
-    */
+// Override the original models with mocks
+jest.mock('server/src/models/Channel', () => {
+    const { ChannelMock } = require('server/__mocks__/sequelize');
+    return ChannelMock;
+});
+jest.mock('server/src/models/Announcement', () => {
+    const { AnnouncementMock } = require('server/__mocks__/sequelize');
+    return AnnouncementMock;
+});
+jest.mock('server/src/models/UserInformation', () => {
+    const { UserInformationMock } = require('server/__mocks__/sequelize');
+    return UserInformationMock;
 });
 
+//import Channel from 'server/src/models/Channel';
+
+
+const app = express();
+app.use(express.json());
+app.use('/channel', channelRouter);
+
+describe('GET /channel', () => {
+    /*
+    it('should return all rooms for an Admin', async () => {
+        const body = {
+            name: 'nonExistingUser'
+        };
+        const response = await request(app)
+        .post('/channel')
+        .send(body);
+        expect(response.status).toBe(201);
+    });
+
+    it('should return room corresponding to all unit of employee and all other non-unit channels', async () => {
+        const body = {
+            name: 'existingUser'
+        };
+        const response = await request(app)
+        .post('/channel')
+        .send(body);
+        expect(response.status).toBe(400);
+    });
+
+    it('should return room corresponding to all unit of nurse manager and all other non-unit channels', async () => {
+        const body = {
+            name: 'existingUser'
+        };
+        const response = await request(app)
+        .post('/channel')
+        .send(body);
+        expect(response.status).toBe(400);
+    });
+
+    it('should return room corresponding to all unit of employee and all other non-unit channels', async () => {
+        const body = {
+            name: 'existingUser'
+        };
+        const response = await request(app)
+        .post('/channel')
+        .send(body);
+        expect(response.status).toBe(400);
+    });
+
+    it('should return room corresponding to all unit of nurse manager and all other non-unit channels', async () => {
+        const body = {
+            name: 'existingUser'
+        };
+        const response = await request(app)
+        .post('/channel')
+        .send(body);
+        expect(response.status).toBe(400);
+    });
+    */
+
+    it('get channel with non-numeric id', async () => {
+        const response = await request(app)
+        .get('/channel/abc')
+        .set('unitid', '1')
+        .set('roleid', '2');
+        expect(response.status).toBe(400);
+    });
+
+    it('get channel for an employee looking for a non-unit channel', async() => {
+        const response = await request(app)
+        .get('/channel/2')
+        .set('unitid', '1')
+        .set('roleid', '1');
+        expect(response.status).toBe(200);
+    })
+
+    it('get channel for an employee looking for a channel for their unit', async() => {
+        const response = await request(app)
+        .get('/channel/1')
+        .set('unitid', '1')
+        .set('roleid', '1');
+        expect(response.status).toBe(200);
+    })
+
+    it('get channel for an employee looking for a channel for a unit they do not belong to', async() => {
+        const response = await request(app)
+        .get('/channel/3')
+        .set('unitid', '1')
+        .set('roleid', '1');
+        expect(response.status).toBe(401);
+    })
+
+    it('get channel for a nurse manager looking for a non-unit channel', async() => {
+        const response = await request(app)
+        .get('/channel/2')
+        .set('unitid', '1')
+        .set('roleid', '3');
+        expect(response.status).toBe(200);
+    })
+
+    it('get channel for a nurse manager looking for a channel for their unit', async() => {
+        const response = await request(app)
+        .get('/channel/1')
+        .set('unitid', '1')
+        .set('roleid', '3');
+        expect(response.status).toBe(200);
+    })
+
+    it('get channel for a nurse manager looking for a channel for a unit they do not belong to', async() => {
+        const response = await request(app)
+        .get('/channel/3')
+        .set('unitid', '1')
+        .set('roleid', '3');
+        expect(response.status).toBe(401);
+    })
+
+    it('get channel with id that does not exist', async () => {
+        const response = await request(app)
+        .get('/channel/45')
+        .set('roleid', '2');
+        expect(response.status).toBe(400);
+    });
+
+});
+
+
+describe('POST /channel', () => {
+    it('should create a channel that does not exist', async () => {
+        const body = {
+            name: 'nonExistingUser'
+        };
+        const response = await request(app)
+        .post('/channel')
+        .send(body);
+        expect(response.status).toBe(201);
+    });
+
+    it('should not create a channel that does exist', async () => {
+        const body = {
+            name: 'existingRoom'
+        };
+        const response = await request(app)
+        .post('/channel')
+        .send(body);
+        expect(response.status).toBe(400);
+    });
+
+    it('error should be raised when name is not provided', async () => {
+        const response = await request(app)
+        .post('/channel');
+        expect(response.status).toBe(400);
+    });
+});
