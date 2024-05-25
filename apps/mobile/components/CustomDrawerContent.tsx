@@ -1,3 +1,7 @@
+/**
+ * File: CustomDrawerContent.tsx
+ * Purpose: Override's the default app drawer template
+ */
 import { useNavigation } from "expo-router";
 import { useAuth } from "../contexts/AuthContext";
 import { DrawerContentScrollView, DrawerItem } from "@react-navigation/drawer";

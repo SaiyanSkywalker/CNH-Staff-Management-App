@@ -1,3 +1,7 @@
+/**
+ * File: index.tsx
+ * Purpose: Component for "login" screen, allows user to log in to app
+ */
 import React, { useState } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import {
@@ -58,6 +62,12 @@ const styles = StyleSheet.create({
 });
 const Page = () => {
   const { auth } = useAuth();
+
+  /**
+   * Handles user login,
+   * Shows alerts if there are errors
+   * Redirects to user schedule otherwise
+   */
   const onPressLogin = async () => {
     if (!username || !password) {
       Alert.alert("Error", "Please enter both email and password.");
@@ -70,6 +80,10 @@ const Page = () => {
       Alert.alert("Login Failed", "Invalid email or password.");
     }
   };
+  /**
+   * TODO: Add functionality for forgot password
+   * NOTE: workflow for combining this feature with CNH infrastructure was never devised
+   */
   const onPressForgotPassword = () => {
     // Do something about forgot password operation
   };

@@ -1,3 +1,8 @@
+/**
+ * File: calendar.tsx
+ * Purpose: Component for "calendar" screen where user can view their schedule
+ */
+
 import React, { useEffect, useState } from "react";
 import { StyleSheet, Text, View } from "react-native";
 import ScheduleEntryAttributes from "@shared/src/interfaces/ScheduleEntryAttributes";
@@ -101,13 +106,14 @@ const CalendarPage: React.FC = () => {
       );
       const fetchedShifts: { [date: string]: ScheduleEntryAttributes[] } = {};
 
-      // Create events for AgendaList
+      // Create event objects for AgendaList
       if (response.data) {
         response.data.forEach((shift: ScheduleEntryAttributes) => {
           const date = format(
             parseISO(shift.shiftDate.toString()),
             "yyyy-MM-dd"
           );
+          // Group shifts by date
           if (!fetchedShifts[date]) {
             fetchedShifts[date] = [];
           }

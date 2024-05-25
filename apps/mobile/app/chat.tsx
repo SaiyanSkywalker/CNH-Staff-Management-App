@@ -1,3 +1,8 @@
+/**
+ * File: chat.tsx
+ * Purpose: Component for "chat" screen where user cand send messages to different channels
+ */
+
 import React, { useState, useEffect, useRef } from "react";
 import { View, Text, TextInput, FlatList, StyleSheet } from "react-native";
 import axios from "axios";
@@ -79,6 +84,10 @@ export default function ChatPage() {
   >(undefined);
   const [selectedChannelName, setSelectedChannelName] = useState<string>("");
   const { auth } = useAuth();
+
+  /**
+   * Get all the messages for a particular channel
+   */
   const fetchAnnouncements = async () => {
     if (selectedChannel) {
       try {
@@ -107,6 +116,9 @@ export default function ChatPage() {
       }
     }
   };
+  /**
+   * Fetch all channels accessible to user
+   */
   const fetchChannels = async () => {
     try {
       const accessToken = await getToken("accessToken");
@@ -137,13 +149,21 @@ export default function ChatPage() {
     }
   };
 
+  /**
+   * Runs every time user selects a new channel
+   */
   const handleChannelChange = (value: string | null) => {
     if (value) {
       setPrevSelectedChannel((prevChannel) => selectedChannel);
       setSelectedChannel((prevChannel) => channelMap.get(value));
     }
   };
-  const parseAnnouncmentDate = (date: Date) => {
+  /**
+   * Parse date from dropdown for a server-friendly format
+   * @param date date to be parsed
+   * @returns formatted date string
+   */
+  const parseAnnouncmentDate = (date: Date): string => {
     if (!date) {
       return "";
     }
@@ -164,6 +184,9 @@ export default function ChatPage() {
 
   useEffect(() => {
     fetchAnnouncements();
+
+    // Event listeners for sockets that allow for real-time updates
+    // to the message forum
     const providerListener = (newAnnouncement: AnnouncementAttributes) => {
       const announcementExists = announcements.some(
         (announcement) => announcement.id === newAnnouncement.id
@@ -192,7 +215,12 @@ export default function ChatPage() {
     };
   }, [selectedChannel]);
 
+  /**
+   * Runs every time user sends a message
+   */
   const handleSend = () => {
+
+    // Send message to server through socket
     if (message && selectedChannel?.id && auth?.user?.id && auth?.socket) {
       const newAnnouncement: AnnouncementAttributes = {
         body: message,

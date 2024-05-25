@@ -1,3 +1,8 @@
+/**
+ * File: schedule.tsx
+ * Purpose: Allows users sign up for open shifts
+ */
+
 import React, { useEffect, useState } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import { parse, format } from "date-fns";
