@@ -1,3 +1,9 @@
+/**
+ * File: Unit.ts
+ * Purpose: defines Unit Sequelize model,
+ * which corresponds to Unit table in the db
+ */
+
 import { Column, DataType, Model, Table } from "sequelize-typescript";
 import UnitAttributes from "@shared/src/interfaces/UnitAttributes";
 

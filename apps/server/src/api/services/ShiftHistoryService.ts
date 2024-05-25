@@ -1,9 +1,18 @@
+/**
+ * File: ShiftHistoryService.ts
+ * Purpose: Contains functionality for database operations involving shift history
+ */
 import ShiftHistoryQuery from "@shared/src/interfaces/ShiftHistoryQuery";
 import ShiftHistory from "server/src/models/ShiftHistory";
 import Unit from "server/src/models/Unit";
 import UserInformation from "server/src/models/UserInformation";
 import ShiftHistoryClient from "@shared/src/interfaces/ShiftHistoryClient";
 
+/**
+ * Gets shift history based on search queries
+ * @param shiftHistoryQuery search data to filter shift history
+ * @returns records from ShiftHistory table that match query
+ */
 export const getShiftHistory = async (shiftHistoryQuery: ShiftHistoryQuery): Promise<ShiftHistoryClient[]> => {
   let shiftHistoryObjects: ShiftHistoryClient[] = [];
   try {
@@ -14,7 +23,6 @@ export const getShiftHistory = async (shiftHistoryQuery: ShiftHistoryQuery): Pro
       ...(shiftHistoryQuery.status != undefined ? { status: shiftHistoryQuery.status } : {}),
       ...(shiftHistoryQuery.shift != undefined ? { shiftTime: shiftHistoryQuery.shift } : {}),
     }
-
     const shiftHistory: ShiftHistory[] = await ShiftHistory.findAll({
       where: queryParams,
       include: [

@@ -1,3 +1,9 @@
+/**
+ * File: ScheduleEntry.ts
+ * Purpose: defines ScheduleEntry Sequelize model,
+ * which corresponds to ScheduleEntry table in the db
+ */
+
 import { Column, DataType, Model, Table, Unique } from "sequelize-typescript";
 import ScheduleEntryAttributes from "@shared/src/interfaces/ScheduleEntryAttributes";
 @Table({
@@ -16,8 +22,6 @@ import ScheduleEntryAttributes from "@shared/src/interfaces/ScheduleEntryAttribu
   ],
 })
 class ScheduleEntry extends Model<ScheduleEntryAttributes> {
-
-
   @Column({
     primaryKey: true,
     type: DataType.INTEGER,

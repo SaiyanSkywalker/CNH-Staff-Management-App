@@ -1,8 +1,16 @@
+/**
+ * File: unit.ts
+ * Purpose: Defines routes assosciated with
+ * processing data related to units (cost centers)
+ */
 import { Request, Response, Router } from "express";
 import { sequelize } from "../../loaders/dbLoader";
 
 const unitRouter = Router();
 
+/**
+ * Retrieves all units
+ */
 unitRouter.get("/", async (req: Request, res: Response) => {
   try {
     const units = await sequelize.models.Unit.findAll();
@@ -14,11 +22,14 @@ unitRouter.get("/", async (req: Request, res: Response) => {
   }
 });
 
+/**
+ * Retrives unit based on id
+ */
 unitRouter.get("/:id", async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     const units = await sequelize.models.Unit.findAll({
-      where: { id }
+      where: { id },
     });
     res.json(units);
   } catch (error) {

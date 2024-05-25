@@ -1,12 +1,22 @@
+/**
+ * File: CsvUtils.ts
+ * Purpose: contains utility functions used to process CSV files
+ */
 import ScheduleEntryAttributes from "@shared/src/interfaces/ScheduleEntryAttributes";
 import { UploadedFile } from "express-fileupload";
 import moment from "moment";
-// Converts CSV file to a 2D
+
+// Converts CSV file to a 2D array
 export const csvToArray = (content: string): string[][] => {
   let lines = content.split("\n").slice(1); // Skip line with header columns
   return lines.map((l) => l.trim().split(","));
 };
 
+/**
+ * Converts 2D array to array of ScheduleEntry
+ * @param lines contents of CSV files
+ * @returns
+ */
 export const csvToScheduleData = (
   lines: string[][]
 ): ScheduleEntryAttributes[] => {
@@ -27,6 +37,11 @@ export const csvToScheduleData = (
   });
 };
 
+/**
+ * Checks headers of CSV to ensure that CSV file is valid
+ * @param schedule uploaded CSV file
+ * @returns object indicating if schedule is valid, if schedule isn't valid object also contains error
+ */
 export const validateSchedule = (schedule: UploadedFile): any => {
   const content = schedule.data.toString();
 
@@ -56,12 +71,13 @@ export const validateSchedule = (schedule: UploadedFile): any => {
 
   const headers = content.trim().split("\n")[0].split(",");
 
+  // Check if CSV contains headers in correct order
   const isValid =
     headers.length === defaultHeaders.length &&
     headers.every((header, index) => header === defaultHeaders[index]);
 
   if (!isValid) {
-    return { isValid: false, error: "File of incorrect format" };
+    return { isValid: false, error: "File has incorrect format" };
   }
 
   return { isValid: true };

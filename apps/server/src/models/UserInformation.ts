@@ -1,3 +1,9 @@
+/**
+ * File: UserInformation.ts
+ * Purpose: defines UserInformation Sequelize model,
+ * which corresponds to UserInformation table in the db
+ */
+
 import {
   DataType,
   Table,
@@ -45,9 +51,17 @@ class UserInformation extends Model<UserInformationAttributes> {
   @Column({ type: DataType.STRING, allowNull: false })
   password!: string;
 
-  @BelongsTo(() => Unit, { foreignKey: "unitId", targetKey: "id", onDelete: "SET NULL" })
+  @BelongsTo(() => Unit, {
+    foreignKey: "unitId",
+    targetKey: "id",
+    onDelete: "SET NULL",
+  })
   unit?: Unit;
-  @BelongsTo(() => Role, { foreignKey: "roleId", targetKey: "id", onDelete: "SET NULL" })
+  @BelongsTo(() => Role, {
+    foreignKey: "roleId",
+    targetKey: "id",
+    onDelete: "SET NULL",
+  })
   role?: Role;
 }
 export default UserInformation;

@@ -1,19 +1,30 @@
+/**
+ * File: ShiftCapacityService.ts
+ * Purpose: Service that manages operations with database involving
+ * shift capacity data
+ */
 import ShiftCapacity from "server/src/models/ShiftCapacity";
 import ShiftCapacityRequest from "@shared/src/interfaces/ShiftCapacityRequest";
 import DefaultCapacity from "server/src/models/DefaultCapacity";
 import Unit from "server/src/models/Unit";
-import ShiftCapacityAttributes from "@shared/src/interfaces/ShiftCapacityAttributes";
-import ShiftCapacityResponse from "@shared/src/interfaces/ShiftCapacityResponse";
 
+/**
+ * Breaks down shift into smaller 4hr internvals
+ * @param shiftTime string containing start and end times of shift
+ * @returns list of 4hr intervals that exist within original shift time
+ */
 const parseShift = (shiftTime: string): string[] => {
   let shiftStrings: string[] = [];
   let beginTimeHour = Number(shiftTime.substring(0, 2));
   let endTimeHour = Number(shiftTime.substring(8, 10));
   let minutes = shiftTime.substring(3, 5);
   let differenceInHours = endTimeHour - beginTimeHour;
+  // If shift end time is in the next day, modify hours difference
   if (differenceInHours <= 0) {
     differenceInHours += 24;
   }
+  // Make a new shift interval for every 4hrs between shift
+  // start and end times
   for (let i = 0; i < differenceInHours; i += 4) {
     let newBeginTime: number = (beginTimeHour + i) % 24;
     let newEndTime: number = (beginTimeHour + i + 4) % 24;
@@ -37,6 +48,11 @@ const parseShift = (shiftTime: string): string[] => {
   return shiftStrings;
 };
 
+/**
+ * Gets the nexy day for current date
+ * @param currentDate date string
+ * @returns
+ */
 const nextDay = (currentDate: string) => {
   const newDate = new Date(currentDate);
   const currentDay = newDate.getDate();
@@ -51,6 +67,10 @@ const nextDay = (currentDate: string) => {
   return newDate.toISOString().substring(0, 10);
 };
 
+/**
+ * Stores shift capacity in db
+ * @param shiftCapacityRequest
+ */
 export const postShiftCapacity = async (
   shiftCapacityRequest: ShiftCapacityRequest
 ): Promise<void> => {
@@ -69,6 +89,9 @@ export const postShiftCapacity = async (
       }
       let nUnitId = Number(unitId);
       let model: ShiftCapacity | DefaultCapacity;
+
+      // Based on request body stores default shift capacity
+      // or regular shift capacity
       if (shiftCapacityRequest.isDefault) {
         model =
           (await DefaultCapacity.findOne({
@@ -108,6 +131,12 @@ export const postShiftCapacity = async (
   }
 };
 
+/**
+ * Get shift capacities for a unit (updated and default)
+ * @param date shift date
+ * @param costCenterId shift cost center
+ * @returns
+ */
 export const getShiftCapacity = async (
   date: string | undefined = undefined,
   costCenterId: number | undefined = undefined
