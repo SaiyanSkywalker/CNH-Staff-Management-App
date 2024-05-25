@@ -1,3 +1,9 @@
+/**
+ * File: UnitAttributes.ts
+ * Purpose: interface that shows structure of info related 
+ * to users (based on UserInformation model)
+ */
+
 import RoleAttributes from "./RoleAttributes";
 import UnitAttributes from "./UnitAttributes";
 
