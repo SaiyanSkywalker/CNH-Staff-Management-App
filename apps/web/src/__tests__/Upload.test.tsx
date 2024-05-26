@@ -1,7 +1,24 @@
 import "@testing-library/jest-dom";
 import { render, screen } from "@testing-library/react";
 import Upload from "../app/upload/page";
-import { mockUseRouter } from "@webSrc/__mocks__/mockRouter";
+import { useRouter } from "next/navigation";
+
+// Mocking useRouter hook
+jest.mock("next/navigation", () => ({
+  useRouter: jest.fn()
+}));
+
+interface Router {
+  replace: jest.Mock<any, any>;
+  back: jest.Mock<any, any>;
+  forward: jest.Mock<any, any>;
+  refresh: jest.Mock<any, any>;
+  push: jest.Mock<any, any>;
+  prefetch: jest.Mock<any, any>;
+}
+
+// Router (type of useRouter) needs to be mocked for usage
+const mockUseRouter = useRouter as jest.Mock<Router>;
 
 describe("Upload", () => {
   beforeEach(() => {

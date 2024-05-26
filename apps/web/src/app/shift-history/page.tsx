@@ -10,7 +10,7 @@ import page from "@webSrc/styles/ShiftHistory.module.css";
 import { useAuth } from "@webSrc/contexts/AuthContext";
 import { useSearchParams } from "next/navigation";
 import ShiftHistoryClient from "@shared/src/interfaces/ShiftHistoryClient";
-import config from "web/src/config";
+import config from "@webSrc/config";
 import axios from "axios";
 import UnitAttributes from "@shared/src/interfaces/UnitAttributes";
 import AuthWrapper from "@webSrc/components/ProtectedRoute";
@@ -89,8 +89,9 @@ const Page = () => {
   const updateList = async (): Promise<void> => {
     try {
       let unitRequested: string = "";
-      if(auth?.user?.roleId === 3) {
-        const unitId: string = auth?.user?.roleId === 3 ? "/" + String(auth?.user?.unitId) : ""
+      if (auth?.user?.roleId === 3) {
+        const unitId: string =
+          auth?.user?.roleId === 3 ? "/" + String(auth?.user?.unitId) : "";
         const getUnit = async (unitId: string): Promise<void> => {
           const res = await axios({
             method: "GET",
@@ -100,14 +101,16 @@ const Page = () => {
           const nurseManagerUnits: UnitAttributes[] = res.data;
           const nurseManagerUnit: UnitAttributes = nurseManagerUnits[0];
           unitRequested = nurseManagerUnit.name;
-        }
+        };
         await getUnit(unitId);
       }
-    
-      console.log(`unitRequested is ${unitRequested}`);
+
+      // console.log(`unitRequested is ${unitRequested}`);
       setIsLoading((prevLoad) => !prevLoad);
       const res = await axios(
-        `http://localhost:3003/shift-history?employeeId=${employeeId}&employeeName=${employeeName}&unit=${auth?.user?.roleId === 3 ? unitRequested : unit}&requestedDate=${requestedDate}&shiftDate=${shiftDate}&shift=${shift}&status=${status}`,
+        `http://localhost:3003/shift-history?employeeId=${employeeId}&employeeName=${employeeName}&unit=${
+          auth?.user?.roleId === 3 ? unitRequested : unit
+        }&requestedDate=${requestedDate}&shiftDate=${shiftDate}&shift=${shift}&status=${status}`,
         {
           method: "GET",
           headers: {
@@ -256,10 +259,7 @@ const Page = () => {
               ></input>
             </div>
 
-            {auth?.user?.roleId === 3 ? 
-            undefined 
-            :
-              (
+            {auth?.user?.roleId === 3 ? undefined : (
               <div>
                 <label className={page.label}>Unit</label>
                 <input
@@ -269,8 +269,7 @@ const Page = () => {
                   className={page.input}
                 ></input>
               </div>
-              )
-            }
+            )}
 
             <div>
               <label className={page.label}>Requested Date</label>
@@ -364,7 +363,7 @@ const Page = () => {
                     {
                       parseDate(
                         shiftHistory.createdAt
-                      ) /*shiftHistory.createdAt.substring(5,7) + "/" + shiftHistory.createdAt.substring(8,10) + "/" + shiftHistory.createdAt.substring(0,4)*/
+                      ) 
                     }{" "}
                   </td>
                   <td className={page.td}>{shiftHistory.dateRequested}</td>

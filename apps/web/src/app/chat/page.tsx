@@ -152,19 +152,30 @@ const Page = () => {
 
         loadingContext?.showLoader();
         const accessToken = getAccessToken();
-        const res = await fetch(`${config.apiUrl}/channel`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${accessToken}`,
-          },
-          body: JSON.stringify(newChannelRequest),
-        });
+        const res = await axios.post(
+          `${config.apiUrl}/channel`,
+          JSON.stringify(newChannelRequest),
+          {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${accessToken}`,
+            },
+          }
+        );
+
+        // const res = await fetch(`${config.apiUrl}/channel`, {
+        //   method: "POST",
+        //   headers: {
+        //     "Content-Type": "application/json",
+        //     Authorization: `Bearer ${accessToken}`,
+        //   },
+        //   body: JSON.stringify(newChannelRequest),
+        // });
 
         loadingContext?.hideLoader();
 
         if (res.status === 201) {
-          let jsonData = await res.json();
+          let jsonData: any = res;
           bannerContext?.showBanner(
             `Success, the new channel ${newChannel} successfully saved`,
             "success"
@@ -235,7 +246,6 @@ const Page = () => {
     if (!message || !selectedChannel || !auth?.user?.id) {
       return;
     }
-
     const newAnnouncement: AnnouncementAttributes = {
       body: message,
       sender: auth?.user,
@@ -328,7 +338,7 @@ const Page = () => {
                 >
                   <ul className={styles["announcements-ul"]}>
                     {announcements.map((announcement) => (
-                      <li key={announcement.id}>
+                      <li key={uuidv4()}>
                         <div className={styles["announcements-info"]}>
                           <h3>{announcement.sender?.username}&nbsp;</h3>
                           <small>

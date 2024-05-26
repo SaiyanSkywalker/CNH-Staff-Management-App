@@ -72,7 +72,7 @@ describe("Chat Functionality", () => {
 
     // Wait for the success banner to be displayed
     await waitFor(() => {
-      console.log(screen.debug());
+      // console.log(screen.debug());
       expect(
         screen.getByText(/Success, the new channel .* succesfully saved/i)
       ).toBeInTheDocument();
@@ -91,7 +91,7 @@ describe("Chat Functionality", () => {
 
     // Wait for the error banner to be displayed
     await waitFor(() => {
-    //   console.log(screen.debug());
+      //   // console.log(screen.debug());
       expect(
         screen.getByText(/Error in saving the new channel .*$/i)
       ).toBeInTheDocument();
@@ -123,7 +123,7 @@ describe("Chat Functionality", () => {
 
     // Wait for the error banner to be displayed
     await waitFor(() => {
-    //   console.log(screen.debug());
+      //   // console.log(screen.debug());
       expect(
         screen.getByText(/Error in sending message: .*$/i)
       ).toBeInTheDocument();
