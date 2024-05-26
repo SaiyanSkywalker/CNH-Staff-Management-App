@@ -1,3 +1,7 @@
+/**
+ * File: not-found.tsx
+ * Purpose: contains code for /not-found (and any non-existent route)
+ */
 "use client";
 import Link from "next/link";
 const Page = () => {

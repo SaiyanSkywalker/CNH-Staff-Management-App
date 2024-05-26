@@ -48,6 +48,14 @@ export default function AuthProvider({
   const [user, setUser] = useState<UserInformation>({} as UserInformation);
   const [socket, setSocket] = useState<Socket | null | undefined>(undefined);
   const [userUUID, setUserUUID] = useState<string | undefined>(undefined);
+
+  /**
+   * login user to app
+   * @param username username for user
+   * @param password unhashed password
+   * @param isMobile true if user is logging in from mobile, false otherwise
+   * @returns
+   */
   const login = async (
     username: string,
     password: string,
@@ -68,6 +76,11 @@ export default function AuthProvider({
     }
     return false;
   };
+  /**
+   * Creates new socket on for user,
+   * update context state
+   * @param userInfo info about user
+   */
   const loginUser = (userInfo: UserInformation) => {
     setUser(userInfo);
     setIsLoggedIn(true);

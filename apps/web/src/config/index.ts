@@ -1,3 +1,7 @@
+/**
+ * File: index.ts
+ * Purpose: Contains info used to configure web app
+ */
 interface WebConfig {
   apiUrl: string;
 }
