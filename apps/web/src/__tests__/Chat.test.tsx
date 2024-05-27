@@ -3,15 +3,44 @@ import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import Chat from "../app/chat/page";
 import axios from "axios";
 import { mockUseRouter } from "@webSrc/__mocks__/mockRouter";
+import {
+  MockAuthContextProvider,
+  MockBannerContextProvider,
+  MockLoadingContextProvider,
+  mockAuthContextValue,
+  mockBannerContextValue,
+  mockLoadingContextValue,
+} from "@webSrc/__mocks__/mockContexts";
+import { ReactNode } from "react";
+import { io } from "socket.io-client";
 
 // Mocking axios
 jest.mock("axios");
+jest.mock("socket.io-client", () => {
+  const mockSocket = {
+    on: jest.fn(),
+    off: jest.fn(),
+    emit: jest.fn(),
+  };
+  return {
+    io: jest.fn(() => mockSocket),
+  };
+});
 
-// Mocking getAccessToken directly
-const mockGetAccessToken = jest.fn().mockReturnValue("fake_token");
+const renderWithProviders = (component: ReactNode) => {
+  return render(
+    <MockAuthContextProvider>
+      <MockBannerContextProvider>
+        <MockLoadingContextProvider>{component}</MockLoadingContextProvider>
+      </MockBannerContextProvider>
+    </MockAuthContextProvider>
+  );
+};
 
 describe("Chat Functionality", () => {
   beforeEach(() => {
+    jest.clearAllMocks();
+
     // Mocking the implementation of useRouter before each test
     mockUseRouter.mockImplementation(() => ({
       replace: jest.fn(),
@@ -24,7 +53,7 @@ describe("Chat Functionality", () => {
   });
 
   it("renders new channel input and button", () => {
-    render(<Chat />);
+    renderWithProviders(<Chat />);
     const inputElement: HTMLElement =
       screen.getByPlaceholderText("Enter channel name");
     const buttonElement: HTMLElement = screen.getByRole("button", {
@@ -36,21 +65,21 @@ describe("Chat Functionality", () => {
   });
 
   it("displays channels list", () => {
-    render(<Chat />);
+    renderWithProviders(<Chat />);
     const channelsElement: HTMLElement = screen.getByText("Channels");
 
     expect(channelsElement).toBeInTheDocument();
   });
 
   it("displays announcements container", () => {
-    render(<Chat />);
+    renderWithProviders(<Chat />);
     const announcementsElement: HTMLElement = screen.getByText("Announcements");
 
     expect(announcementsElement).toBeInTheDocument();
   });
 
   it("renders message input and send button", () => {
-    render(<Chat />);
+    renderWithProviders(<Chat />);
     const inputElement: HTMLElement = screen.getByPlaceholderText(
       "Type your message here..."
     );
@@ -64,26 +93,29 @@ describe("Chat Functionality", () => {
 
   it("creates a new channel", async () => {
     (axios.post as jest.Mock).mockResolvedValueOnce({ status: 201 });
-    render(<Chat />);
+    renderWithProviders(<Chat />);
     fireEvent.change(screen.getByPlaceholderText("Enter channel name"), {
       target: { value: "New Channel" },
     });
     fireEvent.click(screen.getByRole("button", { name: "+ Add channel" }));
 
-    // Wait for the success banner to be displayed
+    // Ensure showBanner was called
     await waitFor(() => {
-      // console.log(screen.debug());
-      expect(
-        screen.getByText(/Success, the new channel .* succesfully saved/i)
-      ).toBeInTheDocument();
+      expect(mockBannerContextValue.showBanner).toHaveBeenCalledWith(
+        expect.stringMatching(
+          /Success, the new channel .* successfully saved/i
+        ),
+        "success"
+      );
     });
   });
 
   it("handles error when creating a new channel fails", async () => {
-    (axios.post as jest.Mock).mockRejectedValueOnce(
+    (axios.post as jest.Mock).mockRejectedValue(
       new Error("Failed to create new channel")
     );
-    render(<Chat />);
+
+    renderWithProviders(<Chat />);
     fireEvent.change(screen.getByPlaceholderText("Enter channel name"), {
       target: { value: "New Channel" },
     });
@@ -91,15 +123,15 @@ describe("Chat Functionality", () => {
 
     // Wait for the error banner to be displayed
     await waitFor(() => {
-      //   // console.log(screen.debug());
-      expect(
-        screen.getByText(/Error in saving the new channel .*$/i)
-      ).toBeInTheDocument();
+      expect(mockBannerContextValue.showBanner).toHaveBeenCalledWith(
+        expect.stringMatching(/Error in saving the new channel .*$/i),
+        "error"
+      );
     });
   });
 
   it("sends a message to the selected channel", async () => {
-    render(<Chat />);
+    renderWithProviders(<Chat />);
     fireEvent.change(screen.getByPlaceholderText("Type your message here..."), {
       target: { value: "Hello, world!" },
     });
@@ -111,22 +143,28 @@ describe("Chat Functionality", () => {
     );
   });
 
-  it("handles error when sending a message fails", async () => {
-    (axios.post as jest.Mock).mockRejectedValueOnce(
-      new Error("Failed to send message")
-    );
-    render(<Chat />);
-    fireEvent.change(screen.getByPlaceholderText("Type your message here..."), {
-      target: { value: "Hello, world!" },
-    });
-    fireEvent.click(screen.getByRole("button", { name: "Send" }));
+  // TODO: Need to figure out a way to mock handling events emitted by server on client
 
-    // Wait for the error banner to be displayed
-    await waitFor(() => {
-      //   // console.log(screen.debug());
-      expect(
-        screen.getByText(/Error in sending message: .*$/i)
-      ).toBeInTheDocument();
-    });
-  });
+  // it("handles error when sending a message fails", async () => {
+  //   (axios.post as jest.Mock).mockRejectedValue(
+  //     new Error("Failed to send message")
+  //   );
+  //   renderWithProviders(<Chat />);
+  //   fireEvent.change(screen.getByPlaceholderText("Type your message here..."), {
+  //     target: { value: "Hello, world!" },
+  //   });
+  //   fireEvent.click(screen.getByRole("button", { name: "Send" }));
+  //   const socket = mockAuthContextValue.auth.socket;
+  //   if (socket) {
+  //     socket.emit("message_failed", {});
+  //     await waitFor(() => {
+  //       console.log(screen.debug());
+  //       const errorElement = screen.getByText(
+  //         "Error occurred on server. Please try again!"
+  //       );
+  //       expect(errorElement).toBeInTheDocument();
+  //       expect(errorElement).toBeVisible(); // Check if the element is visible
+  //     });
+  //   }
+  // });
 });

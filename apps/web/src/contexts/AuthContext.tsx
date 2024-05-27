@@ -20,18 +20,13 @@ interface AuthDetails {
   logout: () => Promise<boolean>;
 }
 
-
 interface IAuthContext {
   auth: AuthDetails;
 }
 
-const AuthContext = createContext<Partial<IAuthContext>>({});
+export const AuthContext = createContext<Partial<IAuthContext>>({});
 
-export default function AuthProvider({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [user, setUser] = useState<UserInformation>({} as UserInformation);
   const [socket, setSocket] = useState<Socket | null | undefined>(undefined);
@@ -225,6 +220,6 @@ export default function AuthProvider({
       {children}
     </AuthContext.Provider>
   );
-}
+};
 
 export const useAuth = () => useContext(AuthContext);

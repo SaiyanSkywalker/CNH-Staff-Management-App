@@ -69,8 +69,8 @@ const Page = () => {
           Authorization: `Bearer ${accessToken}`,
         },
       });
-      const data: ChannelAttributes[] = await response.data;
-      if (data) {
+      if (response && response.data) {
+        const data: ChannelAttributes[] = await response.data;
         setChannels(data);
         const newChannelMap: Map<string, ChannelAttributes> = new Map<
           string,
@@ -83,7 +83,10 @@ const Page = () => {
       }
     } catch (err: any) {
       if (!err.response) {
-        bannerContext?.showBanner("Error, server is currently down!", "error");
+        bannerContext?.showBanner(
+          "Error retrieivng channels from server",
+          "error"
+        );
       }
       // console.error(err);
     }
@@ -201,7 +204,7 @@ const Page = () => {
     } catch (error) {
       loadingContext?.hideLoader();
       bannerContext?.showBanner(
-        `Error in saving in saving the new channel ${newChannel} + ${error}`,
+        `Error in saving the new channel ${newChannel} + ${error}`,
         "error"
       );
 
