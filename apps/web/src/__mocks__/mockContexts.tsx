@@ -8,7 +8,10 @@ import {
   LoadingContextProps,
 } from "@webSrc/contexts/LoadingContext";
 import { AuthContext } from "@webSrc/contexts/AuthContext";
+import { io } from "socket.io-client";
+import { render } from "@testing-library/react";
 
+const mockedIo = io as jest.MockedFunction<typeof io>;
 // Mock implementations for BannerContext
 export const mockBannerContextValue: BannerContextProps = {
   bannerText: "",
@@ -50,6 +53,7 @@ const mockSocket: any = {
   off: jest.fn(),
   emit: jest.fn(),
 };
+mockedIo.mockReturnValue(mockSocket);
 export const mockAuthContextValue = {
   auth: {
     user: null,
@@ -68,3 +72,13 @@ export const MockAuthContextProvider = ({
     {children}
   </AuthContext.Provider>
 );
+
+export const renderWithProviders = (component: ReactNode) => {
+  return render(
+    <MockAuthContextProvider>
+      <MockBannerContextProvider>
+        <MockLoadingContextProvider>{component}</MockLoadingContextProvider>
+      </MockBannerContextProvider>
+    </MockAuthContextProvider>
+  );
+};

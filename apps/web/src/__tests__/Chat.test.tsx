@@ -16,17 +16,8 @@ import { io } from "socket.io-client";
 
 // Mocking axios
 jest.mock("axios");
-jest.mock("socket.io-client", () => {
-  const mockSocket = {
-    on: jest.fn(),
-    off: jest.fn(),
-    emit: jest.fn(),
-  };
-  return {
-    io: jest.fn(() => mockSocket),
-  };
-});
-
+jest.mock("socket.io-client");
+const mockedIo = io as jest.MockedFunction<typeof io>;
 const renderWithProviders = (component: ReactNode) => {
   return render(
     <MockAuthContextProvider>
@@ -143,28 +134,31 @@ describe("Chat Functionality", () => {
     );
   });
 
-  // TODO: Need to figure out a way to mock handling events emitted by server on client
+  it("handles error when sending a message fails", async () => {
+    renderWithProviders(<Chat />);
+    fireEvent.change(screen.getByPlaceholderText("Type your message here..."), {
+      target: { value: "Hello, world!" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Send" }));
 
-  // it("handles error when sending a message fails", async () => {
-  //   (axios.post as jest.Mock).mockRejectedValue(
-  //     new Error("Failed to send message")
-  //   );
-  //   renderWithProviders(<Chat />);
-  //   fireEvent.change(screen.getByPlaceholderText("Type your message here..."), {
-  //     target: { value: "Hello, world!" },
-  //   });
-  //   fireEvent.click(screen.getByRole("button", { name: "Send" }));
-  //   const socket = mockAuthContextValue.auth.socket;
-  //   if (socket) {
-  //     socket.emit("message_failed", {});
-  //     await waitFor(() => {
-  //       console.log(screen.debug());
-  //       const errorElement = screen.getByText(
-  //         "Error occurred on server. Please try again!"
-  //       );
-  //       expect(errorElement).toBeInTheDocument();
-  //       expect(errorElement).toBeVisible(); // Check if the element is visible
-  //     });
-  //   }
-  // });
+    // Find eventHandler for event name
+    const eventHandler = mockAuthContextValue.auth.socket.on.mock.calls.find(
+      (call: any) => call[0] === "message_failed"
+    )?.[1];
+
+    // If it exists, call event handler
+    if (eventHandler) {
+      eventHandler();
+    }
+
+    // Assert that error element appears on screen
+    await waitFor(() => {
+      console.log(screen.debug());
+      const errorElement = screen.getByText(
+        "Error occurred on server. Please try again!"
+      );
+      expect(errorElement).toBeInTheDocument();
+      expect(errorElement).toBeVisible(); // Check if the element is visible
+    });
+  });
 });

@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 
 // Mocking useRouter hook
 jest.mock("next/navigation", () => ({
-  useRouter: jest.fn()
+  useRouter: jest.fn(),
 }));
 
 interface Router {
