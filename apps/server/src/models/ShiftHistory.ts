@@ -1,3 +1,9 @@
+/**
+ * File: ShiftHistory.ts
+ * Purpose: defines ShiftHistory Sequelize model,
+ * which corresponds to ShiftHistory table in the db
+ */
+
 import {
   BelongsTo,
   Column,
@@ -25,13 +31,21 @@ class ShiftHistory extends Model<ShiftHistoryAttributes> {
   @Column(DataType.STRING)
   status!: string;
 
-  @BelongsTo(() => UserInformation, { targetKey: "employeeId", foreignKey: "userId", onDelete: "CASCADE" })
+  @BelongsTo(() => UserInformation, {
+    targetKey: "employeeId",
+    foreignKey: "userId",
+    onDelete: "CASCADE",
+  })
   user!: UserInformation;
 
-  @BelongsTo(() => Unit, { targetKey: "id", foreignKey: "unitId", onDelete: "CASCADE" })
+  @BelongsTo(() => Unit, {
+    targetKey: "id",
+    foreignKey: "unitId",
+    onDelete: "CASCADE",
+  })
   unit!: Unit;
 
-  @Column( { type: DataType.STRING, allowNull: false })
+  @Column({ type: DataType.STRING, allowNull: false })
   dateRequested!: string;
 
   @Column(DataType.INTEGER)

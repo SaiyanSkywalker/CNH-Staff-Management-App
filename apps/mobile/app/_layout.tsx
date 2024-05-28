@@ -1,4 +1,10 @@
-import AuthProvider, { useAuth } from "../contexts/AuthContext";
+/**
+ * File: _layout.tsx
+ * Purpose: Implemenents the strcture of the app drawer
+ * that's toggled by clicking the hamburger menu in the top left
+ * part of the screen
+ */
+import AuthProvider from "../contexts/AuthContext";
 import { Drawer } from "expo-router/drawer";
 import React from "react";
 import { Ionicons } from "@expo/vector-icons";

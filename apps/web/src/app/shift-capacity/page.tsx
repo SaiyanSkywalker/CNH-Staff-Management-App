@@ -1,3 +1,7 @@
+/**
+ * File: page.tsx
+ * Purpose: Contains functionality for shift capacity page
+ */
 "use client";
 
 import {
@@ -57,9 +61,13 @@ const ShiftCapacity = () => {
     "23:00 - 11:00",
   ];
 
+  /**
+   * Get all cost centers (based on user role)
+   */
   const getUnits = async () => {
     try {
-      const unitId: string = auth?.user?.roleId === 3 ? "/" + String(auth?.user?.unitId) : ""
+      const unitId: string =
+        auth?.user?.roleId === 3 ? "/" + String(auth?.user?.unitId) : "";
       const response = await axios({
         method: "GET",
         url: `${config.apiUrl}/unit${unitId}`,
@@ -105,6 +113,11 @@ const ShiftCapacity = () => {
     setIsChecked((prevIsChecked) => !prevIsChecked);
   }
 
+  /**
+   * Handles user submission for shift capacities
+   * Show banner based on request success/failure
+   * @param event 
+   */
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     console.log("date is:");
     console.dir(date);

@@ -1,3 +1,4 @@
+
 export default interface ScheduleEntryAttributes {
   id?: number;
   employeeId: number;

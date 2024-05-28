@@ -1,19 +1,27 @@
+/**
+ * File: socketHandler.ts
+ * Trees: Contains logic for creating sockets, and handling socket events
+ */
 import UserSocketAttributes from "@shared/src/interfaces/UserSocketAttributes";
 import ShiftRequestAttributes from "@shared/src/interfaces/ShiftRequestAttributes";
 import { Server, Socket } from "socket.io";
 import ShiftHistory from "../models/ShiftHistory";
 import Unit from "server/src/models/Unit";
 import UserInformation from "server/src/models/UserInformation";
-import ScheduleEntry from "../models/ScheduleEntry";
-import { calculateDuration } from "../util/dateUtils";
 import CNHSocket from "@shared/src/interfaces/CNHSocket";
 import AnnouncementAttributes from "@shared/src/interfaces/AnnouncementAttributes";
 import Announcement from "../models/Announcement";
 import Channel from "../models/Channel";
 
+// Socket maps used to hold sockets in memory
 export const mobileSocketMap = new Map<string, Map<string, CNHSocket>>();
 export const adminSocketMap = new Map<string, Map<string, CNHSocket>>();
 
+/**
+ * Wrapper function where socket operations are defined
+ * @param io
+ * @param socket
+ */
 const socketHandler = (io: Server, socket: CNHSocket) => {
   socket.on("disconnect", () => {
     if (socket.userInfo) {
@@ -21,6 +29,7 @@ const socketHandler = (io: Server, socket: CNHSocket) => {
       console.log("DISCONNECTED!");
     }
   });
+  // Event where user is added to socket map (happens when user logs in)
   socket.on("add_user", (arg: UserSocketAttributes) => {
     const socketMap = arg.isAdmin ? adminSocketMap : mobileSocketMap;
     if (!socketMap.has(arg.username)) {
@@ -37,6 +46,7 @@ const socketHandler = (io: Server, socket: CNHSocket) => {
   });
 
   //REQUEST_INIT event
+  // Event where mobile user sends shift request to be processed by admin
   socket.on("shift_submission", async (arg: ShiftRequestAttributes) => {
     try {
       console.log(arg);
@@ -66,6 +76,7 @@ const socketHandler = (io: Server, socket: CNHSocket) => {
   });
 
   //REQUEST_UPDATE event
+  // Event where admin user accepts or rejects shift request
   socket.on(
     "shift_accept",
     async (arg: { shiftHistoryId: number; isAccepted: boolean }) => {
@@ -136,6 +147,7 @@ const socketHandler = (io: Server, socket: CNHSocket) => {
   );
 
   //MESSAGE_SENT event
+  // Event where chat message is sent
   socket.on("message_sent", async (arg: AnnouncementAttributes) => {
     let message: string = arg.body;
     let userId: number = arg.senderId;
@@ -160,6 +172,7 @@ const socketHandler = (io: Server, socket: CNHSocket) => {
     }
   });
 
+  // Event where user joins room in chat page/screen
   socket.on(
     "join_room",
     (arg: { prevSelectedChannel: string; selectedChannel: string }) => {
@@ -177,11 +190,14 @@ const socketHandler = (io: Server, socket: CNHSocket) => {
     }
   );
 
+  // Event where user leaves room (emitted when user switches chat channels)
   socket.on("leave_room", (arg: { channelName: string }) => {
     socket.leave(arg.channelName);
   });
 };
 
+// Event where user is removed from socket map
+// typically emitted when user signs out
 const removeUser = (user: UserSocketAttributes) => {
   console.log("BEFORE: REMOVE_USER!");
   const socketMap = user.isAdmin ? adminSocketMap : mobileSocketMap;

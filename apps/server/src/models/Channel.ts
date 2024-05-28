@@ -1,3 +1,9 @@
+/**
+ * File: Channel.ts
+ * Purpose: defines Channel Sequelize model,
+ * which corresponds to Channel table in the db
+ */
+
 import {
   BelongsTo,
   Column,

@@ -1,3 +1,8 @@
+/**
+ * File: BannerContext.tsx
+ * Purpose: handle the showing/hiding of Banner component with
+ * configurable message
+ */
 "use client";
 import { createContext, useState, ReactNode } from "react";
 

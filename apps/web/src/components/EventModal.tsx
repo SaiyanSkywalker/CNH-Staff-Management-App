@@ -1,3 +1,8 @@
+/**
+ * File: EventModal.tsx
+ * Purpose: Modal that appears when the user is on the /schedule page
+ * and clicks a cell on the calendar (month view)
+ */
 import { CNHEvent } from "@webSrc/interfaces/CNHEvent";
 import React from "react";
 interface ModalProps {

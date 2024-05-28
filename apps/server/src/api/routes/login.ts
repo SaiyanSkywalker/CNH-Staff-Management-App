@@ -1,3 +1,7 @@
+/**
+ * File: login.ts
+ * Purpose: defines routes used for the login functionality
+ */
 import { Request, Response, Router } from "express";
 import { sequelize } from "server/src/loaders/dbLoader";
 import Role from "server/src/models/Role";
@@ -10,7 +14,9 @@ loginRouter.post(
   "/",
   async (req: Request, res: Response): Promise<Response> => {
     try {
-      console.log("HIT /LOGIN");
+      // console.log("HIT /LOGIN");
+
+      // Determine the user role
       const roleName: string =
         req.body.isMobile === "1"
           ? "USER"

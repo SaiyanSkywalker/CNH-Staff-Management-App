@@ -1,3 +1,9 @@
+/**
+ * File: index.ts
+ * Purpose: Import route definitions from other files and assigned 
+ * them to the router object used in the server
+ */
+
 import { Router } from "express";
 import scheduleRoutes from "./schedule";
 import shiftHistoryRoutes from "./shift-history";

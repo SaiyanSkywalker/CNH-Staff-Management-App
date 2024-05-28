@@ -1,3 +1,8 @@
+/**
+ * File: page.tsx
+ * Purpose: contains functionality for shift history page
+ */
+
 "use client";
 import {
   useState,
@@ -65,6 +70,10 @@ const Page = () => {
   const { auth } = useAuth();
   const bannerContext = useContext(BannerContext);
 
+  /**
+   * Check employee id to see if it's numeric
+   * @returns true if employee id is valid, false otherwise
+   */
   const validateEmployeeId = (): boolean => {
     const trimmedEmployeeId = employeeId.trim();
     if (trimmedEmployeeId.length === 0) {
@@ -76,6 +85,11 @@ const Page = () => {
     return true;
   };
 
+  /**
+   * Get all shift history data (based on user role)
+   * @param event
+   * @returns
+   */
   const getShiftHistories = async (
     event: FormEvent<HTMLFormElement>
   ): Promise<void> => {
@@ -89,8 +103,9 @@ const Page = () => {
   const updateList = async (): Promise<void> => {
     try {
       let unitRequested: string = "";
-      if(auth?.user?.roleId === 3) {
-        const unitId: string = auth?.user?.roleId === 3 ? "/" + String(auth?.user?.unitId) : ""
+      if (auth?.user?.roleId === 3) {
+        const unitId: string =
+          auth?.user?.roleId === 3 ? "/" + String(auth?.user?.unitId) : "";
         const getUnit = async (unitId: string): Promise<void> => {
           const res = await axios({
             method: "GET",
@@ -100,14 +115,16 @@ const Page = () => {
           const nurseManagerUnits: UnitAttributes[] = res.data;
           const nurseManagerUnit: UnitAttributes = nurseManagerUnits[0];
           unitRequested = nurseManagerUnit.name;
-        }
+        };
         await getUnit(unitId);
       }
-    
+
       console.log(`unitRequested is ${unitRequested}`);
       setIsLoading((prevLoad) => !prevLoad);
       const res = await axios(
-        `http://localhost:3003/shift-history?employeeId=${employeeId}&employeeName=${employeeName}&unit=${auth?.user?.roleId === 3 ? unitRequested : unit}&requestedDate=${requestedDate}&shiftDate=${shiftDate}&shift=${shift}&status=${status}`,
+        `http://localhost:3003/shift-history?employeeId=${employeeId}&employeeName=${employeeName}&unit=${
+          auth?.user?.roleId === 3 ? unitRequested : unit
+        }&requestedDate=${requestedDate}&shiftDate=${shiftDate}&shift=${shift}&status=${status}`,
         {
           method: "GET",
           headers: {
@@ -127,6 +144,7 @@ const Page = () => {
     }
   };
 
+  // Event handlers for changing any of the search input fields
   const handleEmployeeIdChange = (event: BaseSyntheticEvent): void => {
     setEmployeeId((prevEmployeeId) => event.target.value);
   };
@@ -155,6 +173,11 @@ const Page = () => {
     setStatus((prevStatus) => event.target.value);
   };
 
+  /**
+   * Styles status column based on shift request status
+   * @param status status of shift request
+   * @returns
+   */
   const statusStyle = (
     status: string
   ): { color: string; fontWeight: string } => {
@@ -169,6 +192,10 @@ const Page = () => {
     };
   };
 
+  /**
+   * Changes style of employyeeId baseed on if employee id is valid
+   * @returns
+   */
   const buttonStyle = (): { backgroundColor: string } => {
     return {
       backgroundColor: validateEmployeeId()
@@ -177,6 +204,11 @@ const Page = () => {
     };
   };
 
+  /**
+   * Emit socket event when accept/reject button is clicked
+   * @param shiftHistoryId id of shift history in db
+   * @param isAccepted indicates if shift is accepted,
+   */
   const acceptOrDenyShift = (
     shiftHistoryId: number,
     isAccepted: boolean
@@ -210,6 +242,7 @@ const Page = () => {
     bannerContext?.showBanner(`Error in ${acceptedString} shift!`, "error");
   };
 
+  // Parse date for shift date column
   const parseDate = (date: Date) =>
     date.toString().substring(5, 7) +
     "/" +
@@ -256,10 +289,7 @@ const Page = () => {
               ></input>
             </div>
 
-            {auth?.user?.roleId === 3 ? 
-            undefined 
-            :
-              (
+            {auth?.user?.roleId === 3 ? undefined : (
               <div>
                 <label className={page.label}>Unit</label>
                 <input
@@ -269,8 +299,7 @@ const Page = () => {
                   className={page.input}
                 ></input>
               </div>
-              )
-            }
+            )}
 
             <div>
               <label className={page.label}>Requested Date</label>

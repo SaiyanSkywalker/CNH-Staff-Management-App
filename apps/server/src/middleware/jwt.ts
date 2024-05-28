@@ -1,10 +1,14 @@
+/**
+ * File: jwt.ts
+ * Purpose: contains functions that handle operations involving JWT tokens
+ */
 import jwt from "jsonwebtoken";
 import config from "../config";
 import { NextFunction, Request, Response } from "express";
 import UserInformation from "../models/UserInformation";
 
 interface UserRequest extends Request {
-  user?: any;
+  user?: any; // contains info about user (usually of type UserInformationAttributes)
 }
 /**
  * Verfies JWT for any request made to server
@@ -27,6 +31,7 @@ export const verifyToken = (
       message: "No JWT token found; user could not be authenticated",
     });
   }
+  // Attempy to verfiy token
   jwt.verify(token, config.jwtSecretKey, (err: any, user: any) => {
     if (err) {
       // invalid token, user is unauthorized
@@ -41,6 +46,13 @@ export const verifyToken = (
   });
 };
 
+/**
+ * Encrypts user info as a JWT token
+ * @param user user information
+ * @param secret jwt secret
+ * @param lifetime how long token will last
+ * @returns
+ */
 export const createToken = (
   user: UserInformation,
   secret: string,

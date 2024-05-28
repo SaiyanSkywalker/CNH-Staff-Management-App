@@ -1,3 +1,7 @@
+/**
+ * File: schedule.ts
+ * Purpose: defines the routes assoicated with getting schedule data
+ */
 import config from "server/src/config";
 import { Request, Response, Router } from "express";
 import { UploadedFile } from "express-fileupload";
@@ -7,6 +11,7 @@ import {
   getUnitScheduleData,
   getScheduleDataForUser,
   saveScheduleData,
+  handleTestScheduleData,
 } from "../services/ScheduleEntryService";
 import { adminSocketMap } from "server/src/sockets/socketHandler";
 import { Socket } from "socket.io";
@@ -16,8 +21,10 @@ const scheduleRouter = Router();
 // Gets all shift data for admin portal
 scheduleRouter.get("/", async (req: Request, res: Response): Promise<void> => {
   try {
+    // const scheduleData = handleTestScheduleData(
+    //   req.query.costCenterId as string
+    // );
     // Uncomment code below if you want to use data from db instead
-    // const scheduleData = handleTestScheduleData(req.query.costCenterId as string)
     const scheduleData = await getScheduleData(
       req.query.costCenterId as string
     );
@@ -45,6 +52,7 @@ scheduleRouter.get(
   }
 );
 
+// Get all the shifts for a particular user
 scheduleRouter.get(
   "/:user",
   async (req: Request, res: Response): Promise<void> => {
@@ -58,6 +66,7 @@ scheduleRouter.get(
   }
 );
 
+// Add schedules to database from uploaded CSV file
 scheduleRouter.post("/", async (req: Request, res: Response) => {
   try {
     if (!req.files?.schedule) {

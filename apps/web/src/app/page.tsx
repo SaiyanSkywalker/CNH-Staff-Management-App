@@ -1,3 +1,8 @@
+/**
+ * File: page.tsx
+ * Purpose: home page, redirects user based on login status
+ *
+ */
 "use client";
 import { useEffect } from "react";
 import { useAuth } from "@webSrc/contexts/AuthContext";

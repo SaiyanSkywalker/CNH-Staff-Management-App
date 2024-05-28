@@ -1,3 +1,8 @@
+/**
+ * File: DefaultUnits.ts
+ * Purpose: Defines default units to be added
+ * to database if not already present
+ */
 const DefaultUnits = [
   { laborLevelEntryId: 53040, name: "ECMO", description: "ECMO" },
   {
