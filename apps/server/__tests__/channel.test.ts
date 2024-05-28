@@ -1,6 +1,5 @@
 import request from 'supertest';
 import express from 'express';
-//import app from 'server/src';
 import channelRouter from 'server/src/api/routes/channel';
 import ChannelAttributes from '@shared/src/interfaces/ChannelAttributes';
 
@@ -9,17 +8,16 @@ jest.mock('server/src/models/Channel', () => {
     const { ChannelMock } = require('server/__mocks__/sequelize');
     return ChannelMock;
 });
+
 jest.mock('server/src/models/Announcement', () => {
     const { AnnouncementMock } = require('server/__mocks__/sequelize');
     return AnnouncementMock;
 });
+
 jest.mock('server/src/models/UserInformation', () => {
     const { UserInformationMock } = require('server/__mocks__/sequelize');
     return UserInformationMock;
 });
-
-//import Channel from 'server/src/models/Channel';
-
 
 const app = express();
 app.use(express.json());

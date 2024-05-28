@@ -104,8 +104,8 @@ const Page = () => {
         await getUnit(unitId);
       }
     
-      console.log(`unitRequested is ${unitRequested}`);
-      setIsLoading((prevLoad) => !prevLoad);
+      //console.log(`unitRequested is ${unitRequested}`);
+      setIsLoading(true);
       const res = await axios(
         `http://localhost:3003/shift-history?employeeId=${employeeId}&employeeName=${employeeName}&unit=${auth?.user?.roleId === 3 ? unitRequested : unit}&requestedDate=${requestedDate}&shiftDate=${shiftDate}&shift=${shift}&status=${status}`,
         {
@@ -119,8 +119,8 @@ const Page = () => {
 
       const jsonResponse: ShiftHistoryClient[] = res.data;
       // console.log("jsonResponse is:");
-      // console.dir(jsonResponse);
-      setIsLoading((prevLoad) => !prevLoad);
+      console.dir(jsonResponse);
+      setIsLoading(false);
       setShiftHistories((prevshiftHistories) => jsonResponse);
     } catch (error) {
       console.log(error);
@@ -209,13 +209,6 @@ const Page = () => {
     const acceptedString: string = sh.isAccepted ? "accepting" : "denying";
     bannerContext?.showBanner(`Error in ${acceptedString} shift!`, "error");
   };
-
-  const parseDate = (date: Date) =>
-    date.toString().substring(5, 7) +
-    "/" +
-    date.toString().substring(8, 10) +
-    "/" +
-    date.toString().substring(0, 4);
 
   // Initial fill of list
   useEffect(() => {
@@ -362,9 +355,7 @@ const Page = () => {
                   <td className={page.td}>
                     {" "}
                     {
-                      parseDate(
-                        shiftHistory.createdAt
-                      ) /*shiftHistory.createdAt.substring(5,7) + "/" + shiftHistory.createdAt.substring(8,10) + "/" + shiftHistory.createdAt.substring(0,4)*/
+                      shiftHistory.createdAt
                     }{" "}
                   </td>
                   <td className={page.td}>{shiftHistory.dateRequested}</td>
