@@ -102,8 +102,8 @@ export default function ChatPage() {
             Authorization: `Bearer: ${accessToken}`,
           },
         });
-        const data = response.data;
-        if (data) {
+        if (response && response.data) {
+          const data = response.data;
           auth?.socket?.emit("join_room", {
             prevSelectedChannel: prevSelectedChannel?.name,
             selectedChannel: selectedChannel?.name,
@@ -132,8 +132,8 @@ export default function ChatPage() {
           Authorization: `Bearer: ${accessToken}`,
         },
       });
-      const data: ChannelAttributes[] = await response.data;
-      if (data) {
+      if (response && response.data) {
+        const data: ChannelAttributes[] = await response.data;
         setChannels(data);
         const newChannelMap: Map<string, ChannelAttributes> = new Map<
           string,
@@ -219,7 +219,6 @@ export default function ChatPage() {
    * Runs every time user sends a message
    */
   const handleSend = () => {
-
     // Send message to server through socket
     if (message && selectedChannel?.id && auth?.user?.id && auth?.socket) {
       const newAnnouncement: AnnouncementAttributes = {

@@ -33,6 +33,7 @@ describe("Schedule", () => {
   };
 
   beforeEach(() => {
+    jest.clearAllMocks();
     (useAuth as jest.Mock).mockReturnValue(mockAuth);
   });
 
