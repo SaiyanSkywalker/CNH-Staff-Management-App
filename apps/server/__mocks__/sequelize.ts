@@ -100,11 +100,11 @@ export const ChannelMock = {
 export const DefaultCapacityMock = {
     records: [], 
     findOne: jest.fn((query): Promise<DefaultCapacityAttributes | null> => {
-        let defaultCapacityOne: DefaultCapacityAttributes = {id: 1, unitId: 1, shift: '15:00 - 19:00' , capacity: 20}
-        let defaultCapacityTwo: DefaultCapacityAttributes = {id: 2, unitId: 1, shift: '19:00 - 23:00' , capacity: 20}
-        let defaultCapacityThree: DefaultCapacityAttributes = {id: 3, unitId: 1, shift: '23:00 - 03:00' , capacity: 20}
-        let defaultCapacityFour: DefaultCapacityAttributes = {id: 4, unitId: 1, shift: '03:00 - 07:00' , capacity: 20}        
-        let defaultCapacityFull: DefaultCapacityAttributes = {id: 5, unitId: 1, shift: '15:00 - 07:00' , capacity: 20}
+        let defaultCapacityOne: DefaultCapacityAttributes & { save: () => Promise<DefaultCapacityAttributes> } = {id: 1, unitId: 1, shift: '15:00 - 19:00' , capacity: 20, save: jest.fn().mockResolvedValue(this)}
+        let defaultCapacityTwo: DefaultCapacityAttributes & { save: () => Promise<DefaultCapacityAttributes> }  = {id: 2, unitId: 1, shift: '19:00 - 23:00' , capacity: 20, save: jest.fn().mockResolvedValue(this)}
+        let defaultCapacityThree: DefaultCapacityAttributes & { save: () => Promise<DefaultCapacityAttributes> }  = {id: 3, unitId: 1, shift: '23:00 - 03:00' , capacity: 20, save: jest.fn().mockResolvedValue(this)}
+        let defaultCapacityFour: DefaultCapacityAttributes & { save: () => Promise<DefaultCapacityAttributes> }  = {id: 4, unitId: 1, shift: '03:00 - 07:00' , capacity: 20, save: jest.fn().mockResolvedValue(this)}        
+        let defaultCapacityFull: DefaultCapacityAttributes & { save: () => Promise<DefaultCapacityAttributes> }  = {id: 5, unitId: 1, shift: '15:00 - 07:00' , capacity: 20, save: jest.fn().mockResolvedValue(this)}
 
         if(query['where']['shift'] === '15:00 - 07:00' && query['where']['unitId'] == 1) {
             return Promise.resolve(defaultCapacityFull);
@@ -157,10 +157,10 @@ export const DefaultCapacityMock = {
 
 export const ShiftCapacityMock = {
     findOne: jest.fn((query): Promise<ShiftCapacityAttributes | null> => {
-        let shiftCapacityOne: ShiftCapacityAttributes = {id: 1, unitId: 1, shift: '23:00 - 03:00' , capacity: 40, shiftDate: '2024-05-28'}
-        let shiftCapacityTwo: ShiftCapacityAttributes = {id: 2, unitId: 1, shift: '03:00 - 07:00' , capacity: 40, shiftDate: '2024-05-28'}
-        let shiftCapacityFull: ShiftCapacityAttributes = {id: 3, unitId: 1, shift: '23:00 - 07:00' , capacity: 40, shiftDate: '2024-05-28'}
-        let secondUnitShiftCapacity: ShiftCapacityAttributes = {id: 4, unitId: 2, shift: '03:00 - 07:00' , capacity: 30, shiftDate: '2024-05-28'}
+        let shiftCapacityOne: ShiftCapacityAttributes & { save: () => Promise<ShiftCapacityAttributes> } = { id: 1, unitId: 1, shift: '23:00 - 03:00', capacity: 40, shiftDate: '2024-05-28', save: jest.fn().mockResolvedValue(this) };
+        let shiftCapacityTwo: ShiftCapacityAttributes & { save: () => Promise<ShiftCapacityAttributes> } = { id: 2, unitId: 1, shift: '03:00 - 07:00', capacity: 40, shiftDate: '2024-05-28', save: jest.fn().mockResolvedValue(this) };
+        let shiftCapacityFull: ShiftCapacityAttributes & { save: () => Promise<ShiftCapacityAttributes> } = { id: 3, unitId: 1, shift: '23:00 - 07:00', capacity: 40, shiftDate: '2024-05-28', save: jest.fn().mockResolvedValue(this) };
+        let secondUnitShiftCapacity: ShiftCapacityAttributes & { save: () => Promise<ShiftCapacityAttributes> } = { id: 4, unitId: 2, shift: '03:00 - 07:00', capacity: 30, shiftDate: '2024-05-28', save: jest.fn().mockResolvedValue(this) };
 
         if(query['where']['shift'] === shiftCapacityOne.shift && query['where']['unitId'] == shiftCapacityOne.unitId && query['where']['shiftDate'] === shiftCapacityOne.shiftDate) {
             return Promise.resolve(shiftCapacityOne);
