@@ -102,15 +102,12 @@ export default function ChatPage() {
             Authorization: `Bearer: ${accessToken}`,
           },
         });
-        if (response && response.data) {
-          const data = response.data;
-          auth?.socket?.emit("join_room", {
-            prevSelectedChannel: prevSelectedChannel?.name,
-            selectedChannel: selectedChannel?.name,
-          });
-          setAnnouncements(data);
-        }
-        setAnnouncements(response.data);
+        const data = response && response.data ? response.data : [];
+        auth?.socket?.emit("join_room", {
+          prevSelectedChannel: prevSelectedChannel?.name,
+          selectedChannel: selectedChannel?.name,
+        });
+        setAnnouncements(data);
       } catch (error) {
         console.error("Failed to fetch announcements", error);
       }
