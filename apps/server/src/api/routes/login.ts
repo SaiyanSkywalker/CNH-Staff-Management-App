@@ -3,6 +3,7 @@ import { sequelize } from "server/src/loaders/dbLoader";
 import Role from "server/src/models/Role";
 import config from "../../config";
 import Unit from "server/src/models/Unit";
+import UserInformation from "server/src/models/UserInformation";
 import { createToken } from "server/src/middleware/jwt";
 const loginRouter = Router();
 
@@ -10,7 +11,7 @@ loginRouter.post(
   "/",
   async (req: Request, res: Response): Promise<Response> => {
     try {
-      console.log("HIT /LOGIN");
+      //console.log("HIT /LOGIN");
       const roleName: string =
         req.body.isMobile === "1"
           ? "USER"
@@ -18,14 +19,14 @@ loginRouter.post(
           ? "ADMIN"
           : "NURSEMANAGER";
       // search for user in db
-      const user = await sequelize.models.UserInformation.findOne({
-        where: {
-          username: sequelize.where(
-            sequelize.fn("UPPER", sequelize.col("username")),
-            sequelize.fn("UPPER", req.body.username)
+      const user: UserInformation | null = await UserInformation.findOne({
+        where: sequelize.and(
+          sequelize.where(
+            sequelize.fn('UPPER', sequelize.col('username')),
+            sequelize.fn('UPPER', req.body.username)
           ),
-          password: req.body.password,
-        },
+          { password: req.body.password }
+        ),
         include: [
           {
             model: Role,

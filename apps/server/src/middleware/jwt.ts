@@ -2,6 +2,7 @@ import jwt from "jsonwebtoken";
 import config from "../config";
 import { NextFunction, Request, Response } from "express";
 import UserInformation from "../models/UserInformation";
+import UserInformationAttributes from "@shared/src/interfaces/UserInformationAttributes";
 
 interface UserRequest extends Request {
   user?: any;
@@ -42,7 +43,7 @@ export const verifyToken = (
 };
 
 export const createToken = (
-  user: UserInformation,
+  user: UserInformationAttributes,
   secret: string,
   lifetime: string
 ): string => {

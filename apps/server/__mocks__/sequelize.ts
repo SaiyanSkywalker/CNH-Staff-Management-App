@@ -211,7 +211,9 @@ export const ShiftCapacityMock = {
 
 export const RoleMock = {
     findOne: jest.fn(),
-    create: jest.fn()
+    findAll: jest.fn(),
+    create: jest.fn(),
+    save: jest.fn()
 };
 
 export const ScheduleEntryMock = {
@@ -293,7 +295,10 @@ export const UnitMock = {
 };
 
 export const UserInformationMock = {
-    findOne: jest.fn(),
+    findOne: jest.fn((query) => {
+        console.log("query is:");
+        console.dir(query);
+    }),
     create: jest.fn(),
     findAll: jest.fn(),
     save: jest.fn()
