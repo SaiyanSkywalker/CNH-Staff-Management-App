@@ -122,9 +122,7 @@ export default function ChatPage() {
   const fetchChannels = async () => {
     try {
       const accessToken = await getToken("accessToken");
-      const response = await axios({
-        method: "GET",
-        url: `${config.apiUrl}/channel`,
+      const response = await axios.get(`${config.apiUrl}/channel`, {
         responseType: "json",
         headers: {
           unitId: auth?.user?.unitId,
@@ -241,6 +239,7 @@ export default function ChatPage() {
         multiple={false}
         open={open}
         setOpen={setOpen}
+        onPress={setOpen}
         value={selectedChannelName}
         setValue={setSelectedChannelName}
         items={channels.map((channel) => {
@@ -251,6 +250,7 @@ export default function ChatPage() {
         })}
         style={{}}
         onChangeValue={handleChannelChange}
+        testID="channelDropdown"
       />
 
       <View style={styles.messageList}>
