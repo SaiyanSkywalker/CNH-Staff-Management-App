@@ -17,10 +17,10 @@ jest.mock('server/src/models/Unit', () => {
     return UnitMock;
 });
 
-jest.mock('server/src/models/Channel', () => {
-    const { ChannelMock } = require('server/__mocks__/sequelize');
-    return ChannelMock;
-});
+jest.mock('server/src/loaders/dbLoader', () => {
+    const { sequelizeMock } = require('server/__mocks__/sequelize');
+    return { __esModule: true, sequelize: sequelizeMock };
+  });
 
 const app = express();
 app.use(express.json());
@@ -33,7 +33,7 @@ describe('POST /login', () => {
         expect(response.status).toBe(400);
     });
 
-    fit('post request from mobile user', async () => {
+    it('post request from mobile user', async () => {
         const body = {
             isMobile: "1"
         }

@@ -11,19 +11,26 @@ loginRouter.post(
   "/",
   async (req: Request, res: Response): Promise<Response> => {
     try {
-      //console.log("HIT /LOGIN");
+      //Send error if request body is missing info
+      if (!req.body.username || !req.body.password || !req.body.isMobile) {
+        return res.status(400).send({
+          message:
+            "Request body does not contain all required params (username, password, isMobile)",
+        });
+      }
       const roleName: string =
         req.body.isMobile === "1"
           ? "USER"
           : req.body.isMobile === "2"
           ? "ADMIN"
           : "NURSEMANAGER";
+
       // search for user in db
       const user: UserInformation | null = await UserInformation.findOne({
         where: sequelize.and(
           sequelize.where(
-            sequelize.fn('UPPER', sequelize.col('username')),
-            sequelize.fn('UPPER', req.body.username)
+            sequelize.fn("UPPER", sequelize.col("username")),
+            sequelize.fn("UPPER", req.body.username)
           ),
           { password: req.body.password }
         ),
@@ -56,6 +63,7 @@ loginRouter.post(
 
       return res.json({ access: accessToken, refresh: refreshToken });
     } catch (error) {
+      console.log(error);
       return res
         .status(500)
         .json({ error: "Error retrieving data from user table" + error });
