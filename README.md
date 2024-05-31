@@ -11,16 +11,11 @@ The projects are located in the following directories:
 	- Server: `apps/server`
 
   
-
-  
-
 ## Installation/Execution
 
-  
-
 1. If this is the first time starting the project, run `npm i` from root directory of this repository to install all necessary dependencies for the 3 projects
-
-2. Start the mobile app by running the following commands:
+2. 
+3. Start the mobile app by running the following commands:
 
 
 	1.  `cd apps/mobile`
@@ -38,7 +33,7 @@ The projects are located in the following directories:
 
   
 
-**Note**: These commands are ran with the assumption that you have already set up emulators in Android Studio/XCode. If you need any help with this, please refer to this [link](https://reactnative.dev/docs/environment-setup?guide=native).
+**Note**: These commands are ran with the assumption that you have already set up emulators in Android Studio/XCode. If you need any help with this, please refer to **Resources** section of this README.
 
   
 
@@ -121,3 +116,10 @@ DB_CONNECTION_STRING=connection_string
 - DB_CONNECTION_STRING: Connection string used to connect to database
 
 **NOTE:** more information about how to connect to Sequelize can be found [here](https://sequelize.org/docs/v6/getting-started/)
+
+## Resources
+- Setting up mobile emulators
+	- [React Native guide to setting up environment (Android & iOS)](https://reactnative.dev/docs/set-up-your-environment)
+		- Note: Any iOS emulation must be done on a computer with MacOS installed. XCode (the application that manages the iOS emulators) can't be installed on any other operating system.
+	- `npx expo start -c` (run this from `apps/mobile`): Clears cache in Expo before starting application. Similar to running `npm run android` or `npm run ios`.
+
