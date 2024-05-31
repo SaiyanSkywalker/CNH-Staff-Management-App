@@ -14,8 +14,7 @@ The projects are located in the following directories:
 ## Installation/Execution
 
 1. If this is the first time starting the project, run `npm i` from root directory of this repository to install all necessary dependencies for the 3 projects
-2. 
-3. Start the mobile app by running the following commands:
+2. Start the mobile app by running the following commands:
 
 
 	1.  `cd apps/mobile`
