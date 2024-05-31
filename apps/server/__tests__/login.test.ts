@@ -33,13 +33,52 @@ describe('POST /login', () => {
         expect(response.status).toBe(400);
     });
 
-    it('post request from mobile user', async () => {
+    it('post request with missing username', async () => {
         const body = {
-            isMobile: "1"
+            isMobile: "1",
+            password: "1234"
         }
         const response = await request(app)
         .post('/login')
         .send(body);
         expect(response.status).toBe(400);
+        expect(response.body.message).toBe("Request body does not contain all required params (username, password, isMobile)");
+    });
+
+    it('post request with missing password', async () => {
+        const body = {
+            isMobile: "1",
+            username: "fa484"
+        }
+        const response = await request(app)
+        .post('/login')
+        .send(body);
+        expect(response.status).toBe(400);
+        expect(response.body.message).toBe("Request body does not contain all required params (username, password, isMobile)");
+    });
+
+    it('post request with missing isMobile parameter', async () => {
+        const body = {
+            username: "fa484",
+            password: "5678"
+        }
+        const response = await request(app)
+        .post('/login')
+        .send(body);
+        expect(response.status).toBe(400);
+        expect(response.body.message).toBe("Request body does not contain all required params (username, password, isMobile)");
+    });
+
+    fit('post request from mobileUser', async () => {
+        const body = {
+            username: "fa484",
+            password: "5678",
+            isMobile: "1",
+        }
+        const response = await request(app)
+        .post('/login')
+        .send(body);
+        expect(response.status).toBe(400);
+        expect(response.body.message).toBe("Request body does not contain all required params (username, password, isMobile)");
     });
 })

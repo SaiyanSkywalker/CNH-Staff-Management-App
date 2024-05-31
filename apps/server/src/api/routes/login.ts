@@ -26,13 +26,15 @@ loginRouter.post(
           : "NURSEMANAGER";
 
       // search for user in db
+      const username = req.body.username as string;
+      const password = req.body.password as string;
       const user: UserInformation | null = await UserInformation.findOne({
         where: sequelize.and(
           sequelize.where(
             sequelize.fn("UPPER", sequelize.col("username")),
-            sequelize.fn("UPPER", req.body.username)
+            sequelize.fn("UPPER", username)
           ),
-          { password: req.body.password }
+          { password: password }
         ),
         include: [
           {
