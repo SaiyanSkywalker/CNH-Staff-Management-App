@@ -61,7 +61,7 @@ scheduleRouter.get(
 scheduleRouter.post("/", async (req: Request, res: Response) => {
   try {
     if (!req.files?.schedule) {
-      res.status(400).send({ error: "Schedule file not found" });
+      return res.status(400).send({ error: "Schedule file not found" });
     } else {
       const file: UploadedFile = req.files.schedule as UploadedFile;
       const username: string = req.body.username;
@@ -69,7 +69,7 @@ scheduleRouter.post("/", async (req: Request, res: Response) => {
       // Check if CSV is valid, then attempt to save shifts
       const validationStatus: any = validateSchedule(file);
       if (!validationStatus.isValid) {
-        res.status(400).send({ error: validationStatus.error });
+        return res.status(400).send({ error: validationStatus.error });
       }
       await saveScheduleData(file);
       res.send({ isError: false });
@@ -85,7 +85,9 @@ scheduleRouter.post("/", async (req: Request, res: Response) => {
     }
   } catch (error) {
     console.error(error);
-    res.status(500).send({ message: `Error saving schedule data from file` });
+    return res
+      .status(500)
+      .send({ message: `Error saving schedule data from file` });
   }
 });
 export default scheduleRouter;

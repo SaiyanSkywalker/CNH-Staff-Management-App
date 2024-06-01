@@ -1,6 +1,7 @@
 import ScheduleEntryAttributes from "@shared/src/interfaces/ScheduleEntryAttributes";
 import { UploadedFile } from "express-fileupload";
 import moment from "moment";
+import path from "path";
 // Converts CSV file to a 2D
 export const csvToArray = (content: string): string[][] => {
   let lines = content.split("\n").slice(1); // Skip line with header columns
@@ -28,6 +29,17 @@ export const csvToScheduleData = (
 };
 
 export const validateSchedule = (schedule: UploadedFile): any => {
+  const extension = path.extname(schedule.name);
+  if (extension !== ".csv") {
+    return {
+      isValid: false,
+      error: "File type is invalid. Only CSV files can be uploaded",
+    };
+  }
+  if (!schedule || !schedule.data || schedule.data.length === 0) {
+    return { isValid: false, error: "File can't be empty" };
+  }
+
   const content = schedule.data.toString();
 
   const defaultHeaders = [
@@ -49,10 +61,6 @@ export const validateSchedule = (schedule: UploadedFile): any => {
     "Worked Costs Center",
     "Facility ID\r",
   ];
-
-  if (!content) {
-    return { isValid: false, error: "File can't be empty" };
-  }
 
   const headers = content.trim().split("\n")[0].split(",");
 

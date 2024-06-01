@@ -1,4 +1,4 @@
-﻿Record Type,,LasName,First Name,MI,Shift Date,Start Time,End Date,Duration,Shift Type,Null,Null,Processed Time,Job Code,q,Worked Costs Center,Facility ID
+﻿Record Type,,LasName,First Name,MI,Shift Date,Start Time,End Date,Duration,Shift Type,Null,Null,Processed Time,Job Code
 SCHEDIMPORT,50000,Last001,First001,,20230905,7:00,19:30,12:30,REG,,,2.02E+11,N1320,47025,47025,CNMC
 SCHEDIMPORT,50000,Last001,First001,,20230906,7:00,19:30,12:30,REG,,,2.02E+11,N1320,47025,47025,CNMC
 SCHEDIMPORT,50001,Last002,First002,M,20230909,19:00,7:30,12:30,REG,,,2.02E+11,N1217,42000,42000,CNMC
