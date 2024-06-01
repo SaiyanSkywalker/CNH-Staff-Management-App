@@ -722,9 +722,10 @@ export const UserInformationMock = {
       password: "1234",
       get: jest.fn().mockResolvedValue(this),
     };
-    console.log("query is:");
-    console.dir(query);
-    return Promise.resolve(user1);
+    if (isMatchingQuery(query, user1.username, user1.password)) {
+      return Promise.resolve(user1);
+    }
+    return Promise.resolve(null);
   }),
   create: jest.fn(),
   findAll: jest.fn(),
@@ -733,8 +734,23 @@ export const UserInformationMock = {
 
 // Mock sequelize functions
 export const sequelizeMock = {
-  fn: jest.fn(),
-  col: jest.fn(),
-  where: jest.fn(),
-  and: jest.fn(),
+  and: (...conditions: any) => ({ type: "AND", conditions }),
+  where: (lhs: any, rhs: any) => ({ type: "WHERE", lhs, rhs }),
+  fn: (fnName: any, col: any) => ({ type: "FN", fnName, col }),
+  col: (colName: any) => ({ type: "COL", colName }),
+};
+
+const isMatchingQuery = (query: any, username: string, password: string) => {
+  if (!query.where) return false;
+
+  const [usernameCondition, passwordCondition] = query.where.conditions;
+
+  const usernameMatches =
+    usernameCondition.lhs.fnName === "UPPER" &&
+    usernameCondition.lhs.col.colName === "username" &&
+    usernameCondition.rhs.col.toUpperCase() === username.toUpperCase();
+
+  const passwordMatches = passwordCondition.password === password;
+
+  return usernameMatches && passwordMatches;
 };
