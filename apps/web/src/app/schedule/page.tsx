@@ -16,7 +16,7 @@ import { ChangeEvent, useCallback, useEffect, useMemo, useState } from "react";
 import axios from "axios";
 import UnitAttributes from "@shared/src/interfaces/UnitAttributes";
 import ScheduleEntryAttributes from "@shared/src/interfaces/ScheduleEntryAttributes";
-import config from "web/src/config";
+import config from "@webSrc/config";
 import { CNHEvent } from "@webSrc/interfaces/CNHEvent";
 import Modal from "@webSrc/components/EventModal";
 import styles from "@webSrc/styles/Schedule.module.css";
@@ -323,13 +323,12 @@ const Page = () => {
   const getSchedules = async () => {
     try {
       const accessToken = getAccessToken();
-      const response = await axios({
-        method: "GET",
-        url: `${config.apiUrl}/schedule?costCenterId=${
-          !isNurseManager
-            ? selectedOption
-            : `${auth?.user?.unit?.laborLevelEntryId}`
-        }`,
+      const url = `${config.apiUrl}/schedule?costCenterId=${
+        !isNurseManager
+          ? selectedOption
+          : `${auth?.user?.unit?.laborLevelEntryId}`
+      }`;
+      const response = await axios.get(url, {
         headers: { Authorization: `Bearer ${accessToken}` },
         responseType: "json",
       });
@@ -345,9 +344,7 @@ const Page = () => {
   const getUnits = async () => {
     try {
       const accessToken = getAccessToken();
-      const response = await axios({
-        method: "GET",
-        url: `${config.apiUrl}/unit`,
+      const response = await axios.get(`${config.apiUrl}/unit`, {
         headers: { Authorization: `Bearer ${accessToken}` },
         responseType: "json",
       });
@@ -366,12 +363,13 @@ const Page = () => {
     try {
       // Get default capacity
       const accessToken = getAccessToken();
-      const response = await axios({
-        method: "GET",
-        url: `${config.apiUrl}/shift-capacity/admin/`,
-        responseType: "json",
-        headers: { Authorization: `Bearer ${accessToken}` },
-      });
+      const response = await axios.get(
+        `${config.apiUrl}/shift-capacity/admin/`,
+        {
+          responseType: "json",
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }
+      );
       const data: ShiftCapacityResponse = response.data;
       setDefaultCapacities(data.default);
       setUpdatedCapacities(data.updated);
