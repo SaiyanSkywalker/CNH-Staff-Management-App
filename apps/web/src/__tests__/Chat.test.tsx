@@ -4,29 +4,13 @@ import Chat from "../app/chat/page";
 import axios from "axios";
 import { mockUseRouter } from "@webSrc/__mocks__/mockRouter";
 import {
-  MockAuthContextProvider,
-  MockBannerContextProvider,
-  MockLoadingContextProvider,
   mockAuthContextValue,
   mockBannerContextValue,
-  mockLoadingContextValue,
+  renderWithProviders,
 } from "@webSrc/__mocks__/mockContexts";
-import { ReactNode } from "react";
-import { io } from "socket.io-client";
 
-// Mocking axios
 jest.mock("axios");
 jest.mock("socket.io-client");
-const mockedIo = io as jest.MockedFunction<typeof io>;
-const renderWithProviders = (component: ReactNode) => {
-  return render(
-    <MockAuthContextProvider>
-      <MockBannerContextProvider>
-        <MockLoadingContextProvider>{component}</MockLoadingContextProvider>
-      </MockBannerContextProvider>
-    </MockAuthContextProvider>
-  );
-};
 
 describe("Chat Functionality", () => {
   beforeEach(() => {

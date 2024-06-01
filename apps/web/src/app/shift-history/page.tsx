@@ -18,6 +18,7 @@ import { getAccessToken } from "@webSrc/utils/token";
 import AdminShiftRequestUpdate from "@shared/src/interfaces/AdminShiftRequestUpdate";
 import { BannerContext } from "@webSrc/contexts/BannerContext";
 import { v4 as uuid4 } from "uuid";
+import { error } from "console";
 const Page = () => {
   const params = useSearchParams();
   const employeeNameQuery: string = params.get("employeeName") ?? "";
@@ -93,10 +94,9 @@ const Page = () => {
         const unitId: string =
           auth?.user?.roleId === 3 ? "/" + String(auth?.user?.unitId) : "";
         const getUnit = async (unitId: string): Promise<void> => {
-          const res = await axios({
-            method: "GET",
-            url: `${config.apiUrl}/unit${unitId}`,
+          const res = await axios.get(`${config.apiUrl}/unit${unitId}`, {
             responseType: "json",
+            headers: { Authorization: `Bearer ${getAccessToken()}` },
           });
           const nurseManagerUnits: UnitAttributes[] = res.data;
           const nurseManagerUnit: UnitAttributes = nurseManagerUnits[0];
@@ -107,26 +107,24 @@ const Page = () => {
 
       // console.log(`unitRequested is ${unitRequested}`);
       setIsLoading((prevLoad) => !prevLoad);
-      const res = await axios(
-        `http://localhost:3003/shift-history?employeeId=${employeeId}&employeeName=${employeeName}&unit=${
-          auth?.user?.roleId === 3 ? unitRequested : unit
-        }&requestedDate=${requestedDate}&shiftDate=${shiftDate}&shift=${shift}&status=${status}`,
-        {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${getAccessToken()}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      const url = `http://localhost:3003/shift-history?employeeId=${employeeId}&employeeName=${employeeName}&unit=${
+        auth?.user?.roleId === 3 ? unitRequested : unit
+      }&requestedDate=${requestedDate}&shiftDate=${shiftDate}&shift=${shift}&status=${status}`;
+      const res = await axios.get(url, {
+        headers: {
+          Authorization: `Bearer ${getAccessToken()}`,
+          "Content-Type": "application/json",
+        },
+      });
 
-      const jsonResponse: ShiftHistoryClient[] = res.data;
-      // console.log("jsonResponse is:");
-      // console.dir(jsonResponse);
-      setIsLoading((prevLoad) => !prevLoad);
-      setShiftHistories((prevshiftHistories) => jsonResponse);
+      if (res) {
+        // console.log("jsonResponse is:");
+        // console.dir(jsonResponse);
+        setIsLoading((prevLoad) => !prevLoad);
+        setShiftHistories((prevshiftHistories) => res.data);
+      }
     } catch (error) {
-      console.log(error);
+      bannerContext?.showBanner(`Error in retrieving shift histories`, "error");
     }
   };
 
@@ -241,8 +239,11 @@ const Page = () => {
         <form className={page.form} onSubmit={getShiftHistories}>
           <div className={page.submission}>
             <div>
-              <label className={page.label}>Employee ID</label>
+              <label className={page.label} htmlFor="employeeId">
+                Employee ID
+              </label>
               <input
+                id="employeeId"
                 placeholder="Enter ID"
                 value={employeeId}
                 onChange={handleEmployeeIdChange}
@@ -250,8 +251,11 @@ const Page = () => {
               ></input>
             </div>
             <div>
-              <label className={page.label}>Employee Name</label>
+              <label className={page.label} htmlFor="employeeName">
+                Employee Name
+              </label>
               <input
+                id="employeeName"
                 placeholder="Enter Name"
                 value={employeeName}
                 onChange={handleEmployeeNameChange}
@@ -261,8 +265,11 @@ const Page = () => {
 
             {auth?.user?.roleId === 3 ? undefined : (
               <div>
-                <label className={page.label}>Unit</label>
+                <label className={page.label} htmlFor="unit">
+                  Unit
+                </label>
                 <input
+                  id="unit"
                   placeholder="Enter Unit"
                   value={unit}
                   onChange={handleUnitChange}
@@ -272,8 +279,11 @@ const Page = () => {
             )}
 
             <div>
-              <label className={page.label}>Requested Date</label>
+              <label className={page.label} htmlFor="requestedDate">
+                Requested Date
+              </label>
               <input
+                id="requestedDate"
                 value={requestedDate}
                 onChange={handleRequestedDateChange}
                 type="date"
@@ -282,7 +292,9 @@ const Page = () => {
             </div>
 
             <div>
-              <label className={page.label}>Shift Date</label>
+              <label className={page.label} htmlFor="widget">
+                Shift Date
+              </label>
               <input
                 value={shiftDate}
                 onChange={handleShiftDateChange}
@@ -294,7 +306,9 @@ const Page = () => {
             </div>
 
             <div>
-              <label className={page.label}>Shift</label>
+              <label className={page.label} htmlFor="shift">
+                Shift
+              </label>
               <select
                 onChange={handleShiftChange}
                 name="shift"
@@ -360,11 +374,7 @@ const Page = () => {
                   <td className={page.td}> {shiftHistory.unit} </td>
                   <td className={page.td}>
                     {" "}
-                    {
-                      parseDate(
-                        shiftHistory.createdAt
-                      ) 
-                    }{" "}
+                    {parseDate(shiftHistory.createdAt)}{" "}
                   </td>
                   <td className={page.td}>{shiftHistory.dateRequested}</td>
                   <td className={page.td}> {shiftHistory.shift} </td>
