@@ -102,7 +102,7 @@ describe("Chat", () => {
         body: "Hello, test message!",
         sender: mockAuth.auth.user,
         senderId: mockAuth.auth.user.id ?? 0,
-        channelId: 1,
+        channelId: "1",
         createdAt: expect.any(Date),
       });
     });
@@ -132,6 +132,7 @@ describe("Chat", () => {
       sender: { username: "testuser" },
       createdAt: new Date().toISOString(),
     };
+    
     const messageProviderCallback = mockAuth.auth.socket.on.mock.calls.find(
       ([event]) => event === "message_provider"
     )[1];
