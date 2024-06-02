@@ -122,3 +122,48 @@ DB_CONNECTION_STRING=connection_string
 		- Note: Any iOS emulation must be done on a computer with MacOS installed. XCode (the application that manages the iOS emulators) can't be installed on any other operating system.
 	- `npx expo start -c` (run this from `apps/mobile`): Clears cache in Expo before starting application. Similar to running `npm run android` or `npm run ios`.
 
+
+## Contents of the Deliverable
+
+### Main Features
+
+- Web
+  - Login: admin and nurse managers are able to log in/log out
+
+  - Upload timesheets (CSV files)
+
+  - Schedule: Schedules for hospital staff can be viewed on a (day, week, month basis)
+
+  - Shift history: Admins can view all past shift requests
+
+  - Shift requests: admin can accept/deny requests
+
+  - Admin can adjust staff capacities for different shifts
+
+  - Admin and nurse manager users can send messages to nurses
+- Server
+
+  - Data management
+
+  - Stores/retrieves data for mobile and web apps
+  - Creates db model (using Sequelize)
+  - Handles login authentication and authorization
+  - File processing
+  - Socket management (chat and user notifications)
+
+- Mobile
+  - Login: Users can easily log in/log out of app
+  - Schedule: users can view what shifts they have assigned to them
+  - Shift request: users can request new or changes to shifts
+  - Live notifications for updates on shift requests
+  - Chat: forum that lets nurses send messages to other users/admins
+
+### Issues & Workarounds
+
+- Sign In
+	- Passwords aren't encrypted in db
+	- No current mechanism for users to sign up for mobile or web app
+ 	- **Workaround:** Accounts have to manually be added to the `UserInformation` table in the database
+- Some unit tests may not pass
+	- **Workaround:** Some tests have to be executed manually by launching the server project, admin portal and/or mobile app
+
