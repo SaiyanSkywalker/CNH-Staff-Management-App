@@ -4,6 +4,13 @@ import DefaultCapacityAttributes from "@shared/src/interfaces/DefaultCapacityAtt
 import UserInformationAttributes from "@shared/src/interfaces/UserInformationAttributes";
 import UnitAttributes from "@shared/src/interfaces/UnitAttributes";
 import ShiftCapacityAttributes from "@shared/src/interfaces/ShiftCapacityAttributes";
+import ScheduleEntryAttributes from "@shared/src/interfaces/ScheduleEntryAttributes";
+
+export const Op = {
+  and: (...conditions: any) => ({ type: "AND", conditions }),
+  gte: Symbol.for("sequelize.gte"),
+  lte: Symbol.for("sequelize.lte"),
+};
 
 export const AnnouncementMock = {
   findOne: jest.fn(),
@@ -493,6 +500,117 @@ export const RoleMock = {
 export const ScheduleEntryMock = {
   findOne: jest.fn(),
   create: jest.fn(),
+  findAll: jest.fn(() => {
+    return [];
+  }),
+  // findAll: jest.fn((query): any => {
+  //   console.log(query);
+  //   const mockedScheduleEntries: ScheduleEntryAttributes[] = [
+  //     {
+  //       employeeId: 51101,
+  //       lastName: "Last1102",
+  //       firstName: "First1102",
+  //       middleInitial: "",
+  //       shiftDate: new Date("2023-09-05T04:00:00.000Z"),
+  //       startTime: "8:00",
+  //       endTime: "16:30",
+  //       duration: "8:30",
+  //       shiftType: "REG",
+  //       jobCode: "P5814",
+  //       costCenterId: 24530,
+  //     },
+  //     {
+  //       employeeId: 51101,
+  //       lastName: "Last1102",
+  //       firstName: "First1102",
+  //       middleInitial: "",
+  //       shiftDate: new Date("2023-09-06T04:00:00.000Z"),
+  //       startTime: "8:00",
+  //       endTime: "16:30",
+  //       duration: "8:30",
+  //       shiftType: "REG",
+  //       jobCode: "P5814",
+  //       costCenterId: 24530,
+  //     },
+  //     {
+  //       employeeId: 50582,
+  //       lastName: "Last583",
+  //       firstName: "First583",
+  //       middleInitial: "S",
+  //       shiftDate: new Date("2023-09-05T04:00:00.000Z"),
+  //       startTime: "8:00",
+  //       endTime: "18:30",
+  //       duration: "10:30",
+  //       shiftType: "REG",
+  //       jobCode: "P5863",
+  //       costCenterId: 41005,
+  //     },
+  //     {
+  //       employeeId: 50582,
+  //       lastName: "Last583",
+  //       firstName: "First583",
+  //       middleInitial: "S",
+  //       shiftDate: new Date("2023-09-06T04:00:00.000Z"),
+  //       startTime: "8:00",
+  //       endTime: "18:30",
+  //       duration: "10:30",
+  //       shiftType: "REG",
+  //       jobCode: "P5863",
+  //       costCenterId: 41005,
+  //     },
+  //     {
+  //       employeeId: 50582,
+  //       lastName: "Last583",
+  //       firstName: "First583",
+  //       middleInitial: "S",
+  //       shiftDate: new Date("2023-09-07T04:00:00.000Z"),
+  //       startTime: "8:00",
+  //       endTime: "18:30",
+  //       duration: "10:30",
+  //       shiftType: "REG",
+  //       jobCode: "P5863",
+  //       costCenterId: 41005,
+  //     },
+  //     {
+  //       employeeId: 50582,
+  //       lastName: "Last583",
+  //       firstName: "First583",
+  //       middleInitial: "S",
+  //       shiftDate: new Date("2023-09-11T04:00:00.000Z"),
+  //       startTime: "8:00",
+  //       endTime: "18:30",
+  //       duration: "10:30",
+  //       shiftType: "REG",
+  //       jobCode: "P5863",
+  //       costCenterId: 41005,
+  //     },
+  //     {
+  //       employeeId: 50582,
+  //       lastName: "Last583",
+  //       firstName: "First583",
+  //       middleInitial: "S",
+  //       shiftDate: new Date("2023-09-12T04:00:00.000Z"),
+  //       startTime: "8:00",
+  //       endTime: "18:30",
+  //       duration: "10:30",
+  //       shiftType: "REG",
+  //       jobCode: "P5863",
+  //       costCenterId: 41005,
+  //     },
+  //   ];
+  //   const { where } = query;
+  //   // Check if where.shiftDate exists and is in the desired range
+  //   const filteredEntries = mockedScheduleEntries.filter((entry) => {
+  //     return (
+  //       (!where.shiftDate[Op.gte] ||
+  //         entry.shiftDate >= where.shiftDate[Op.gte]) &&
+  //       (!where.shiftDate[Op.lte] ||
+  //         entry.shiftDate <= where.shiftDate[Op.lte]) &&
+  //       entry.shiftType === "REG"
+  //     );
+  //   });
+  //   return Promise.resolve(mockedScheduleEntries);
+  // }),
 };
 
 export const ShiftHistoryMock = {

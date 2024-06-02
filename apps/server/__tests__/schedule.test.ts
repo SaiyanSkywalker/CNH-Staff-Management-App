@@ -32,6 +32,12 @@ jest.mock("server/src/sockets/socketHandler", () => {
   };
 });
 
+// jest.mock("server/src/loaders/dbLoader", () => {
+//   const { sequelizeMock } = require("server/__mocks__/sequelize");
+//   return { __esModule: true, sequelize: sequelizeMock };
+// });
+
+
 const app = express();
 app.use(fileUpload());
 app.use("/schedule", scheduleRouter);
@@ -102,7 +108,13 @@ describe("POST /schedule", () => {
 });
 
 describe("/GET schedule", () => {
-  it("no query parameters in get request", async () => {});
+  beforeEach(() => {
+    jest.resetAllMocks();
+  });
+  fit("no query parameters in get request", async () => {
+    const response = await request(app).get("/schedule");
+    expect(response.status).toBe(200);
+  });
   it("query costCenterId in get request", async () => {});
   it("non-numeric costCenterId in get request", async () => {});
 
