@@ -92,16 +92,17 @@ export default function ChatPage() {
     if (selectedChannel) {
       try {
         const accessToken = await getToken("accessToken");
-        const response = await axios({
-          method: "GET",
-          url: `${config.apiUrl}/channel/${selectedChannel?.id}`,
-          responseType: "json",
-          headers: {
-            unitId: auth?.user?.unitId,
-            roleId: auth?.user?.roleId,
-            Authorization: `Bearer: ${accessToken}`,
-          },
-        });
+        const response = await axios.get(
+          `${config.apiUrl}/channel/${selectedChannel?.id}`,
+          {
+            responseType: "json",
+            headers: {
+              unitId: auth?.user?.unitId,
+              roleId: auth?.user?.roleId,
+              Authorization: `Bearer: ${accessToken}`,
+            },
+          }
+        );
         const data = response && response.data ? response.data : [];
         auth?.socket?.emit("join_room", {
           prevSelectedChannel: prevSelectedChannel?.name,

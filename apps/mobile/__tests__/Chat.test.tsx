@@ -37,7 +37,9 @@ describe("Chat", () => {
   });
 
   it("allows the user to select a channel", async () => {
-    (axios.get as jest.Mock).mockResolvedValueOnce({ data: [{ name: "General", id: "1" }] });
+    (axios.get as jest.Mock).mockResolvedValueOnce({
+      data: [{ name: "General", id: "1" }],
+    });
 
     const { getByText, getByTestId } = render(<ChatPage />);
     fireEvent.press(getByTestId("channelDropdown"));
@@ -55,7 +57,9 @@ describe("Chat", () => {
   });
 
   it("displays messages in the selected channel", async () => {
-    (axios.get as jest.Mock).mockResolvedValueOnce({ data: [{ name: "General", id: "1" }] });
+    (axios.get as jest.Mock).mockResolvedValueOnce({
+      data: [{ name: "General", id: "1" }],
+    });
     (axios.get as jest.Mock).mockResolvedValueOnce({
       data: [
         {
