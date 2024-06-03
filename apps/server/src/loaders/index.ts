@@ -1,3 +1,7 @@
+/**
+ * File: index.ts
+ * Run server and start database connection
+ */
 import dbLoader from "./dbLoader";
 import expressLoader from "./expressLoader";
 import { Application } from "express";

@@ -1,4 +1,7 @@
-"use client";
+/**
+ * File: page.tsx
+ * Purpose: Schedule view page
+ */
 "use client";
 import {
   Calendar,
@@ -16,7 +19,7 @@ import { ChangeEvent, useCallback, useEffect, useMemo, useState } from "react";
 import axios from "axios";
 import UnitAttributes from "@shared/src/interfaces/UnitAttributes";
 import ScheduleEntryAttributes from "@shared/src/interfaces/ScheduleEntryAttributes";
-import config from "web/src/config";
+import config from "@webSrc/config";
 import { CNHEvent } from "@webSrc/interfaces/CNHEvent";
 import Modal from "@webSrc/components/EventModal";
 import styles from "@webSrc/styles/Schedule.module.css";
@@ -49,10 +52,11 @@ const Page = () => {
     ShiftCapacityAttributes[]
   >([]);
 
-  const hardCodedCapacity = 25;
+  const hardCodedCapacity = 25; // default capacity if there db value can't be found
   const { auth } = useAuth();
   const isNurseManager: boolean = auth?.user?.roleId === 3;
 
+  // Formatters for different parts of Calendar component
   const { views, defaultView, formats } = useMemo(() => {
     const timeGutterFormatter: DateFormatFunction = (
       date: Date,
@@ -204,7 +208,6 @@ const Page = () => {
         endTime.setDate(endTime.getDate() + 1);
       }
 
-      // First look for updated capacity
       const updatedCapacity = updatedCapacities.find(
         (value: ShiftCapacityAttributes) =>
           value.shift === `${tokens[2]} - ${tokens[3]}` &&
@@ -222,6 +225,8 @@ const Page = () => {
         }
       )?.capacity;
 
+      // If found, use updated capacity, otherwise use default,
+      // otherwise use hardcoded
       capacity = updatedCapacity || defaultCapacity || hardCodedCapacity;
 
       const capacityRatio = buckets[b].length / capacity;
@@ -232,6 +237,8 @@ const Page = () => {
       } else {
         mc[date] = Math.min(mc[date], capacityRatio);
       }
+
+      // Create events to be shown in Calendar component
       const event: CNHEvent = {
         title: `Cost Center: ${tokens[0]}, ${buckets[b].length}/${capacity} ${
           endTime.getDay() - startTime.getDay() != 0 ? " (Night Shift)" : ""
@@ -320,16 +327,19 @@ const Page = () => {
     setShiftFilter(e.target.value);
     setEvents(buildEvents(schedules, e.target.value));
   };
+  /**
+   * Get schedule data for a specific (or all)
+   * cost centers
+   */
   const getSchedules = async () => {
     try {
       const accessToken = getAccessToken();
-      const response = await axios({
-        method: "GET",
-        url: `${config.apiUrl}/schedule?costCenterId=${
-          !isNurseManager
-            ? selectedOption
-            : `${auth?.user?.unit?.laborLevelEntryId}`
-        }`,
+      const url = `${config.apiUrl}/schedule?costCenterId=${
+        !isNurseManager
+          ? selectedOption
+          : `${auth?.user?.unit?.laborLevelEntryId}`
+      }`;
+      const response = await axios.get(url, {
         headers: { Authorization: `Bearer ${accessToken}` },
         responseType: "json",
       });
@@ -342,12 +352,12 @@ const Page = () => {
       // console.error(err);
     }
   };
+
+  /** Get all cost centers (dependent on user role) */
   const getUnits = async () => {
     try {
       const accessToken = getAccessToken();
-      const response = await axios({
-        method: "GET",
-        url: `${config.apiUrl}/unit`,
+      const response = await axios.get(`${config.apiUrl}/unit`, {
         headers: { Authorization: `Bearer ${accessToken}` },
         responseType: "json",
       });
@@ -362,16 +372,20 @@ const Page = () => {
       // console.error(err);
     }
   };
+  /**
+   * Get the staff capacities for shifts in each cost center
+   */
   const getCapacities = async () => {
     try {
       // Get default capacity
       const accessToken = getAccessToken();
-      const response = await axios({
-        method: "GET",
-        url: `${config.apiUrl}/shift-capacity/admin/`,
-        responseType: "json",
-        headers: { Authorization: `Bearer ${accessToken}` },
-      });
+      const response = await axios.get(
+        `${config.apiUrl}/shift-capacity/admin/`,
+        {
+          responseType: "json",
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }
+      );
       const data: ShiftCapacityResponse = response.data;
       setDefaultCapacities(data.default);
       setUpdatedCapacities(data.updated);

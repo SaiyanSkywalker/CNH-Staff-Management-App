@@ -1,3 +1,9 @@
+/**
+ * File: Announcement.ts
+ * Purpose: defines Announcement Sequelize model,
+ * which corresponds to Announcement table in the db
+ */
+
 import {
   BelongsTo,
   Column,
@@ -22,10 +28,18 @@ class Announcement extends Model<AnnouncementAttributes> {
   @Column({ type: DataType.STRING })
   body!: string;
 
-  @BelongsTo(() => UserInformation, { foreignKey: "senderId", targetKey: "id", onDelete: 'CASCADE' })
+  @BelongsTo(() => UserInformation, {
+    foreignKey: "senderId",
+    targetKey: "id",
+    onDelete: "CASCADE",
+  })
   sender!: UserInformation;
 
-  @BelongsTo(() => Channel,{ foreignKey: "channelId", targetKey: "id", onDelete: 'CASCADE' })
+  @BelongsTo(() => Channel, {
+    foreignKey: "channelId",
+    targetKey: "id",
+    onDelete: "CASCADE",
+  })
   channel!: Channel;
 }
 

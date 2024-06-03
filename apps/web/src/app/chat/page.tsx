@@ -1,3 +1,7 @@
+/**
+ * File: page.tsx
+ * Purpose: Component for /chat page; Contains functionality for chat feature
+ */
 "use client";
 
 import React, {
@@ -12,7 +16,7 @@ import {
   BannerContext,
   BannerContextProps,
 } from "@webSrc/contexts/BannerContext";
-import axios, { AxiosError } from "axios";
+import axios from "axios";
 import config from "@webSrc/config";
 import {
   LoadingContext,
@@ -56,6 +60,9 @@ const Page = () => {
     borderColor: "#C6373C",
   };
 
+  /**
+   * Get channels for chat
+   */
   const getChannels = async () => {
     try {
       const accessToken = getAccessToken();
@@ -69,8 +76,8 @@ const Page = () => {
           Authorization: `Bearer ${accessToken}`,
         },
       });
-      const data: ChannelAttributes[] = await response.data;
-      if (data) {
+      if (response && response.data) {
+        const data: ChannelAttributes[] = await response.data;
         setChannels(data);
         const newChannelMap: Map<string, ChannelAttributes> = new Map<
           string,
@@ -83,12 +90,20 @@ const Page = () => {
       }
     } catch (err: any) {
       if (!err.response) {
-        bannerContext?.showBanner("Error, server is currently down!", "error");
+        bannerContext?.showBanner(
+          "Error retrieivng channels from server",
+          "error"
+        );
       }
       // console.error(err);
     }
   };
 
+  /**
+   * Convert date for chat into user-friendly format
+   * @param date datetime chat was posted
+   * @returns formatted date string
+   */
   const parseAnnouncmentDate = (date: Date) => {
     if (!date) {
       return "";
@@ -105,6 +120,10 @@ const Page = () => {
     );
   };
 
+  /**
+   * Gets chat announcements for a particular channel
+   * @returns list of announcements
+   */
   const getAnnouncements = async () => {
     try {
       if (!selectedChannel) {
@@ -137,6 +156,10 @@ const Page = () => {
     }
   };
 
+  /**
+   * Sends request for new chat channel to be created in db
+   * @param event
+   */
   async function newChannelOnSubmit(event: FormEvent<HTMLFormElement>) {
     try {
       event.preventDefault();
@@ -152,19 +175,30 @@ const Page = () => {
 
         loadingContext?.showLoader();
         const accessToken = getAccessToken();
-        const res = await fetch(`${config.apiUrl}/channel`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${accessToken}`,
-          },
-          body: JSON.stringify(newChannelRequest),
-        });
+        const res = await axios.post(
+          `${config.apiUrl}/channel`,
+          JSON.stringify(newChannelRequest),
+          {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${accessToken}`,
+            },
+          }
+        );
+
+        // const res = await fetch(`${config.apiUrl}/channel`, {
+        //   method: "POST",
+        //   headers: {
+        //     "Content-Type": "application/json",
+        //     Authorization: `Bearer ${accessToken}`,
+        //   },
+        //   body: JSON.stringify(newChannelRequest),
+        // });
 
         loadingContext?.hideLoader();
 
         if (res.status === 201) {
-          let jsonData = await res.json();
+          let jsonData: any = res;
           bannerContext?.showBanner(
             `Success, the new channel ${newChannel} successfully saved`,
             "success"
@@ -190,7 +224,7 @@ const Page = () => {
     } catch (error) {
       loadingContext?.hideLoader();
       bannerContext?.showBanner(
-        `Error in saving in saving the new channel ${newChannel} + ${error}`,
+        `Error in saving the new channel ${newChannel} + ${error}`,
         "error"
       );
 
@@ -204,6 +238,9 @@ const Page = () => {
 
   useEffect(() => {
     getAnnouncements();
+
+    // Event listeners for sockets that allow for real-time updates
+    // to the message forum
     const providerListener = (newAnnouncement: AnnouncementAttributes) => {
       setAnnouncements((announcements) => [...announcements, newAnnouncement]);
       changeChatMessage("");
@@ -229,13 +266,17 @@ const Page = () => {
     };
   }, [selectedChannel]);
 
+  /**
+   * Emits a socket event once user posts a message in the chat
+   * @param event
+   * @returns
+   */
   const handleChatSubmit = (event: React.FormEvent) => {
     event.preventDefault();
 
     if (!message || !selectedChannel || !auth?.user?.id) {
       return;
     }
-
     const newAnnouncement: AnnouncementAttributes = {
       body: message,
       sender: auth?.user,
@@ -247,14 +288,24 @@ const Page = () => {
     auth?.socket?.emit("message_sent", newAnnouncement);
   };
 
+  /**
+   * Handles user input when entering a new channel name
+   * @param event
+   */
   const handleNewChannel = (event: React.ChangeEvent<HTMLInputElement>) => {
     let newChannelName = event.target.value;
+
+    // Disables channel names with more than 51 characters
     let channelDisabled =
       newChannelName.length == 0 || newChannelName.length > 51 ? true : false;
     setIsChannelDisabled(channelDisabled);
     setNewChannel(newChannelName);
   };
 
+  /**
+   * Enables/disables send button based on chat input   (255 char limit)
+   * @param chatMessage
+   */
   const changeChatMessage = (chatMessage: string) => {
     let chatDisabled =
       chatMessage.length == 0 || chatMessage.length > 255 || !selectedChannel
@@ -264,16 +315,22 @@ const Page = () => {
     setMessage(chatMessage);
   };
 
+  /**
+   * Handling user typing messsage
+   * @param event 
+   */
   const handleChangeChat = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
     let chatMessage = event.target.value;
     changeChatMessage(chatMessage);
   };
 
+  // Handles user selecting a different channel
   const handleOptionChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     setPrevSelectedChannel((prevChannel) => selectedChannel);
     setSelectedChannel((prevChannel) => channelMap.get(event.target.value));
   };
 
+  // Handles user clicking out of error
   const handleClickTextArea = (
     event: React.MouseEvent<HTMLTextAreaElement>
   ) => {
@@ -328,7 +385,7 @@ const Page = () => {
                 >
                   <ul className={styles["announcements-ul"]}>
                     {announcements.map((announcement) => (
-                      <li key={announcement.id}>
+                      <li key={uuidv4()}>
                         <div className={styles["announcements-info"]}>
                           <h3>{announcement.sender?.username}&nbsp;</h3>
                           <small>

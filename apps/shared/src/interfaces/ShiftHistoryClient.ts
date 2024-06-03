@@ -1,3 +1,7 @@
+/**
+ * File: ShiftHistoryClient.ts
+ * Purpose: interface used in admin portal to represent ShiftHistory data
+ */
 export default interface ShiftHistoryClient {
     id: number,
     employeeId: number,
@@ -6,5 +10,5 @@ export default interface ShiftHistoryClient {
     dateRequested: string,
     status: string,
     shift: string,
-    createdAt: Date,
+    createdAt: string,
 }

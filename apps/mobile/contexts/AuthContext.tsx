@@ -1,3 +1,7 @@
+/**
+ * File: AuthContext.tsx
+ * Purpose: Context object used to maintain user login state
+ */
 import axios from "axios";
 import "core-js/stable/atob";
 import { createContext, useContext, useEffect, useState } from "react";
@@ -44,6 +48,14 @@ export default function AuthProvider({
   const [user, setUser] = useState<UserInformation>({} as UserInformation);
   const [socket, setSocket] = useState<Socket | null | undefined>(undefined);
   const [userUUID, setUserUUID] = useState<string | undefined>(undefined);
+
+  /**
+   * login user to app
+   * @param username username for user
+   * @param password unhashed password
+   * @param isMobile true if user is logging in from mobile, false otherwise
+   * @returns
+   */
   const login = async (
     username: string,
     password: string,
@@ -64,6 +76,11 @@ export default function AuthProvider({
     }
     return false;
   };
+  /**
+   * Creates new socket on for user,
+   * update context state
+   * @param userInfo info about user
+   */
   const loginUser = (userInfo: UserInformation) => {
     setUser(userInfo);
     setIsLoggedIn(true);
@@ -102,7 +119,7 @@ export default function AuthProvider({
   /**
    * Used to retreive user info when logging in
    * @param username
-   * @param password
+   * @param password password (unhashed)
    * @returns
    */
   const getUser = async (
@@ -130,20 +147,11 @@ export default function AuthProvider({
     return null;
   };
 
-  const refreshUser = async () => {
-    try {
-      const refreshToken = await getToken("refreshToken");
-      if (refreshToken != undefined || refreshToken != null) {
-        const userInfo = jwtDecode(refreshToken) as UserInformation;
-        if (userInfo) {
-          loginUser(userInfo);
-        }
-      }
-    } catch (error) {
-      console.log(error);
-    }
-  };
   useEffect(() => {
+    /**
+     * Fetches new access token (from server) after it expires
+     * @returns access token (wrapped in promise)
+     */
     const refreshAccessToken = async (): Promise<string | null> => {
       try {
         const refreshToken = getToken("refreshToken");
@@ -165,10 +173,14 @@ export default function AuthProvider({
       }
       return null;
     };
+
+    // Interceptor that runs before every axios request and resends
+    // request with new access token if response is forbidden or unauthorized
     const axiosInterceptor = axios.interceptors.response.use(
       (response) => response,
       async (error) => {
         const originalRequest = error.config;
+        // resend request with new access token if response is forbidden or unauthorized
         if (
           error.response &&
           (error.response.status === 401 || error.response.status === 403) &&
@@ -193,8 +205,6 @@ export default function AuthProvider({
         return Promise.reject(error);
       }
     );
-    // Sign the user back in on refresh/navigating back to admin portal from other site
-    // refreshUser();
     return () => {
       axios.interceptors.response.eject(axiosInterceptor);
     };

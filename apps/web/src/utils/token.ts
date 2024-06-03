@@ -1,3 +1,7 @@
+/**
+ * Gets JWT access token from HTTP cookie
+ * @returns JWT token string
+ */
 export const getAccessToken = () => {
   const cookies = document.cookie.split(";").map((cookie) => cookie.trim());
   const tokenCookie = cookies.find((cookie) =>

@@ -1,3 +1,9 @@
+/**
+ * File: ScheduleData.ts
+ * Purpose: Contains test data from CSV provided by CNH
+ * to database if not already present
+ */
+
 // List of entries from schedule CSV
 // file provided by CNH/Oracle
 

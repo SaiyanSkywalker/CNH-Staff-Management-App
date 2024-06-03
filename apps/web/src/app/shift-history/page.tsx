@@ -1,3 +1,8 @@
+/**
+ * File: page.tsx
+ * Purpose: contains functionality for shift history page
+ */
+
 "use client";
 import {
   useState,
@@ -10,7 +15,7 @@ import page from "@webSrc/styles/ShiftHistory.module.css";
 import { useAuth } from "@webSrc/contexts/AuthContext";
 import { useSearchParams } from "next/navigation";
 import ShiftHistoryClient from "@shared/src/interfaces/ShiftHistoryClient";
-import config from "web/src/config";
+import config from "@webSrc/config";
 import axios from "axios";
 import UnitAttributes from "@shared/src/interfaces/UnitAttributes";
 import AuthWrapper from "@webSrc/components/ProtectedRoute";
@@ -18,6 +23,7 @@ import { getAccessToken } from "@webSrc/utils/token";
 import AdminShiftRequestUpdate from "@shared/src/interfaces/AdminShiftRequestUpdate";
 import { BannerContext } from "@webSrc/contexts/BannerContext";
 import { v4 as uuid4 } from "uuid";
+import { error } from "console";
 const Page = () => {
   const params = useSearchParams();
   const employeeNameQuery: string = params.get("employeeName") ?? "";
@@ -65,6 +71,10 @@ const Page = () => {
   const { auth } = useAuth();
   const bannerContext = useContext(BannerContext);
 
+  /**
+   * Check employee id to see if it's numeric
+   * @returns true if employee id is valid, false otherwise
+   */
   const validateEmployeeId = (): boolean => {
     const trimmedEmployeeId = employeeId.trim();
     if (trimmedEmployeeId.length === 0) {
@@ -76,6 +86,11 @@ const Page = () => {
     return true;
   };
 
+  /**
+   * Get all shift history data (based on user role)
+   * @param event
+   * @returns
+   */
   const getShiftHistories = async (
     event: FormEvent<HTMLFormElement>
   ): Promise<void> => {
@@ -89,44 +104,45 @@ const Page = () => {
   const updateList = async (): Promise<void> => {
     try {
       let unitRequested: string = "";
-      if(auth?.user?.roleId === 3) {
-        const unitId: string = auth?.user?.roleId === 3 ? "/" + String(auth?.user?.unitId) : ""
+      if (auth?.user?.roleId === 3) {
+        const unitId: string =
+          auth?.user?.roleId === 3 ? "/" + String(auth?.user?.unitId) : "";
         const getUnit = async (unitId: string): Promise<void> => {
-          const res = await axios({
-            method: "GET",
-            url: `${config.apiUrl}/unit${unitId}`,
+          const res = await axios.get(`${config.apiUrl}/unit${unitId}`, {
             responseType: "json",
+            headers: { Authorization: `Bearer ${getAccessToken()}` },
           });
           const nurseManagerUnits: UnitAttributes[] = res.data;
           const nurseManagerUnit: UnitAttributes = nurseManagerUnits[0];
           unitRequested = nurseManagerUnit.name;
-        }
+        };
         await getUnit(unitId);
       }
-    
-      console.log(`unitRequested is ${unitRequested}`);
-      setIsLoading((prevLoad) => !prevLoad);
-      const res = await axios(
-        `http://localhost:3003/shift-history?employeeId=${employeeId}&employeeName=${employeeName}&unit=${auth?.user?.roleId === 3 ? unitRequested : unit}&requestedDate=${requestedDate}&shiftDate=${shiftDate}&shift=${shift}&status=${status}`,
-        {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${getAccessToken()}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
 
-      const jsonResponse: ShiftHistoryClient[] = res.data;
-      // console.log("jsonResponse is:");
-      // console.dir(jsonResponse);
+      // console.log(`unitRequested is ${unitRequested}`);
       setIsLoading((prevLoad) => !prevLoad);
-      setShiftHistories((prevshiftHistories) => jsonResponse);
+      const url = `http://localhost:3003/shift-history?employeeId=${employeeId}&employeeName=${employeeName}&unit=${
+        auth?.user?.roleId === 3 ? unitRequested : unit
+      }&requestedDate=${requestedDate}&shiftDate=${shiftDate}&shift=${shift}&status=${status}`;
+      const res = await axios.get(url, {
+        headers: {
+          Authorization: `Bearer ${getAccessToken()}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (res) {
+        // console.log("jsonResponse is:");
+        // console.dir(jsonResponse);
+        setIsLoading((prevLoad) => !prevLoad);
+        setShiftHistories((prevshiftHistories) => res.data);
+      }
     } catch (error) {
-      console.log(error);
+      bannerContext?.showBanner(`Error in retrieving shift histories`, "error");
     }
   };
 
+  // Event handlers for changing any of the search input fields
   const handleEmployeeIdChange = (event: BaseSyntheticEvent): void => {
     setEmployeeId((prevEmployeeId) => event.target.value);
   };
@@ -155,6 +171,11 @@ const Page = () => {
     setStatus((prevStatus) => event.target.value);
   };
 
+  /**
+   * Styles status column based on shift request status
+   * @param status status of shift request
+   * @returns
+   */
   const statusStyle = (
     status: string
   ): { color: string; fontWeight: string } => {
@@ -169,6 +190,10 @@ const Page = () => {
     };
   };
 
+  /**
+   * Changes style of employyeeId baseed on if employee id is valid
+   * @returns
+   */
   const buttonStyle = (): { backgroundColor: string } => {
     return {
       backgroundColor: validateEmployeeId()
@@ -177,6 +202,11 @@ const Page = () => {
     };
   };
 
+  /**
+   * Emit socket event when accept/reject button is clicked
+   * @param shiftHistoryId id of shift history in db
+   * @param isAccepted indicates if shift is accepted,
+   */
   const acceptOrDenyShift = (
     shiftHistoryId: number,
     isAccepted: boolean
@@ -210,13 +240,6 @@ const Page = () => {
     bannerContext?.showBanner(`Error in ${acceptedString} shift!`, "error");
   };
 
-  const parseDate = (date: Date) =>
-    date.toString().substring(5, 7) +
-    "/" +
-    date.toString().substring(8, 10) +
-    "/" +
-    date.toString().substring(0, 4);
-
   // Initial fill of list
   useEffect(() => {
     async function initialList() {
@@ -238,8 +261,11 @@ const Page = () => {
         <form className={page.form} onSubmit={getShiftHistories}>
           <div className={page.submission}>
             <div>
-              <label className={page.label}>Employee ID</label>
+              <label className={page.label} htmlFor="employeeId">
+                Employee ID
+              </label>
               <input
+                id="employeeId"
                 placeholder="Enter ID"
                 value={employeeId}
                 onChange={handleEmployeeIdChange}
@@ -247,8 +273,11 @@ const Page = () => {
               ></input>
             </div>
             <div>
-              <label className={page.label}>Employee Name</label>
+              <label className={page.label} htmlFor="employeeName">
+                Employee Name
+              </label>
               <input
+                id="employeeName"
                 placeholder="Enter Name"
                 value={employeeName}
                 onChange={handleEmployeeNameChange}
@@ -256,25 +285,27 @@ const Page = () => {
               ></input>
             </div>
 
-            {auth?.user?.roleId === 3 ? 
-            undefined 
-            :
-              (
+            {auth?.user?.roleId === 3 ? undefined : (
               <div>
-                <label className={page.label}>Unit</label>
+                <label className={page.label} htmlFor="unit">
+                  Unit
+                </label>
                 <input
+                  id="unit"
                   placeholder="Enter Unit"
                   value={unit}
                   onChange={handleUnitChange}
                   className={page.input}
                 ></input>
               </div>
-              )
-            }
+            )}
 
             <div>
-              <label className={page.label}>Requested Date</label>
+              <label className={page.label} htmlFor="requestedDate">
+                Requested Date
+              </label>
               <input
+                id="requestedDate"
                 value={requestedDate}
                 onChange={handleRequestedDateChange}
                 type="date"
@@ -283,7 +314,9 @@ const Page = () => {
             </div>
 
             <div>
-              <label className={page.label}>Shift Date</label>
+              <label className={page.label} htmlFor="widget">
+                Shift Date
+              </label>
               <input
                 value={shiftDate}
                 onChange={handleShiftDateChange}
@@ -295,7 +328,9 @@ const Page = () => {
             </div>
 
             <div>
-              <label className={page.label}>Shift</label>
+              <label className={page.label} htmlFor="shift">
+                Shift
+              </label>
               <select
                 onChange={handleShiftChange}
                 name="shift"
@@ -359,14 +394,7 @@ const Page = () => {
                   <td className={page.td}> {shiftHistory.employeeId} </td>
                   <td className={page.td}> {shiftHistory.employeeName} </td>
                   <td className={page.td}> {shiftHistory.unit} </td>
-                  <td className={page.td}>
-                    {" "}
-                    {
-                      parseDate(
-                        shiftHistory.createdAt
-                      ) /*shiftHistory.createdAt.substring(5,7) + "/" + shiftHistory.createdAt.substring(8,10) + "/" + shiftHistory.createdAt.substring(0,4)*/
-                    }{" "}
-                  </td>
+                  <td className={page.td}> {shiftHistory.createdAt} </td>
                   <td className={page.td}>{shiftHistory.dateRequested}</td>
                   <td className={page.td}> {shiftHistory.shift} </td>
                   <td

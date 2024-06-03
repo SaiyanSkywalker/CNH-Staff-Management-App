@@ -1,3 +1,7 @@
+/**
+ * File: Loading.tsx
+ * Purpose: Loading spinner component that is triggered by LoadingContext
+ */
 "use client";
 import {
   LoadingContext,

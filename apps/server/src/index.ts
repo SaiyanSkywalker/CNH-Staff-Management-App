@@ -1,3 +1,10 @@
+/**
+ * File: index.ts
+ * Purpose: Start up server project (initialize loaders and socket connection)
+ * This is the first point of entry for the server project, this is what's ran
+ * when running the command `npm run dev` from the `apps/server` directory
+ */
+
 import express from "express";
 import config from "./config";
 import loaders from "./loaders";
@@ -37,3 +44,5 @@ const startServer = async () => {
 };
 
 startServer();
+
+export default app;

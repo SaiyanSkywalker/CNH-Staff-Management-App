@@ -1,3 +1,7 @@
+/**
+ * File: Banner.tsx
+ * Purpose: Contains logic for banner shown by BannerContext
+ */
 "use client";
 import { useContext } from "react";
 import {

@@ -1,3 +1,7 @@
+/**
+ * File: Navbar.tsx
+ * Purpose: Navbar for application, contains links to other pages
+ */
 "use client";
 
 import Link from "next/link";

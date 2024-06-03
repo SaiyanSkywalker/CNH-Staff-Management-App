@@ -1,3 +1,7 @@
+/**
+ * File: page.tsx
+ * Purpose: contains functionality for upload schedule feature
+ */
 "use client";
 
 import React, {
@@ -43,6 +47,11 @@ const Page = () => {
   const loadingContext: LoadingContextProps | undefined =
     useContext(LoadingContext);
   const authContext = useAuth();
+
+  /**
+   * Removes/adds thumbnail based on if file has been selected
+   * @param e
+   */
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     const inputElement: HTMLInputElement | null = fileInputRef.current;
     const containerElement: HTMLDivElement | null = containerRef.current;
@@ -70,6 +79,7 @@ const Page = () => {
     }
   };
 
+  // Event handlers for dragging files into the input
   const handleDrag = (e: DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     const dropZoneElement: HTMLDivElement | null = containerRef.current;
@@ -80,6 +90,10 @@ const Page = () => {
     const dropZoneElement: HTMLDivElement | null = containerRef.current;
     dropZoneElement?.classList.remove(`${styles["drop-zone--over"]}`);
   };
+
+  /**
+   * Uploads CSV file to server
+   */
   const uploadCSV = async () => {
     try {
       if (bannerContext && loadingContext) {
@@ -120,6 +134,12 @@ const Page = () => {
     }
   };
 
+  /**
+   * Creates thumbnail element seen when file hasn't not been selected
+   * @param dropZoneElement
+   * @param file
+   * @returns
+   */
   const buildThumbnail = (dropZoneElement: HTMLDivElement, file: File) => {
     const prompt = dropZoneElement.querySelector(
       `.${styles["drop-zone__prompt"]}`

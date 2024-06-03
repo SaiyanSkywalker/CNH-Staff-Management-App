@@ -1,3 +1,7 @@
+/**
+ * File: index.tsx
+ * Purpose: Component for "login" screen, allows user to log in to app
+ */
 import React, { useState } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import {
@@ -58,6 +62,12 @@ const styles = StyleSheet.create({
 });
 const Page = () => {
   const { auth } = useAuth();
+
+  /**
+   * Handles user login,
+   * Shows alerts if there are errors
+   * Redirects to user schedule otherwise
+   */
   const onPressLogin = async () => {
     if (!username || !password) {
       Alert.alert("Error", "Please enter both email and password.");
@@ -70,6 +80,10 @@ const Page = () => {
       Alert.alert("Login Failed", "Invalid email or password.");
     }
   };
+  /**
+   * TODO: Add functionality for forgot password
+   * NOTE: workflow for combining this feature with CNH infrastructure was never devised
+   */
   const onPressForgotPassword = () => {
     // Do something about forgot password operation
   };
@@ -81,7 +95,7 @@ const Page = () => {
       <View style={styles.inputView}>
         <TextInput
           style={styles.inputText}
-          placeholder="Username"
+          placeholder="Enter username"
           placeholderTextColor="#003f5c"
           onChangeText={(text) => setUsername(text)}
         />
@@ -90,7 +104,7 @@ const Page = () => {
         <TextInput
           style={styles.inputText}
           secureTextEntry
-          placeholder="Password"
+          placeholder="Enter password"
           placeholderTextColor="#003f5c"
           onChangeText={(text) => setPassword(text)}
         />
@@ -99,7 +113,7 @@ const Page = () => {
         <Text style={styles.forgotText}>Forgot Password?</Text>
       </TouchableOpacity>
       <TouchableOpacity onPress={onPressLogin} style={styles.loginBtn}>
-        <Text style={styles.loginText}>LOGIN </Text>
+        <Text style={styles.loginText}>LOGIN</Text>
       </TouchableOpacity>
     </View>
   );

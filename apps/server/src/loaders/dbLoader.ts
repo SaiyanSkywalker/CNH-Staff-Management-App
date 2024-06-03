@@ -1,3 +1,8 @@
+/**
+ * File: dbLoader.ts
+ * Purpose: Initiates database connection using Sequelize,
+ * adds default values
+ */
 import path from "path";
 import {
   Model,
@@ -35,20 +40,25 @@ const createDefaultValues = async <T extends {}>(
   }
 };
 
+/**
+ * Creates chat channels for each unit in db
+ * @returns 
+ */
 const createUnitChannels = async () => {
-  let maxId: number | undefined = await Unit.max('id');
-  let minId: number | undefined = await Unit.min('id');
-  if(!maxId || !minId) {
+  let maxId: number | undefined = await Unit.max("id");
+  let minId: number | undefined = await Unit.min("id");
+  if (!maxId || !minId) {
     return;
   }
-  for(let id = minId; id <= maxId; id++) {
-    let unit: Unit | null = await Unit.findOne({where: {id}});
-    if(!unit) {
+  for (let id = minId; id <= maxId; id++) {
+    let unit: Unit | null = await Unit.findOne({ where: { id } });
+    if (!unit) {
       continue;
     }
-    await Channel.findOne({where: {unitRoomId: id}}) ?? Channel.create({unitRoomId: id, name: unit.name});
+    (await Channel.findOne({ where: { unitRoomId: id } })) ??
+      Channel.create({ unitRoomId: id, name: unit.name });
   }
-}
+};
 
 export default async (config: ServerConfig) => {
   try {
@@ -70,7 +80,7 @@ export default async (config: ServerConfig) => {
     //   config.environment.toLowerCase() === "dev" ? { alter: true } : {}
     // );
     await sequelize.sync();
-    
+
     // Adds default list of units and roles to db
     await createDefaultValues(Unit, DefaultUnits);
     await createDefaultValues(Role, DefaultRoles);

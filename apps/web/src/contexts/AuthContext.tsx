@@ -1,3 +1,7 @@
+/**
+ * File: AuthContext.tsx
+ * Purpose: Context that maintains user login state
+ */
 "use client";
 
 import axios from "axios";
@@ -20,12 +24,11 @@ interface AuthDetails {
   logout: () => Promise<boolean>;
 }
 
-
 interface IAuthContext {
   auth: AuthDetails;
 }
 
-const AuthContext = createContext<Partial<IAuthContext>>({});
+export const AuthContext = createContext<Partial<IAuthContext>>({});
 
 export default function AuthProvider({
   children,
@@ -39,13 +42,20 @@ export default function AuthProvider({
   const bannerContext: BannerContextProps | undefined =
     useContext(BannerContext);
   const cookies = new Cookies();
-
+  
+  /**
+   * Creates new socket on for user,
+   * update context state
+   * @param userInfo info about user
+   */
   const loginUser = (userInfo: UserInformation) => {
     setUser(userInfo);
     setIsLoggedIn(true);
     const randomUUID = uuidv4();
     const newSocket = io(config.apiUrl);
 
+    // Create new event handler to allow for notifcations
+    // for new schedule uploads
     newSocket.on("schedule_upload_complete", () => {
       bannerContext?.showBanner("Upload schedule complete", "success");
     });
@@ -57,7 +67,13 @@ export default function AuthProvider({
     setSocket(newSocket);
     setUserUUID(randomUUID);
   };
-
+  /**
+   * login user to app
+   * @param username username for user
+   * @param password unhashed password
+   * @param isMobile true if user is logging in from mobile, false otherwise
+   * @returns
+   */
   const login = async (
     username: string,
     password: string,
@@ -91,7 +107,10 @@ export default function AuthProvider({
       return false;
     }
   };
-
+  /**
+   * Logs out user, removes them from socket map
+   * @returns
+   */
   const logout = (): Promise<boolean> => {
     socket?.emit("remove_user", {
       username: user?.username,
@@ -107,6 +126,12 @@ export default function AuthProvider({
     return Promise.resolve(true);
   };
 
+  /**
+   * Used to retreive user info when logging in
+   * @param username
+   * @param password password (unhashed)
+   * @returns
+   */
   const getUser = async (username: string, password: string, role: string) => {
     try {
       const url = config.apiUrl;
@@ -126,6 +151,10 @@ export default function AuthProvider({
       console.error(err);
     }
   };
+  /**
+   * Fetches new access token (from server) after it expires
+   * @returns access token (wrapped in promise)
+   */
   const refreshAccessToken = async (): Promise<string | null> => {
     try {
       const refreshToken = cookies.get("refreshToken");
@@ -153,6 +182,10 @@ export default function AuthProvider({
     }
     return null;
   };
+  /**
+   * Re-signs in user upon page refresh
+   * @returns
+   */
   const refreshUser = async (): Promise<void> => {
     try {
       const refreshToken: string = cookies.get("refreshToken");
