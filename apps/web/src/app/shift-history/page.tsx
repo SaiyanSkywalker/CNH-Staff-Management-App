@@ -1,3 +1,8 @@
+/**
+ * File: page.tsx
+ * Purpose: contains functionality for shift history page
+ */
+
 "use client";
 import {
   useState,
@@ -66,6 +71,10 @@ const Page = () => {
   const { auth } = useAuth();
   const bannerContext = useContext(BannerContext);
 
+  /**
+   * Check employee id to see if it's numeric
+   * @returns true if employee id is valid, false otherwise
+   */
   const validateEmployeeId = (): boolean => {
     const trimmedEmployeeId = employeeId.trim();
     if (trimmedEmployeeId.length === 0) {
@@ -77,6 +86,11 @@ const Page = () => {
     return true;
   };
 
+  /**
+   * Get all shift history data (based on user role)
+   * @param event
+   * @returns
+   */
   const getShiftHistories = async (
     event: FormEvent<HTMLFormElement>
   ): Promise<void> => {
@@ -128,6 +142,7 @@ const Page = () => {
     }
   };
 
+  // Event handlers for changing any of the search input fields
   const handleEmployeeIdChange = (event: BaseSyntheticEvent): void => {
     setEmployeeId((prevEmployeeId) => event.target.value);
   };
@@ -156,6 +171,11 @@ const Page = () => {
     setStatus((prevStatus) => event.target.value);
   };
 
+  /**
+   * Styles status column based on shift request status
+   * @param status status of shift request
+   * @returns
+   */
   const statusStyle = (
     status: string
   ): { color: string; fontWeight: string } => {
@@ -170,6 +190,10 @@ const Page = () => {
     };
   };
 
+  /**
+   * Changes style of employyeeId baseed on if employee id is valid
+   * @returns
+   */
   const buttonStyle = (): { backgroundColor: string } => {
     return {
       backgroundColor: validateEmployeeId()
@@ -178,6 +202,11 @@ const Page = () => {
     };
   };
 
+  /**
+   * Emit socket event when accept/reject button is clicked
+   * @param shiftHistoryId id of shift history in db
+   * @param isAccepted indicates if shift is accepted,
+   */
   const acceptOrDenyShift = (
     shiftHistoryId: number,
     isAccepted: boolean
@@ -210,13 +239,6 @@ const Page = () => {
     const acceptedString: string = sh.isAccepted ? "accepting" : "denying";
     bannerContext?.showBanner(`Error in ${acceptedString} shift!`, "error");
   };
-
-  const parseDate = (date: Date) =>
-    date.toString().substring(5, 7) +
-    "/" +
-    date.toString().substring(8, 10) +
-    "/" +
-    date.toString().substring(0, 4);
 
   // Initial fill of list
   useEffect(() => {
@@ -372,10 +394,7 @@ const Page = () => {
                   <td className={page.td}> {shiftHistory.employeeId} </td>
                   <td className={page.td}> {shiftHistory.employeeName} </td>
                   <td className={page.td}> {shiftHistory.unit} </td>
-                  <td className={page.td}>
-                    {" "}
-                    {parseDate(shiftHistory.createdAt)}{" "}
-                  </td>
+                  <td className={page.td}> {shiftHistory.createdAt} </td>
                   <td className={page.td}>{shiftHistory.dateRequested}</td>
                   <td className={page.td}> {shiftHistory.shift} </td>
                   <td

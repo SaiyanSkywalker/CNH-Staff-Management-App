@@ -1,39 +1,29 @@
 import "@testing-library/jest-dom";
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { screen, fireEvent, waitFor } from "@testing-library/react";
 import ShiftHistoryPage from "@webSrc/app/shift-history/page";
-import { useRouter } from "next/navigation";
 import axios from "axios";
 import {
   mockAuthContextValue,
   mockBannerContextValue,
   renderWithProviders,
 } from "@webSrc/__mocks__/mockContexts";
-
-jest.mock("next/navigation", () => ({
-  useRouter: jest.fn(),
-  useSearchParams: jest.fn(() => {
-    return {
-      get: jest.fn(),
-    };
-  }),
-}));
+import { mockUseRouter } from "@webSrc/__mocks__/mockRouter";
 
 jest.mock("axios");
 jest.mock("socket.io-client");
 
-// Define the type for useRouter
-interface Router {
-  replace: jest.Mock<any, any>;
-  back: jest.Mock<any, any>;
-  forward: jest.Mock<any, any>;
-  refresh: jest.Mock<any, any>;
-  push: jest.Mock<any, any>;
-  prefetch: jest.Mock<any, any>;
-}
-
 describe("Shift History Page", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+
+    mockUseRouter.mockImplementation(() => ({
+      replace: jest.fn(),
+      back: jest.fn(),
+      forward: jest.fn(),
+      refresh: jest.fn(),
+      push: jest.fn(),
+      prefetch: jest.fn(),
+    }));
   });
 
   it("loads Shift History", async () => {

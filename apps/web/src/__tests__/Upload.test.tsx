@@ -12,11 +12,6 @@ import React, { useState, useContext } from "react";
 
 jest.mock("socket.io-client");
 
-// Mocking useRouter hook
-jest.mock("next/navigation", () => ({
-  useRouter: jest.fn(),
-}));
-
 // Mock auth context
 jest.mock("../contexts/AuthContext", () => ({
   useAuth: jest.fn(),
@@ -24,10 +19,15 @@ jest.mock("../contexts/AuthContext", () => ({
 
 jest.mock("axios");
 
-jest.mock('react', () => ({
-  ...jest.requireActual('react'),
+jest.mock("react", () => ({
+  ...jest.requireActual("react"),
   useState: jest.fn(),
-  useContext: jest.fn(() => ({ showBanner: jest.fn(), hideBanner: jest.fn(), showLoading: jest.fn(), hideLoading: jest.fn() })),
+  useContext: jest.fn(() => ({
+    showBanner: jest.fn(),
+    hideBanner: jest.fn(),
+    showLoading: jest.fn(),
+    hideLoading: jest.fn(),
+  })),
 }));
 
 interface Router {
@@ -43,27 +43,26 @@ interface Router {
 const mockUseRouter = useRouter as jest.Mock<Router>;
 
 describe("Upload Page", () => {
-  let mockRouter: Router;
   let mockUser: any;
   const mockUseAuth = useAuth as jest.Mock;
   const mockUseState = useState as jest.Mock;
   const mockUseContextBanner = useContext as jest.Mock;
   const mockUseContextLoading = useContext as jest.Mock;
-
+  const mockReplace = jest.fn();
   beforeEach(() => {
     jest.clearAllMocks();
     // Mocking the implementation of useRouter before each test
-    mockRouter = {
-      replace: jest.fn(),
+    mockUseRouter.mockImplementation(() => ({
+      replace: mockReplace,
       back: jest.fn(),
       forward: jest.fn(),
       refresh: jest.fn(),
       push: jest.fn(),
       prefetch: jest.fn(),
-    };
+    }));
 
     mockUser = {
-      username: "test", 
+      username: "test",
       roleId: 2,
       unit: {
         laborLevelEntryId: 1,
@@ -73,20 +72,22 @@ describe("Upload Page", () => {
 
     mockUseContextBanner.mockReturnValueOnce(mockBannerContextValue);
     mockUseContextLoading.mockReturnValueOnce(mockLoadingContextValue);
-
-    mockUseRouter.mockReturnValue(mockRouter);
   });
 
   it("renders success message when CSV given", async () => {
     (axios.post as jest.Mock).mockResolvedValue({ data: [] });
-    mockUseAuth.mockReturnValue({ auth: { user: mockUser} });
+    mockUseAuth.mockReturnValue({
+      auth: { user: mockUser, authenticated: true },
+    });
 
     const setState = jest.fn();
     mockUseState.mockImplementation((file: File) => [file, setState]);
 
-    const mockFile = new File(["file content"], "filename.csv", { type: "text/csv" });
+    const mockFile = new File(["file content"], "filename.csv", {
+      type: "text/csv",
+    });
 
-    jest.spyOn(React, 'useState').mockReturnValue([mockFile, setState]);
+    jest.spyOn(React, "useState").mockReturnValue([mockFile, setState]);
 
     render(<Upload />);
 
@@ -97,18 +98,22 @@ describe("Upload Page", () => {
     });
 
     expect(mockBannerContextValue.showBanner).toHaveBeenCalledWith(
-      expect.stringMatching(/File upload has been started, notification will be shown once upload is complete/i),
+      expect.stringMatching(
+        /File upload has been started, notification will be shown once upload is complete/i
+      ),
       "other"
     );
   });
 
   it("renders error message when CSV not given", async () => {
-    (useAuth as jest.Mock).mockReturnValue({ auth: { user: mockUser } });
+    mockUseAuth.mockReturnValue({
+      auth: { user: mockUser, authenticated: true },
+    });
 
     const setState = jest.fn();
     mockUseState.mockImplementation((init: any) => [init, setState]);
 
-    jest.spyOn(React, 'useState').mockReturnValue([null, setState]);
+    jest.spyOn(React, "useState").mockReturnValue([null, setState]);
 
     render(<Upload />);
 
@@ -126,20 +131,21 @@ describe("Upload Page", () => {
 
   it("redirects when user does not have admin role", async () => {
     mockUser.roleId = 3;
-
-    (useAuth as jest.Mock).mockReturnValue({ auth: { user: mockUser } });
+    mockUseAuth.mockReturnValue({
+      auth: { user: mockUser, authenticated: true },
+    });
 
     render(<Upload />);
 
-    fireEvent.click(screen.getByRole("button", { name: "Upload File" }));
-
     await waitFor(() => {
-      expect(mockRouter.replace).toHaveBeenCalledWith("/schedule");
+      expect(mockReplace).toHaveBeenCalledWith("/schedule");
     });
   });
 
   it("renders when user does have admin role", async () => {
-    (useAuth as jest.Mock).mockReturnValue({ auth: { user: mockUser } });
+    mockUseAuth.mockReturnValue({
+      auth: { user: mockUser, authenticated: true },
+    });
 
     render(<Upload />);
 

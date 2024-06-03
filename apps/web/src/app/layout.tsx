@@ -1,3 +1,7 @@
+/**
+ * File: layout.tsx
+ * Purpose: Contains template for entire application
+ */
 import { Inter } from "next/font/google";
 import "../styles/globals.css";
 import Navbar from "../components/Navbar";

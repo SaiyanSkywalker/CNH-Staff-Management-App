@@ -1,3 +1,7 @@
+/**
+ * File: page.tsx
+ * Purpose: Component for /chat page; Contains functionality for chat feature
+ */
 "use client";
 
 import React, {
@@ -12,7 +16,7 @@ import {
   BannerContext,
   BannerContextProps,
 } from "@webSrc/contexts/BannerContext";
-import axios, { AxiosError } from "axios";
+import axios from "axios";
 import config from "@webSrc/config";
 import {
   LoadingContext,
@@ -56,6 +60,9 @@ const Page = () => {
     borderColor: "#C6373C",
   };
 
+  /**
+   * Get channels for chat
+   */
   const getChannels = async () => {
     try {
       const accessToken = getAccessToken();
@@ -92,6 +99,11 @@ const Page = () => {
     }
   };
 
+  /**
+   * Convert date for chat into user-friendly format
+   * @param date datetime chat was posted
+   * @returns formatted date string
+   */
   const parseAnnouncmentDate = (date: Date) => {
     if (!date) {
       return "";
@@ -108,6 +120,10 @@ const Page = () => {
     );
   };
 
+  /**
+   * Gets chat announcements for a particular channel
+   * @returns list of announcements
+   */
   const getAnnouncements = async () => {
     try {
       if (!selectedChannel) {
@@ -140,6 +156,10 @@ const Page = () => {
     }
   };
 
+  /**
+   * Sends request for new chat channel to be created in db
+   * @param event
+   */
   async function newChannelOnSubmit(event: FormEvent<HTMLFormElement>) {
     try {
       event.preventDefault();
@@ -218,6 +238,9 @@ const Page = () => {
 
   useEffect(() => {
     getAnnouncements();
+
+    // Event listeners for sockets that allow for real-time updates
+    // to the message forum
     const providerListener = (newAnnouncement: AnnouncementAttributes) => {
       setAnnouncements((announcements) => [...announcements, newAnnouncement]);
       changeChatMessage("");
@@ -243,6 +266,11 @@ const Page = () => {
     };
   }, [selectedChannel]);
 
+  /**
+   * Emits a socket event once user posts a message in the chat
+   * @param event
+   * @returns
+   */
   const handleChatSubmit = (event: React.FormEvent) => {
     event.preventDefault();
 
@@ -260,14 +288,24 @@ const Page = () => {
     auth?.socket?.emit("message_sent", newAnnouncement);
   };
 
+  /**
+   * Handles user input when entering a new channel name
+   * @param event
+   */
   const handleNewChannel = (event: React.ChangeEvent<HTMLInputElement>) => {
     let newChannelName = event.target.value;
+
+    // Disables channel names with more than 51 characters
     let channelDisabled =
       newChannelName.length == 0 || newChannelName.length > 51 ? true : false;
     setIsChannelDisabled(channelDisabled);
     setNewChannel(newChannelName);
   };
 
+  /**
+   * Enables/disables send button based on chat input   (255 char limit)
+   * @param chatMessage
+   */
   const changeChatMessage = (chatMessage: string) => {
     let chatDisabled =
       chatMessage.length == 0 || chatMessage.length > 255 || !selectedChannel
@@ -277,16 +315,22 @@ const Page = () => {
     setMessage(chatMessage);
   };
 
+  /**
+   * Handling user typing messsage
+   * @param event 
+   */
   const handleChangeChat = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
     let chatMessage = event.target.value;
     changeChatMessage(chatMessage);
   };
 
+  // Handles user selecting a different channel
   const handleOptionChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     setPrevSelectedChannel((prevChannel) => selectedChannel);
     setSelectedChannel((prevChannel) => channelMap.get(event.target.value));
   };
 
+  // Handles user clicking out of error
   const handleClickTextArea = (
     event: React.MouseEvent<HTMLTextAreaElement>
   ) => {

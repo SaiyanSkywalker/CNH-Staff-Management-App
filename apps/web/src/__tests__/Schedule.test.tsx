@@ -16,11 +16,6 @@ interface Router {
   prefetch: jest.Mock<any, any>;
 }
 
-jest.mock("next/navigation", () => ({
-  useRouter: jest.fn(),
-  useSearchParams: jest.fn(),
-}));
-
 // Mocking axios
 jest.mock("axios");
 
@@ -50,6 +45,7 @@ describe("Schedule Functionality", () => {
     // Mocking the implementation of useAuth before each test
     mockUseAuth.mockReturnValue({
       auth: {
+        authenticated: true,
         user: {
           roleId: 3,
           unit: {

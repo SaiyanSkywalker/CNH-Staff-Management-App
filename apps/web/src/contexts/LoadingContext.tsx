@@ -1,3 +1,7 @@
+/**
+ * File: LoadingContext.tsx
+ * Purpose: handle the showing/hiding of the Loading component
+ */
 "use client";
 import { createContext, useState, ReactNode } from "react";
 
