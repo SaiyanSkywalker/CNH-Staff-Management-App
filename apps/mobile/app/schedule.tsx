@@ -212,11 +212,13 @@ const Page = () => {
             },
           }
         );
-        const currentShifts: ScheduleEntryAttributes[] = response.data;
-        const currentCapacities = await getCapacities(shiftDate);
-        setShifts(currentShifts);
-        setCapacites(currentCapacities);
-        getIntervals(shiftDate, currentShifts, currentCapacities);
+        if (response && response.data) {
+          const currentShifts: ScheduleEntryAttributes[] = response.data;
+          const currentCapacities = await getCapacities(shiftDate);
+          setShifts(currentShifts);
+          setCapacites(currentCapacities);
+          getIntervals(shiftDate, currentShifts, currentCapacities);
+        }
       }
     } catch (error) {
       // console.log(error);
@@ -350,13 +352,14 @@ const Page = () => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}> Schedule Shift</Text>
+      <Text style={styles.title}>Schedule Shift</Text>
 
       <View style={styles.dropdownView}>
         <Text style={styles.inputLabel}>Date (press to select)</Text>
         <TouchableOpacity
           onPress={showDatePicker}
           style={styles.dateSelectedBtn}
+          testID="dateSelectedBtn"
         >
           <Text style={styles.dateText}>{formattedDate}</Text>
         </TouchableOpacity>
@@ -375,6 +378,7 @@ const Page = () => {
                     : styles.defaultBackground,
                 ]}
                 onPress={() => setFilter(interval)}
+                testID={interval}
               >
                 <Text style={styles.filterBtnText}>{interval}</Text>
               </TouchableOpacity>
@@ -389,6 +393,7 @@ const Page = () => {
           value={selectedShiftInterval}
           items={items}
           setOpen={setOpen}
+          onPress={setOpen}
           setValue={setSelectedShiftInterval}
           setItems={setItems}
           placeholder="Select a shift"
@@ -402,9 +407,11 @@ const Page = () => {
           labelStyle={{
             fontWeight: "700",
           }}
+          testID="shiftDropwdown"
         />
       </View>
       <DateTimePickerModal
+        testID="dateTimePickerModal"
         isVisible={isDatePickerVisible}
         mode="date"
         date={shiftDate}
@@ -412,7 +419,11 @@ const Page = () => {
         onCancel={hideDatePicker}
         onChange={(shiftDate: Date) => setShiftDate(shiftDate)}
       />
-      <TouchableOpacity onPress={handlePress} style={styles.submitBtn}>
+      <TouchableOpacity
+        onPress={handlePress}
+        style={styles.submitBtn}
+        testID="submitRequestBtn"
+      >
         <Text style={styles.submitText}>SUBMIT REQUEST </Text>
       </TouchableOpacity>
     </View>

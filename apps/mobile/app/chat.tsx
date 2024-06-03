@@ -92,25 +92,23 @@ export default function ChatPage() {
     if (selectedChannel) {
       try {
         const accessToken = await getToken("accessToken");
-        const response = await axios({
-          method: "GET",
-          url: `${config.apiUrl}/channel/${selectedChannel?.id}`,
-          responseType: "json",
-          headers: {
-            unitId: auth?.user?.unitId,
-            roleId: auth?.user?.roleId,
-            Authorization: `Bearer: ${accessToken}`,
-          },
+        const response = await axios.get(
+          `${config.apiUrl}/channel/${selectedChannel?.id}`,
+          {
+            responseType: "json",
+            headers: {
+              unitId: auth?.user?.unitId,
+              roleId: auth?.user?.roleId,
+              Authorization: `Bearer: ${accessToken}`,
+            },
+          }
+        );
+        const data = response && response.data ? response.data : [];
+        auth?.socket?.emit("join_room", {
+          prevSelectedChannel: prevSelectedChannel?.name,
+          selectedChannel: selectedChannel?.name,
         });
-        const data = response.data;
-        if (data) {
-          auth?.socket?.emit("join_room", {
-            prevSelectedChannel: prevSelectedChannel?.name,
-            selectedChannel: selectedChannel?.name,
-          });
-          setAnnouncements(data);
-        }
-        setAnnouncements(response.data);
+        setAnnouncements(data);
       } catch (error) {
         console.error("Failed to fetch announcements", error);
       }
@@ -122,9 +120,7 @@ export default function ChatPage() {
   const fetchChannels = async () => {
     try {
       const accessToken = await getToken("accessToken");
-      const response = await axios({
-        method: "GET",
-        url: `${config.apiUrl}/channel`,
+      const response = await axios.get(`${config.apiUrl}/channel`, {
         responseType: "json",
         headers: {
           unitId: auth?.user?.unitId,
@@ -132,8 +128,8 @@ export default function ChatPage() {
           Authorization: `Bearer: ${accessToken}`,
         },
       });
-      const data: ChannelAttributes[] = await response.data;
-      if (data) {
+      if (response && response.data) {
+        const data: ChannelAttributes[] = await response.data;
         setChannels(data);
         const newChannelMap: Map<string, ChannelAttributes> = new Map<
           string,
@@ -219,7 +215,6 @@ export default function ChatPage() {
    * Runs every time user sends a message
    */
   const handleSend = () => {
-
     // Send message to server through socket
     if (message && selectedChannel?.id && auth?.user?.id && auth?.socket) {
       const newAnnouncement: AnnouncementAttributes = {
@@ -242,6 +237,7 @@ export default function ChatPage() {
         multiple={false}
         open={open}
         setOpen={setOpen}
+        onPress={setOpen}
         value={selectedChannelName}
         setValue={setSelectedChannelName}
         items={channels.map((channel) => {
@@ -252,6 +248,7 @@ export default function ChatPage() {
         })}
         style={{}}
         onChangeValue={handleChannelChange}
+        testID="channelDropdown"
       />
 
       <View style={styles.messageList}>

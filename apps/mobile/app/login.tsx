@@ -95,7 +95,7 @@ const Page = () => {
       <View style={styles.inputView}>
         <TextInput
           style={styles.inputText}
-          placeholder="Username"
+          placeholder="Enter username"
           placeholderTextColor="#003f5c"
           onChangeText={(text) => setUsername(text)}
         />
@@ -104,7 +104,7 @@ const Page = () => {
         <TextInput
           style={styles.inputText}
           secureTextEntry
-          placeholder="Password"
+          placeholder="Enter password"
           placeholderTextColor="#003f5c"
           onChangeText={(text) => setPassword(text)}
         />
