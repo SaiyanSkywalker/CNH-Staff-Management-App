@@ -59,32 +59,55 @@ export const validateSchedule = (schedule: UploadedFile): any => {
     "Job Code",
     "q",
     "Worked Costs Center",
-    "Facility ID\r",
+    "Facility ID",
   ];
 
   const fileContent = content.trim().split("\n");
 
-  const headers = fileContent[0].split(",");
+  const headers: string[] = fileContent[0]
+    .split(",")
+    .map((x) => x.trim().replace(/\r/g, ""));
 
   const isValid =
     headers.length === defaultHeaders.length &&
     headers.every((header, index) => header === defaultHeaders[index]);
 
-    if (!isValid) {
-      return { isValid: false, error: "File of incorrect format" };
-    }
+  if (!isValid) {
+    return { isValid: false, error: "File of incorrect format" };
+  }
 
-  const data: string[][] = fileContent.slice(1, fileContent.length).reduce((array: string[][], line: string) => { 
-    array.push(line.split(","));
-    return array;
-  }, []);
+  const data: string[][] = fileContent
+    .slice(1, fileContent.length)
+    .reduce((array: string[][], line: string) => {
+      array.push(line.split(","));
+      return array;
+    }, []);
 
   for (let line of data) {
-    if(isNaN(Number(line[1])) || isNaN(Number(line[5])) || isNaN(Number(line[14])) || isNaN(Number(line[15])) ) {
-      return { isValid: false, error: "Make sure Personnum, Shift Date, q, Worked Costs Center are all numeric" };
+    if (
+      isNaN(Number(line[1])) ||
+      isNaN(Number(line[5])) ||
+      isNaN(Number(line[14])) ||
+      isNaN(Number(line[15]))
+    ) {
+      return {
+        isValid: false,
+        error:
+          "Make sure Personnum, Shift Date, q, Worked Costs Center are all numeric",
+      };
     }
-    if( ((line[6].length !== 5) || (line[6][2] !== ':')) || ((line[7].length !== 5) || (line[7][2] !== ':')) || ((line[7].length !== 5) || (line[7][2] !== ':')) ) {
-      return { isValid: false, error: "Make sure all time strings follow HH:MM format" };
+    if (
+      line[6].length !== 5 ||
+      line[6][2] !== ":" ||
+      line[7].length !== 5 ||
+      line[7][2] !== ":" ||
+      line[7].length !== 5 ||
+      line[7][2] !== ":"
+    ) {
+      return {
+        isValid: false,
+        error: "Make sure all time strings follow HH:MM format",
+      };
     }
   }
   return { isValid: true };
