@@ -9,7 +9,7 @@ import {
 } from "react";
 import UnitAttributes from "@shared/src/interfaces/UnitAttributes";
 import styles from "../../styles/ShiftCapacity.module.css";
-import config from "web/src/config";
+import config from "@webSrc/config";
 import axios from "axios";
 import ShiftCapacityRequest from "@shared/src/interfaces/ShiftCapacityRequest";
 import {
@@ -59,18 +59,18 @@ const ShiftCapacity = () => {
 
   const getUnits = async () => {
     try {
-      console.log("begin get unit");
-      const unitId: string = auth?.user?.roleId === 3 ? "/" + String(auth?.user?.unitId) : ""
-      const response = await axios({
-        method: "GET",
-        url: `${config.apiUrl}/unit${unitId}`,
-        responseType: "json",
-        headers: { Authorization: `Bearer ${getAccessToken()}` },
-      });
-      console.log(response);
-      const data = await response.data;
-      setInitialLoad(true);
-      setUnits(data);
+      const unitId: string =
+        auth?.user?.roleId === 3 ? "/" + String(auth?.user?.unitId) : "";
+      const response =
+        (await axios.get(`${config.apiUrl}/unit${unitId}`, {
+          responseType: "json",
+          headers: { Authorization: `Bearer ${getAccessToken()}` },
+        })) || null;
+      if (response) {
+        const data = await response.data;
+        setInitialLoad(true);
+        setUnits(data);
+      }
     } catch (err) {
       console.error(err);
     }
@@ -126,14 +126,17 @@ const ShiftCapacity = () => {
           isDefault: isChecked,
         };
         loadingContext?.showLoader();
-        const res = await fetch(`${config.apiUrl}/shift-capacity`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${getAccessToken()}`,
-          },
-          body: JSON.stringify(shiftCapacityRequest),
-        });
+        const res = await axios.post(
+          `${config.apiUrl}/shift-capacity`,
+          shiftCapacityRequest,
+          {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${getAccessToken()}`,
+            },
+          }
+        );
+
         loadingContext?.hideLoader();
         if (res.status === 200) {
           bannerContext?.showBanner(
@@ -158,7 +161,11 @@ const ShiftCapacity = () => {
 
   return (
     <div className={styles.container}>
-      <form className={styles.capacity} onSubmit={onSubmit}>
+      <form
+        className={styles.capacity}
+        onSubmit={onSubmit}
+        data-testid="shiftCapacity-form"
+      >
         <h1 className={styles.h1}>Max Unit Capacity</h1>
         <div className="w-[73.5%] my-3">
           <div className={styles.checkbox}>
@@ -223,6 +230,7 @@ const ShiftCapacity = () => {
                 type="number"
                 min="0"
                 max="100"
+                data-testid={`capacity-input-${unit.id}`}
               ></input>
             </div>
           ))}
