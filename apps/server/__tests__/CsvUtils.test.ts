@@ -50,24 +50,3 @@ test("csvToScheduleData converts strings to an array of ScheduleEntryAttributes"
     expect(scheduleEntries[0]).toStrictEqual(scheduleEntryOne);
     expect(scheduleEntries[1]).toStrictEqual(scheduleEntryTwo);
 });
-
-
-/*
-test("uploaded file has no content", () => {
-    let mv = (path: string, callback: (err: any) => void) => {
-        callback(path);
-    }
-
-    let fileUpload: UploadedFile = {
-        data: Buffer.alloc(0),
-        name: "",
-        encoding: "",
-        mimetype: "",
-        tempFilePath: "",
-        truncated: false,
-        size: 0,
-        md5: "",
-        mv
-    }
-});
-*/

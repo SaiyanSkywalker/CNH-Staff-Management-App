@@ -32,12 +32,6 @@ jest.mock("server/src/sockets/socketHandler", () => {
   };
 });
 
-// jest.mock("server/src/loaders/dbLoader", () => {
-//   const { sequelizeMock } = require("server/__mocks__/sequelize");
-//   return { __esModule: true, sequelize: sequelizeMock };
-// });
-
-
 const app = express();
 app.use(fileUpload());
 app.use("/schedule", scheduleRouter);
@@ -104,6 +98,7 @@ describe("POST /schedule", () => {
       .attach("schedule", filePath)
       .field("username", "testuser");
     expect(response.status).toBe(400);
+    expect(response.body.error).toStrictEqual("Make sure Personnum, Shift Date, q, Worked Costs Center are all numeric");
   });
 });
 
@@ -111,18 +106,49 @@ describe("/GET schedule", () => {
   beforeEach(() => {
     jest.resetAllMocks();
   });
-  fit("no query parameters in get request", async () => {
+
+  it("no query parameters in get request", async () => {
     const response = await request(app).get("/schedule");
     expect(response.status).toBe(200);
   });
-  it("query costCenterId in get request", async () => {});
-  it("non-numeric costCenterId in get request", async () => {});
+  
+  /*
+  it("query costCenterId in get request", async () => {
+    const response = await request(app).get("/schedule?costCenterId=24530");
+    console.log("response.body is:");
+    console.dir(response.body);
+    expect(response.status).toBe(200);
+  });
+  */
 
-  it("numeric costCenterId in get request", async () => {});
-  it("get schedule with nonexistent id", async () => {});
-  it("get schedule with nonexisting username", async () => {});
-  it("get schedule with valid username", async () => {});
-  it("get schedule with no query parameters", async () => {});
-  it("get schedule with invalid unit query parameter", async () => {});
-  it("get schedule with valid unit query parameter", async () => {});
+  it("non-numeric costCenterId in get request", async () => {
+    const response = await request(app).get("/schedule?costCenterId=3frq");
+    expect(response.status).toBe(400);
+    expect(response.body.err).toStrictEqual("costCenterId needs to be numeric if included");
+  });
+
+  //it("numeric costCenterId in get request", async () => {});
+  
+  it("get schedule with nonexistent id", async () => {
+    const response = await request(app).get("/schedule?costCenterId=45");
+    expect(response.status).toBe(200);
+    expect(response.body).toStrictEqual({});
+  });
+  
+  it("get schedule with nonexisting username", async () => {
+    const response = await request(app).get("/schedule/asdf");
+    expect(response.status).toBe(400);
+    expect(response.body.err).toStrictEqual("User does not exist!");
+  });
+  
+  //it("get schedule with valid username", async () => {});
+    
+  it("get schedule with invalid costCenterId query parameter on unit route", async () => {
+    console.log("Right here!");
+    const response = await request(app).get("/schedule/unit?costCenterId=45");
+    expect(response.status).toBe(400);
+    expect(response.body.err).toStrictEqual("Unit does not exist!");
+  });
+  
+  //it("get schedule with valid unit query parameter", async () => {});
 });

@@ -18,7 +18,6 @@ const socketHandler = (io: Server, socket: CNHSocket) => {
   socket.on("disconnect", () => {
     if (socket.userInfo) {
       removeUser(socket.userInfo);
-      console.log("DISCONNECTED!");
     }
   });
   socket.on("add_user", (arg: UserSocketAttributes) => {
@@ -27,8 +26,6 @@ const socketHandler = (io: Server, socket: CNHSocket) => {
       socketMap.set(arg.username, new Map<string, CNHSocket>());
     }
     socketMap.get(arg.username)?.set(arg.uuid, socket);
-    console.log("socketMap is:");
-    console.dir(socketMap);
     socket.userInfo = arg;
   });
 
@@ -39,7 +36,6 @@ const socketHandler = (io: Server, socket: CNHSocket) => {
   //REQUEST_INIT event
   socket.on("shift_submission", async (arg: ShiftRequestAttributes) => {
     try {
-      console.log(arg);
       const user: UserInformation | null = await UserInformation.findOne({
         where: { username: arg.user },
         include: [
@@ -57,8 +53,6 @@ const socketHandler = (io: Server, socket: CNHSocket) => {
           unitId: user.unit?.id as number,
           dateRequested: arg.shiftDate,
         });
-        console.log(newShiftRequest.toJSON());
-        console.log("new shift request has been created");
       }
     } catch (error) {
       console.log(error);
@@ -70,8 +64,6 @@ const socketHandler = (io: Server, socket: CNHSocket) => {
     "shift_accept",
     async (arg: { shiftHistoryId: number; isAccepted: boolean }) => {
       try {
-        console.log("arg.shiftHistoryId is:", arg.shiftHistoryId);
-        console.log("arg.isAccepted is:", arg.isAccepted);
         const shiftHistory: ShiftHistory | null = await ShiftHistory.findOne({
           where: {
             id: arg.shiftHistoryId,
@@ -115,7 +107,6 @@ const socketHandler = (io: Server, socket: CNHSocket) => {
         if (mobileSocketMap.has(shiftHistory?.user.username)) {
           const userMap = mobileSocketMap.get(shiftHistory?.user.username);
           userMap?.forEach((socket: Socket, uuid: string) => {
-            console.log("uuid is:", uuid);
             socket?.emit("shift_update", {
               isAccepted: arg.isAccepted,
               message: message,
@@ -163,16 +154,12 @@ const socketHandler = (io: Server, socket: CNHSocket) => {
   socket.on(
     "join_room",
     (arg: { prevSelectedChannel: string; selectedChannel: string }) => {
-      console.log(`prevSelectedChannel is ${arg.prevSelectedChannel}`);
-      console.log(`selectedChannel is ${arg.selectedChannel}`);
       if (
         arg.prevSelectedChannel &&
         socket.rooms.has(arg.prevSelectedChannel)
       ) {
-        console.log(`LEFT ROOM: ${arg.prevSelectedChannel}`);
         socket.leave(arg.prevSelectedChannel);
       }
-      console.log(`JOINED ROOM: ${arg.selectedChannel}`);
       socket.join(arg.selectedChannel);
     }
   );
@@ -183,9 +170,7 @@ const socketHandler = (io: Server, socket: CNHSocket) => {
 };
 
 const removeUser = (user: UserSocketAttributes) => {
-  console.log("BEFORE: REMOVE_USER!");
   const socketMap = user.isAdmin ? adminSocketMap : mobileSocketMap;
-  console.log(socketMap);
   if (
     socketMap.has(user.username) &&
     socketMap.get(user.username)?.has(user.uuid)
@@ -193,7 +178,5 @@ const removeUser = (user: UserSocketAttributes) => {
     const userMap = socketMap.get(user.username);
     userMap?.delete(user.uuid);
   }
-  console.log("AFTER: REMOVE_USER!");
-  console.log(socketMap);
 };
 export default socketHandler;

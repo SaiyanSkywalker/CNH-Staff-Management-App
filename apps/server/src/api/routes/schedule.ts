@@ -19,8 +19,14 @@ scheduleRouter.get("/", async (req: Request, res: Response): Promise<void> => {
   try {
     // Uncomment code below if you want to use data from db instead
     // const scheduleData = handleTestScheduleData(req.query.costCenterId as string)
+    const costCenterId: string = req.query.costCenterId as string;
+    const numericCostCenterId: number = Number(costCenterId)
+    if(costCenterId !== null && costCenterId !== undefined && isNaN(numericCostCenterId)) {
+      res.status(400).json({ err: "costCenterId needs to be numeric if included" });
+      return;
+    }
     const scheduleData = await getScheduleData(
-      req.query.costCenterId as string
+      costCenterId
     );
     res.json(scheduleData);
   } catch (err) {
@@ -37,6 +43,10 @@ scheduleRouter.get(
       const shiftDate = req.query.shiftDate as string;
       const costCenterId = Number(req.query.costCenterId);
       const shifts = await getUnitScheduleData(shiftDate, costCenterId);
+      if(shifts === null) {
+        res.status(400).json({err: "Unit does not exist!"});
+        return;
+      }
       res.json(shifts);
     } catch (error) {
       res
@@ -52,6 +62,10 @@ scheduleRouter.get(
     try {
       const user: string = req.params.user;
       const shifts = await getScheduleDataForUser(user);
+      if(shifts === null) {
+        res.status(400).json({err: "User does not exist!"});
+        return;
+      }
       res.json(shifts);
     } catch (error) {
       console.error("Error");

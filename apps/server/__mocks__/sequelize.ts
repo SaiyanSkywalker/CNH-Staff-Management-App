@@ -500,117 +500,39 @@ export const RoleMock = {
 export const ScheduleEntryMock = {
   findOne: jest.fn(),
   create: jest.fn(),
-  findAll: jest.fn(() => {
-    return [];
-  }),
-  // findAll: jest.fn((query): any => {
-  //   console.log(query);
-  //   const mockedScheduleEntries: ScheduleEntryAttributes[] = [
-  //     {
-  //       employeeId: 51101,
-  //       lastName: "Last1102",
-  //       firstName: "First1102",
-  //       middleInitial: "",
-  //       shiftDate: new Date("2023-09-05T04:00:00.000Z"),
-  //       startTime: "8:00",
-  //       endTime: "16:30",
-  //       duration: "8:30",
-  //       shiftType: "REG",
-  //       jobCode: "P5814",
-  //       costCenterId: 24530,
-  //     },
-  //     {
-  //       employeeId: 51101,
-  //       lastName: "Last1102",
-  //       firstName: "First1102",
-  //       middleInitial: "",
-  //       shiftDate: new Date("2023-09-06T04:00:00.000Z"),
-  //       startTime: "8:00",
-  //       endTime: "16:30",
-  //       duration: "8:30",
-  //       shiftType: "REG",
-  //       jobCode: "P5814",
-  //       costCenterId: 24530,
-  //     },
-  //     {
-  //       employeeId: 50582,
-  //       lastName: "Last583",
-  //       firstName: "First583",
-  //       middleInitial: "S",
-  //       shiftDate: new Date("2023-09-05T04:00:00.000Z"),
-  //       startTime: "8:00",
-  //       endTime: "18:30",
-  //       duration: "10:30",
-  //       shiftType: "REG",
-  //       jobCode: "P5863",
-  //       costCenterId: 41005,
-  //     },
-  //     {
-  //       employeeId: 50582,
-  //       lastName: "Last583",
-  //       firstName: "First583",
-  //       middleInitial: "S",
-  //       shiftDate: new Date("2023-09-06T04:00:00.000Z"),
-  //       startTime: "8:00",
-  //       endTime: "18:30",
-  //       duration: "10:30",
-  //       shiftType: "REG",
-  //       jobCode: "P5863",
-  //       costCenterId: 41005,
-  //     },
-  //     {
-  //       employeeId: 50582,
-  //       lastName: "Last583",
-  //       firstName: "First583",
-  //       middleInitial: "S",
-  //       shiftDate: new Date("2023-09-07T04:00:00.000Z"),
-  //       startTime: "8:00",
-  //       endTime: "18:30",
-  //       duration: "10:30",
-  //       shiftType: "REG",
-  //       jobCode: "P5863",
-  //       costCenterId: 41005,
-  //     },
-  //     {
-  //       employeeId: 50582,
-  //       lastName: "Last583",
-  //       firstName: "First583",
-  //       middleInitial: "S",
-  //       shiftDate: new Date("2023-09-11T04:00:00.000Z"),
-  //       startTime: "8:00",
-  //       endTime: "18:30",
-  //       duration: "10:30",
-  //       shiftType: "REG",
-  //       jobCode: "P5863",
-  //       costCenterId: 41005,
-  //     },
-  //     {
-  //       employeeId: 50582,
-  //       lastName: "Last583",
-  //       firstName: "First583",
-  //       middleInitial: "S",
-  //       shiftDate: new Date("2023-09-12T04:00:00.000Z"),
-  //       startTime: "8:00",
-  //       endTime: "18:30",
-  //       duration: "10:30",
-  //       shiftType: "REG",
-  //       jobCode: "P5863",
-  //       costCenterId: 41005,
-  //     },
-  //   ];
-  //   const { where } = query;
-  //   // Check if where.shiftDate exists and is in the desired range
-  //   const filteredEntries = mockedScheduleEntries.filter((entry) => {
-  //     return (
-  //       (!where.shiftDate[Op.gte] ||
-  //         entry.shiftDate >= where.shiftDate[Op.gte]) &&
-  //       (!where.shiftDate[Op.lte] ||
-  //         entry.shiftDate <= where.shiftDate[Op.lte]) &&
-  //       entry.shiftType === "REG"
-  //     );
-  //   });
-  //   return Promise.resolve(mockedScheduleEntries);
-  // }),
+  findAll: jest.fn((query) => {
+    console.log("query in ScheduleEntryMock.findAll is:");
+    console.dir(query);
+    const mockedScheduleEntries: ScheduleEntryAttributes[] = [
+       {
+       employeeId: 51101,
+       lastName: "Last1102",
+       firstName: "First1102",
+       middleInitial: "",
+       shiftDate: new Date("2023-09-05T04:00:00.000Z"),
+       startTime: "8:00",
+       endTime: "16:30",
+       duration: "8:30",
+       shiftType: "REG",
+       jobCode: "P5814",
+       costCenterId: 24530,
+      },
+      {
+       employeeId: 51101,
+       lastName: "Last1102",
+       firstName: "First1102",
+       middleInitial: "",
+       shiftDate: new Date("2023-09-06T04:00:00.000Z"),
+       startTime: "8:00",
+       endTime: "16:30",
+       duration: "8:30",
+       shiftType: "REG",
+       jobCode: "P5814",
+       costCenterId: 24530,
+      },
+    ];
+    return Promise.resolve(mockedScheduleEntries);
+  })
 };
 
 export const ShiftHistoryMock = {

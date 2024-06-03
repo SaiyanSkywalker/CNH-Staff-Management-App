@@ -31,6 +31,8 @@ shiftCapacityRouter.post("/", async (req, res) => {
       .status(200)
       .json({ msg: "Request received successfully and result sent back!", updatedShifts });
   } catch (ex) {
+    console.log("ex is:");
+    console.dir(ex);
     res.status(500).json({ error: "Error occurred on server!" });
   }
 });

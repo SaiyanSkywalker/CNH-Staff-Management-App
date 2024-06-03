@@ -5,7 +5,6 @@
  * @returns
  */
 export const calculateDuration = (interval: string[]): string => {
-  console.log(interval);
   const start: Date = new Date();
   const startTokens: number[] = interval[0]
     .split(":")
