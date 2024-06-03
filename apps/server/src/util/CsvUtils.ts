@@ -1,13 +1,23 @@
+/**
+ * File: CsvUtils.ts
+ * Purpose: contains utility functions used to process CSV files
+ */
 import ScheduleEntryAttributes from "@shared/src/interfaces/ScheduleEntryAttributes";
 import { UploadedFile } from "express-fileupload";
 import moment from "moment";
 import path from "path";
-// Converts CSV file to a 2D
+
+// Converts CSV file to a 2D array
 export const csvToArray = (content: string): string[][] => {
   let lines = content.split("\n").slice(1); // Skip line with header columns
   return lines.map((l) => l.trim().split(","));
 };
 
+/**
+ * Converts 2D array to array of ScheduleEntry
+ * @param lines contents of CSV files
+ * @returns
+ */
 export const csvToScheduleData = (
   lines: string[][]
 ): ScheduleEntryAttributes[] => {
@@ -28,6 +38,11 @@ export const csvToScheduleData = (
   });
 };
 
+/**
+ * Checks headers of CSV to ensure that CSV file is valid
+ * @param schedule uploaded CSV file
+ * @returns object indicating if schedule is valid, if schedule isn't valid object also contains error
+ */
 export const validateSchedule = (schedule: UploadedFile): any => {
   const extension = path.extname(schedule.name);
   if (extension !== ".csv") {
@@ -68,12 +83,13 @@ export const validateSchedule = (schedule: UploadedFile): any => {
     .split(",")
     .map((x) => x.trim().replace(/\r/g, ""));
 
+  // Check if CSV contains headers in correct order
   const isValid =
     headers.length === defaultHeaders.length &&
     headers.every((header, index) => header === defaultHeaders[index]);
 
   if (!isValid) {
-    return { isValid: false, error: "File of incorrect format" };
+    return { isValid: false, error: "File has incorrect format" };
   }
 
   const data: string[][] = fileContent
@@ -94,19 +110,6 @@ export const validateSchedule = (schedule: UploadedFile): any => {
         isValid: false,
         error:
           "Make sure Personnum, Shift Date, q, Worked Costs Center are all numeric",
-      };
-    }
-    if (
-      line[6].length !== 5 ||
-      line[6][2] !== ":" ||
-      line[7].length !== 5 ||
-      line[7][2] !== ":" ||
-      line[7].length !== 5 ||
-      line[7][2] !== ":"
-    ) {
-      return {
-        isValid: false,
-        error: "Make sure all time strings follow HH:MM format",
       };
     }
   }

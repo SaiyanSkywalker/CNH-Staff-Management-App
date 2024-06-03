@@ -1,3 +1,8 @@
+/**
+ * File: dbLoader.ts
+ * Purpose: Initiates database connection using Sequelize,
+ * adds default values
+ */
 import path from "path";
 import {
   Model,
@@ -35,6 +40,10 @@ const createDefaultValues = async <T extends {}>(
   }
 };
 
+/**
+ * Creates chat channels for each unit in db
+ * @returns 
+ */
 const createUnitChannels = async () => {
   let maxId: number | undefined = await Unit.max("id");
   let minId: number | undefined = await Unit.min("id");

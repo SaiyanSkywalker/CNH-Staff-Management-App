@@ -1,3 +1,8 @@
+/**
+ * File: ShiftHistoryQuery.ts
+ * Purpose: interface used to represent info for search query
+ * involving ShiftHistory
+ */
 export default interface ShiftHistoryQuery {
     employeeId?: number;
     unitId?: number;

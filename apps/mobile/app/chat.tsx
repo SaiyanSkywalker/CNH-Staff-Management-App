@@ -1,3 +1,8 @@
+/**
+ * File: chat.tsx
+ * Purpose: Component for "chat" screen where user cand send messages to different channels
+ */
+
 import React, { useState, useEffect, useRef } from "react";
 import { View, Text, TextInput, FlatList, StyleSheet } from "react-native";
 import axios from "axios";
@@ -79,40 +84,43 @@ export default function ChatPage() {
   >(undefined);
   const [selectedChannelName, setSelectedChannelName] = useState<string>("");
   const { auth } = useAuth();
+
+  /**
+   * Get all the messages for a particular channel
+   */
   const fetchAnnouncements = async () => {
     if (selectedChannel) {
       try {
         const accessToken = await getToken("accessToken");
-        const response = await axios({
-          method: "GET",
-          url: `${config.apiUrl}/channel/${selectedChannel?.id}`,
-          responseType: "json",
-          headers: {
-            unitId: auth?.user?.unitId,
-            roleId: auth?.user?.roleId,
-            Authorization: `Bearer: ${accessToken}`,
-          },
+        const response = await axios.get(
+          `${config.apiUrl}/channel/${selectedChannel?.id}`,
+          {
+            responseType: "json",
+            headers: {
+              unitId: auth?.user?.unitId,
+              roleId: auth?.user?.roleId,
+              Authorization: `Bearer: ${accessToken}`,
+            },
+          }
+        );
+        const data = response && response.data ? response.data : [];
+        auth?.socket?.emit("join_room", {
+          prevSelectedChannel: prevSelectedChannel?.name,
+          selectedChannel: selectedChannel?.name,
         });
-        const data = response.data;
-        if (data) {
-          auth?.socket?.emit("join_room", {
-            prevSelectedChannel: prevSelectedChannel?.name,
-            selectedChannel: selectedChannel?.name,
-          });
-          setAnnouncements(data);
-        }
-        setAnnouncements(response.data);
+        setAnnouncements(data);
       } catch (error) {
         console.error("Failed to fetch announcements", error);
       }
     }
   };
+  /**
+   * Fetch all channels accessible to user
+   */
   const fetchChannels = async () => {
     try {
       const accessToken = await getToken("accessToken");
-      const response = await axios({
-        method: "GET",
-        url: `${config.apiUrl}/channel`,
+      const response = await axios.get(`${config.apiUrl}/channel`, {
         responseType: "json",
         headers: {
           unitId: auth?.user?.unitId,
@@ -120,8 +128,8 @@ export default function ChatPage() {
           Authorization: `Bearer: ${accessToken}`,
         },
       });
-      const data: ChannelAttributes[] = await response.data;
-      if (data) {
+      if (response && response.data) {
+        const data: ChannelAttributes[] = await response.data;
         setChannels(data);
         const newChannelMap: Map<string, ChannelAttributes> = new Map<
           string,
@@ -137,13 +145,21 @@ export default function ChatPage() {
     }
   };
 
+  /**
+   * Runs every time user selects a new channel
+   */
   const handleChannelChange = (value: string | null) => {
     if (value) {
       setPrevSelectedChannel((prevChannel) => selectedChannel);
       setSelectedChannel((prevChannel) => channelMap.get(value));
     }
   };
-  const parseAnnouncmentDate = (date: Date) => {
+  /**
+   * Parse date from dropdown for a server-friendly format
+   * @param date date to be parsed
+   * @returns formatted date string
+   */
+  const parseAnnouncmentDate = (date: Date): string => {
     if (!date) {
       return "";
     }
@@ -164,6 +180,9 @@ export default function ChatPage() {
 
   useEffect(() => {
     fetchAnnouncements();
+
+    // Event listeners for sockets that allow for real-time updates
+    // to the message forum
     const providerListener = (newAnnouncement: AnnouncementAttributes) => {
       const announcementExists = announcements.some(
         (announcement) => announcement.id === newAnnouncement.id
@@ -187,13 +206,16 @@ export default function ChatPage() {
       auth?.socket?.off("message_subscriber", subscriberListener);
       auth?.socket?.off("message_failed", failedListener);
       if (selectedChannel) {
-        console.log("LEAVING ROOM", selectedChannel.name);
         auth?.socket?.emit("leave_room", { channelName: selectedChannel.name });
       }
     };
   }, [selectedChannel]);
 
+  /**
+   * Runs every time user sends a message
+   */
   const handleSend = () => {
+    // Send message to server through socket
     if (message && selectedChannel?.id && auth?.user?.id && auth?.socket) {
       const newAnnouncement: AnnouncementAttributes = {
         body: message,
@@ -215,6 +237,7 @@ export default function ChatPage() {
         multiple={false}
         open={open}
         setOpen={setOpen}
+        onPress={setOpen}
         value={selectedChannelName}
         setValue={setSelectedChannelName}
         items={channels.map((channel) => {
@@ -225,6 +248,7 @@ export default function ChatPage() {
         })}
         style={{}}
         onChangeValue={handleChannelChange}
+        testID="channelDropdown"
       />
 
       <View style={styles.messageList}>

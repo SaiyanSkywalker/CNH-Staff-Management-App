@@ -1,3 +1,7 @@
+/**
+ * File: login.ts
+ * Purpose: defines routes used for the login functionality
+ */
 import { Request, Response, Router } from "express";
 import { sequelize } from "server/src/loaders/dbLoader";
 import Role from "server/src/models/Role";

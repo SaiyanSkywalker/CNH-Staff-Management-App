@@ -1,3 +1,7 @@
+/**
+ * File: Login.tsx
+ * Purpose: Component used to sign users into application
+ */
 "use client";
 
 import { useState, ChangeEvent, useContext, useEffect } from "react";
@@ -18,6 +22,7 @@ const Login = () => {
   const bannerContext = useContext(BannerContext);
   const loadingContext = useContext(LoadingContext);
 
+  // Event handlers for changing input fields
   const onUsernameChange = (e: ChangeEvent<HTMLInputElement>) => {
     setUsername(e.target.value);
     setError(false);
@@ -34,6 +39,11 @@ const Login = () => {
     setError(false);
   };
 
+  /**
+   * Handles user sending login info to server
+   * On success, Redirects user 
+   * on error, shows banner
+   */
   const submitForm = async () => {
     try {
       loadingContext?.showLoader();

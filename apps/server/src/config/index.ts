@@ -1,7 +1,12 @@
+/**
+ * File: index.ts
+ * Purpose: reads environment variables to generate config object
+ */
+
 import dotenv from "dotenv";
 import { Dialect } from "sequelize";
 import ServerConfig from "../interfaces/ServerConfig";
-dotenv.config();
+dotenv.config(); // gets variables from .env file
 
 // Helper function to convert string to Dialect
 function parseDialect(dialect: string): Dialect {
@@ -17,6 +22,7 @@ function parseDialect(dialect: string): Dialect {
   }
 }
 
+// NOTE: Variables explained in README in root directory of repo
 const config: ServerConfig = {
   environment: process.env.ENVIRONMENT || "dev",
   port: process.env.SERVER_PORT || "3000",

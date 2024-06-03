@@ -1,3 +1,7 @@
+/**
+ * File: ScheduleEntryService.ts
+ * Purpose: service that handles operations with database involving ScheduleEntry
+ */
 import { UploadedFile } from "express-fileupload";
 import ScheduleData from "../../constants/ScheduleData";
 import ScheduleEntryAttributes from "@shared/src/interfaces/ScheduleEntryAttributes";
@@ -8,6 +12,12 @@ import Unit from "server/src/models/Unit";
 import UserInformation from "server/src/models/UserInformation";
 import { error } from "console";
 
+/**
+ * Used in mobile app, gets all shifts for a particular unit
+ * @param date date string
+ * @param costCenterId id for cost center
+ * @returns list of shifts
+ */
 export const getUnitScheduleData = async (
   date: string,
   costCenterId: number
@@ -37,20 +47,24 @@ export const getUnitScheduleData = async (
     return null;
   }
 };
+
 /**
- * Retrieves data about shifts from the db
+ * Retrieves data about shifts (within the last two weeks) from the db
  * @param filter costCenterId, used to filter shifts
- * @returns dictioanry where each key is a costCenterId and every value is a
- * list of shifts under that cost center
+ * @returns dictioanry where
+ * key: costCenterId
+ * value: list of shifts under that cost center
  */
 export const getScheduleData = async (filter: string) => {
   try {
+
+    // Sets a date range of 2 weeks to retrieve shifts
     const upperDateBound: Date = new Date();
     const lowerDateBound = new Date(upperDateBound);
     lowerDateBound.setDate(lowerDateBound.getDate() - 14);
     const id = parseInt(filter, 10);
     if (!id) {
-      // Get shifts from all cost centers if filter is undefined
+      // If filter is undefined, get shifts from all cost centers
       const scheduleEntries: ScheduleEntry[] = await ScheduleEntry.findAll({
         where: {
           [Op.and]: [
@@ -98,7 +112,7 @@ export const getScheduleData = async (filter: string) => {
 };
 
 /**
- * Gets all shifts that a nurse has signed up for
+ * Gets all shifts a nurse is scheduled for
  * @param username name that user uses to log in to mobile application
  */
 export const getScheduleDataForUser = async (username: string) => {

@@ -1,3 +1,7 @@
+/**
+ * File: shift-capacity.ts
+ * Purpose: Defines routes associated with getting staff capacity data for shifts
+ */
 import { Router } from "express";
 import ShiftCapacityRequest from "@shared/src/interfaces/ShiftCapacityRequest";
 import {
@@ -6,6 +10,7 @@ import {
 } from "../services/ShiftCapacityService";
 const shiftCapacityRouter = Router();
 
+// Save shift capacity data to db
 shiftCapacityRouter.post("/", async (req, res) => {
   try {
     if(!req.body || Object.keys(req.body).length === 0) {
@@ -37,6 +42,7 @@ shiftCapacityRouter.post("/", async (req, res) => {
   }
 });
 
+// Gets the shift capacity data for admin portal
 shiftCapacityRouter.get("/admin/", async (req, res) => {
   try {
     const data = await getShiftCapacity();
@@ -47,6 +53,7 @@ shiftCapacityRouter.get("/admin/", async (req, res) => {
   }
 });
 
+// Gets the shift capacity data for mobile app
 shiftCapacityRouter.get("/mobile/", async (req, res) => {
   try {
     const costCenterId = Number(req.query.costCenterId);

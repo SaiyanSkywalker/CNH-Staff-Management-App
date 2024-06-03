@@ -1,3 +1,4 @@
+
 import { Request, Response, Router } from "express";
 import { sequelize } from "server/src/loaders/dbLoader";
 import Role from "server/src/models/Role";
@@ -6,7 +7,12 @@ const userRouter = Router();
 
 userRouter.get("/", async (req: Request, res: Response): Promise<Response> => {
   try {
-    const roleName: string = req.query.isMobile === "1" ? "USER" : (req.query.isMobile === "2" ? "ADMIN" : "NURSEMANAGER");
+    const roleName: string =
+      req.query.isMobile === "1"
+        ? "USER"
+        : req.query.isMobile === "2"
+        ? "ADMIN"
+        : "NURSEMANAGER";
     const user = await sequelize.models.UserInformation.findOne({
       where: {
         username: sequelize.where(

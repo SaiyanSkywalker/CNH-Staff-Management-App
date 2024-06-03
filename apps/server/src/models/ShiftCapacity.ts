@@ -1,3 +1,9 @@
+/**
+ * File: ShiftCapacity.ts
+ * Purpose: defines ShiftCapacity Sequelize model,
+ * which corresponds to ShiftCapacity table in the db
+ */
+
 import {
   Model,
   Column,
@@ -18,7 +24,11 @@ class ShiftCapacity extends Model<ShiftCapacityAttributes> {
   })
   id!: number;
 
-  @BelongsTo(() => Unit, { targetKey: "id", foreignKey: "unitId", onDelete: "CASCADE" })
+  @BelongsTo(() => Unit, {
+    targetKey: "id",
+    foreignKey: "unitId",
+    onDelete: "CASCADE",
+  })
   unit!: Unit;
 
   @Column(DataType.STRING)
