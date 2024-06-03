@@ -135,5 +135,5 @@ DB_CONNECTION_STRING=connection_string
   - Passwords aren't encrypted in db
   - No current mechanism for users to sign up for mobile or web app
   - **Workaround:** Accounts have to manually be added to the `UserInformation` table in the database
-- Some unit tests may not pass
-  - **Workaround:** Some tests have to be executed manually by launching the server project, admin portal and/or mobile app
+- Mobile app persistent login fails sometimes if the server goes down
+  - **Workaround:** No current workaround, potential fix would be imnplemeting a refreshUser functionality in the mobile project similar to the functionality found in the web project.
