@@ -112,22 +112,11 @@ describe("/GET schedule", () => {
     expect(response.status).toBe(200);
   });
   
-  /*
-  it("query costCenterId in get request", async () => {
-    const response = await request(app).get("/schedule?costCenterId=24530");
-    console.log("response.body is:");
-    console.dir(response.body);
-    expect(response.status).toBe(200);
-  });
-  */
-
   it("non-numeric costCenterId in get request", async () => {
     const response = await request(app).get("/schedule?costCenterId=3frq");
     expect(response.status).toBe(400);
     expect(response.body.err).toStrictEqual("costCenterId needs to be numeric if included");
   });
-
-  //it("numeric costCenterId in get request", async () => {});
   
   it("get schedule with nonexistent id", async () => {
     const response = await request(app).get("/schedule?costCenterId=45");
@@ -140,8 +129,6 @@ describe("/GET schedule", () => {
     expect(response.status).toBe(400);
     expect(response.body.err).toStrictEqual("User does not exist!");
   });
-  
-  //it("get schedule with valid username", async () => {});
     
   it("get schedule with invalid costCenterId query parameter on unit route", async () => {
     console.log("Right here!");
@@ -150,5 +137,4 @@ describe("/GET schedule", () => {
     expect(response.body.err).toStrictEqual("Unit does not exist!");
   });
   
-  //it("get schedule with valid unit query parameter", async () => {});
 });
