@@ -84,7 +84,6 @@ describe("Login Page Functionality", () => {
   });
 
   it("handles undefined router object", () => {
-    // Mock useRouter to return undefined for this test case
     (mockUseRouter as jest.Mock).mockReturnValueOnce(undefined);
     (useAuth as jest.Mock).mockReturnValue({ auth: { authenticated: false } });
     render(<Login />);

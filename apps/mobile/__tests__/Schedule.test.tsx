@@ -58,7 +58,6 @@ describe("Schedule", () => {
       data: mockCapacitiesResponse,
     });
 
-    // Press date button and trigger modal
     const dateButton = getByTestId("dateSelectedBtn");
     fireEvent.press(dateButton);
 
@@ -68,7 +67,6 @@ describe("Schedule", () => {
       expect(datePickerModal).toBeTruthy();
     });
 
-    // Mock date selection
     fireEvent(datePickerModal, "change", {
       nativeEvent: { timestamp: "05/30/2024" },
     });
@@ -77,7 +75,6 @@ describe("Schedule", () => {
     await waitFor(() => (confirmButton = getByText("Confirm")));
     fireEvent.press(confirmButton);
 
-    // Select shift interval
     const dropdown = getByTestId("shiftDropwdown");
     fireEvent.press(dropdown);
     await waitFor(() => {
@@ -85,7 +82,6 @@ describe("Schedule", () => {
     });
     fireEvent.press(getByText("07:00 - 11:00"));
 
-    // Submit request
     fireEvent.press(getByTestId("submitRequestBtn"));
 
     // Verify socket.emit was called with correct data
@@ -104,7 +100,6 @@ describe("Schedule", () => {
   it("shows an alert when user tries to submit request without selecting a date", async () => {
     const { getByText, getByTestId } = render(<Schedule />);
 
-    // Press submit request button
     const submitButton = getByTestId("submitRequestBtn");
     fireEvent.press(submitButton);
 
@@ -120,7 +115,6 @@ describe("Schedule", () => {
   it("shows an alert when user tries to submit request without selecting a shift interval", async () => {
     const { getByText, getByTestId } = render(<Schedule />);
 
-    // Press date button and trigger modal
     const dateButton = getByTestId("dateSelectedBtn");
     fireEvent.press(dateButton);
 
@@ -130,18 +124,17 @@ describe("Schedule", () => {
       expect(datePickerModal).toBeTruthy();
     });
 
-    // Mock date to be selected
     fireEvent(datePickerModal, "change", {
       nativeEvent: { timestamp: "05/30/2024" },
     });
 
-    // Mock date selection
     let confirmButton: any;
     await waitFor(() => (confirmButton = getByText("Confirm")));
     fireEvent.press(confirmButton);
 
-    // Attempt to submit request
     fireEvent.press(getByTestId("submitRequestBtn"));
+
+    // Assert that alert is shown
     await waitFor(() => {
       expect(Alert.alert).toHaveBeenCalledWith(
         "Submission Failed",
@@ -153,7 +146,6 @@ describe("Schedule", () => {
   it("displays no shift intervals in dropdown when there are no shifts available", async () => {
     const { getByText, getByTestId } = render(<Schedule />);
 
-    // Press date button and trigger modal
     const dateButton = getByTestId("dateSelectedBtn");
     fireEvent.press(dateButton);
     let datePickerModal: any;
@@ -162,17 +154,14 @@ describe("Schedule", () => {
       expect(datePickerModal).toBeTruthy();
     });
 
-    // Mock date to be selected
     fireEvent(datePickerModal, "change", {
       nativeEvent: { timestamp: "05/30/2024" },
     });
 
-    // Mock date selection
     let confirmButton: any;
     await waitFor(() => (confirmButton = getByText("Confirm")));
     fireEvent.press(confirmButton);
 
-    // Select shift interval
     const dropdown = getByTestId("shiftDropwdown");
     fireEvent.press(dropdown);
     await waitFor(() => {
@@ -185,7 +174,6 @@ describe("Schedule", () => {
     const mockCapacitiesResponse: any = { default: [], updated: [] };
     const mockShiftInfoResponse: any = [];
 
-    // Mocks for getShiftInfo and getCapacities API calls
     (axios.get as jest.Mock).mockResolvedValueOnce({
       data: mockShiftInfoResponse,
     });
@@ -193,7 +181,6 @@ describe("Schedule", () => {
       data: mockCapacitiesResponse,
     });
 
-    // Find the date button using testID
     const dateButton = getByTestId("dateSelectedBtn");
     fireEvent.press(dateButton);
 
@@ -202,24 +189,21 @@ describe("Schedule", () => {
       datePickerModal = getByTestId("dateTimePickerModal");
       expect(datePickerModal).toBeTruthy();
     });
-    // Mock date to be selected
+
     fireEvent(datePickerModal, "change", {
       nativeEvent: { timestamp: "05/30/2024" },
     });
 
-    // Mock date selection
     let confirmButton: any;
     await waitFor(() => (confirmButton = getByText("Confirm")));
     fireEvent.press(confirmButton);
 
-    // Select shift interval
     const dropdown = getByTestId("shiftDropwdown");
     fireEvent.press(dropdown);
     await waitFor(() => {
       expect(getByText("07:00 - 11:00")).toBeTruthy();
     });
 
-    // Select a different shift interval
     const filterBtn = getByTestId("12hr");
     fireEvent.press(filterBtn);
 

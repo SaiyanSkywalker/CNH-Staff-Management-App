@@ -45,7 +45,6 @@ describe("ShiftCapacity", () => {
       },
     ];
 
-    // Mock getUnits()
   });
 
   it("Cannot submit when no capacities are defined", async () => {

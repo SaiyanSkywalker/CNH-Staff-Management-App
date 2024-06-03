@@ -27,43 +27,33 @@ describe("Shift History Page", () => {
   });
 
   it("loads Shift History", async () => {
-    // Mocking successful response for shift history fetch
     (axios.get as jest.Mock).mockResolvedValueOnce({ data: [] });
 
     renderWithProviders(<ShiftHistoryPage />);
 
-    // Wait for shift history to be loaded
     await waitFor(() => {
-      // Assert that the Shift History page is rendered
       expect(screen.getByText("History")).toBeInTheDocument();
-      // Assert that axios.get is called once to fetch the data
       expect(axios.get).toHaveBeenCalledTimes(1);
     });
   });
 
   it("filters Shift History", async () => {
-    // Mocking successful response for shift history fetch
     (axios.get as jest.Mock).mockResolvedValueOnce({ data: [] });
 
     renderWithProviders(<ShiftHistoryPage />);
 
-    // Implement filter interactions and verify filtered results
     fireEvent.change(screen.getByLabelText("Employee ID"), {
       target: { value: "123" },
     });
     fireEvent.click(screen.getByRole("button", { name: "Search" }));
 
-    // Verify filtered results
     await waitFor(() => {
-      // Assert that the Shift History page is rendered
       expect(screen.getByText("History")).toBeInTheDocument();
-      // Assert that axios.get is called twice, once for initial load and once for filtering
       expect(axios.get).toHaveBeenCalledTimes(2);
     });
   });
 
   it("accepts Shifts", async () => {
-    // Mock shift history with a pending shift
     (axios.get as jest.Mock).mockResolvedValueOnce({
       data: [
         {
@@ -80,7 +70,7 @@ describe("Shift History Page", () => {
     });
     renderWithProviders(<ShiftHistoryPage />);
 
-    // Implement interactions to accept a shift
+    // Attempt to accept a shift
     await waitFor(() => {
       expect(
         screen.getByRole("button", { name: "Accept" })
@@ -89,6 +79,7 @@ describe("Shift History Page", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "Accept" }));
 
+    // Assert that proper socket event was emitted
     await waitFor(() => {
       expect(mockAuthContextValue.auth.socket.emit).toHaveBeenCalledWith(
         "shift_accept",
@@ -101,7 +92,6 @@ describe("Shift History Page", () => {
   });
 
   it("rejects Shifts", async () => {
-    // Mock shift history with a pending shift
     (axios.get as jest.Mock).mockResolvedValueOnce({
       data: [
         {
@@ -122,10 +112,11 @@ describe("Shift History Page", () => {
     await waitFor(() => {
       expect(screen.getByRole("button", { name: "Deny" })).toBeInTheDocument();
     });
-    // Implement interactions to reject a shift
+
+    // Attempt to reject a shift
     fireEvent.click(screen.getByRole("button", { name: "Deny" }));
 
-    // Wait for axios.put to be called
+    // Assert that correct socket event is emitted
     await waitFor(() => {
       expect(mockAuthContextValue.auth.socket.emit).toHaveBeenCalledWith(
         "shift_accept",
@@ -138,21 +129,18 @@ describe("Shift History Page", () => {
   });
 
   it("handles Shift History fetch failure", async () => {
-    // Mocking failed response for shift history fetch
     (axios.get as jest.Mock).mockRejectedValueOnce(
       new Error("Failed to fetch shift history")
     );
 
     renderWithProviders(<ShiftHistoryPage />);
 
-    // Wait for error handling to be displayed
     await waitFor(() => {
-      // Assert that the error message is displayed
+      // Assert that the error message is displayed in Banner
       expect(mockBannerContextValue.showBanner).toHaveBeenCalledWith(
         expect.stringMatching(/Error in retrieving shift histories/i),
         "error"
       );
-      // Assert that axios.get is called once to fetch the data
       expect(axios.get).toHaveBeenCalledTimes(1);
     });
   });

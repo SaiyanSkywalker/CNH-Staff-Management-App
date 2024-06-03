@@ -51,7 +51,6 @@ describe("Upload Page", () => {
   const mockReplace = jest.fn();
   beforeEach(() => {
     jest.clearAllMocks();
-    // Mocking the implementation of useRouter before each test
     mockUseRouter.mockImplementation(() => ({
       replace: mockReplace,
       back: jest.fn(),

@@ -84,14 +84,6 @@ describe("POST /login", () => {
       password: "1234",
       isMobile: "1",
     };
-    const expectedResponse = {
-      employeeId: 1,
-      username: "firstUser",
-      firstName: "First",
-      lastName: "User",
-      password: "1234",
-      get: jest.fn().mockResolvedValue(this),
-    };
     const response = await request(app).post("/login").send(body);
     expect(response.status).toBe(200);
   });

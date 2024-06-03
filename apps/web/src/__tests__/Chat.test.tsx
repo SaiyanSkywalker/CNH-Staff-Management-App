@@ -16,7 +16,6 @@ describe("Chat Functionality", () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
-    // Mocking the implementation of useRouter before each test
     mockUseRouter.mockImplementation(() => ({
       replace: jest.fn(),
       back: jest.fn(),
@@ -141,7 +140,7 @@ describe("Chat Functionality", () => {
         "Error occurred on server. Please try again!"
       );
       expect(errorElement).toBeInTheDocument();
-      expect(errorElement).toBeVisible(); // Check if the element is visible
+      expect(errorElement).toBeVisible();
     });
   });
 });

@@ -1,12 +1,10 @@
 import ScheduleEntryAttributes from "@shared/src/interfaces/ScheduleEntryAttributes";
 import { csvToScheduleData, validateSchedule, csvToArray } from "server/src/util/CsvUtils";
 import moment from "moment";
-import { UploadedFile } from "express-fileupload";
 
 test("csvToArray splits data in csv file to an array", () => {
     let content: string="Col1,Col2\n1,2\n3,4";
     let strings: string[][] = csvToArray(content);
-    //console.log(strings);
     expect(strings).toStrictEqual([['1','2'], ['3','4']]);
 });
 

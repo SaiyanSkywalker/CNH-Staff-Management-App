@@ -33,7 +33,6 @@ const mockUseRouter = useRouter as unknown as jest.Mock<Router>;
 describe("Schedule Functionality", () => {
   const mockUseAuth = useAuth as jest.Mock;
   beforeEach(() => {
-    // Mocking the implementation of useRouter before each test
     mockUseRouter.mockImplementation(() => ({
       replace: jest.fn(),
       back: jest.fn(),
@@ -42,7 +41,7 @@ describe("Schedule Functionality", () => {
       push: jest.fn(),
       prefetch: jest.fn(),
     }));
-    // Mocking the implementation of useAuth before each test
+
     mockUseAuth.mockReturnValue({
       auth: {
         authenticated: true,
@@ -65,18 +64,15 @@ describe("Schedule Functionality", () => {
 
     render(<Schedule />);
 
-    // Check if 4-hour shift filter is selected by default
     const fourHourShiftFilter = screen.getByLabelText("4 Hour");
     expect(fourHourShiftFilter).toBeChecked();
 
-    // Change to 8-hour shift filter
     fireEvent.click(screen.getByLabelText("8 Hour"));
     await waitFor(() => {
       expect(fourHourShiftFilter).not.toBeChecked();
       expect(screen.getByLabelText("8 Hour")).toBeChecked();
     });
 
-    // Change to 12-hour shift filter
     fireEvent.click(screen.getByLabelText("12 Hour"));
     await waitFor(() => {
       expect(screen.getByLabelText("8 Hour")).not.toBeChecked();
