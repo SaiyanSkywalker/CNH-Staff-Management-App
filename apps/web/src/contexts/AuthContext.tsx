@@ -28,7 +28,7 @@ interface IAuthContext {
   auth: AuthDetails;
 }
 
-const AuthContext = createContext<Partial<IAuthContext>>({});
+export const AuthContext = createContext<Partial<IAuthContext>>({});
 
 export default function AuthProvider({
   children,
