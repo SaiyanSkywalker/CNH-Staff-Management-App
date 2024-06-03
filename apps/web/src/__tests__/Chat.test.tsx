@@ -137,7 +137,6 @@ describe("Chat Functionality", () => {
 
     // Assert that error element appears on screen
     await waitFor(() => {
-      console.log(screen.debug());
       const errorElement = screen.getByText(
         "Error occurred on server. Please try again!"
       );

@@ -25,7 +25,7 @@ import ProtectedRoute from "@webSrc/components/ProtectedRoute";
 import { getAccessToken } from "@webSrc/utils/token";
 
 const ShiftCapacity = () => {
-  const [units, setUnits] = useState<UnitAttributes[]>([]);
+  const [units, setUnits] = useState<UnitAttributes[] | []>([]);
   const todayDate = new Date();
   const todayDateString = todayDate.toISOString().substring(0, 10);
   const [capacities, setCapacities] = useState<{ [key: string]: number }>({});
@@ -59,6 +59,7 @@ const ShiftCapacity = () => {
 
   const getUnits = async () => {
     try {
+      console.log("begin get unit");
       const unitId: string = auth?.user?.roleId === 3 ? "/" + String(auth?.user?.unitId) : ""
       const response = await axios({
         method: "GET",
@@ -66,6 +67,7 @@ const ShiftCapacity = () => {
         responseType: "json",
         headers: { Authorization: `Bearer ${getAccessToken()}` },
       });
+      console.log(response);
       const data = await response.data;
       setInitialLoad(true);
       setUnits(data);
@@ -109,6 +111,7 @@ const ShiftCapacity = () => {
     console.log("date is:");
     console.dir(date);
     try {
+      console.log("begin submit");
       event.preventDefault();
       if (Object.keys(capacities).length === 0) {
         bannerContext?.showBanner(
