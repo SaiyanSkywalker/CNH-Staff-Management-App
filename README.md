@@ -129,6 +129,11 @@ DB_CONNECTION_STRING=connection_string
   - Live notifications for updates on shift requests
   - Chat: forum that lets nurses send messages to other users/admins
 
+### Feautres not implemented
+
+- Forgot password (web and mobile): Users are unable to reset their passwords
+- Sign up: Users are unable to sign up for accounts on the web and mobile apps at this time. A workaround for this is described below.
+
 ### Issues & Workarounds
 
 - Sign In
