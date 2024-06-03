@@ -19,13 +19,16 @@ const parseShift = (shiftTime: string): string[] => {
   let endTimeHour = Number(shiftTime.substring(8, 10));
   let minutes = shiftTime.substring(3, 5);
   let differenceInHours = endTimeHour - beginTimeHour;
+
   // If shift end time is in the next day, modify hours difference
+  let i = 0;
   if (differenceInHours <= 0) {
     differenceInHours += 24;
   }
+
   // Make a new shift interval for every 4hrs between shift
   // start and end times
-  for (let i = 0; i < differenceInHours; i += 4) {
+  for (i = 0; i < differenceInHours; i += 4) {
     let newBeginTime: number = (beginTimeHour + i) % 24;
     let newEndTime: number = (beginTimeHour + i + 4) % 24;
     let shiftString: string = "";
@@ -44,6 +47,9 @@ const parseShift = (shiftTime: string): string[] => {
     }
     shiftString = beginString + " - " + endString;
     shiftStrings.push(shiftString);
+  }
+  if (i > 4) {
+    shiftStrings.push(shiftTime);
   }
   return shiftStrings;
 };
@@ -73,12 +79,12 @@ const nextDay = (currentDate: string) => {
  */
 export const postShiftCapacity = async (
   shiftCapacityRequest: ShiftCapacityRequest
-): Promise<void> => {
+): Promise<(ShiftCapacity | DefaultCapacity)[]> => {
   const { shiftDate, shiftTime, capacities } = shiftCapacityRequest;
   let shiftTimeStrings: string[] = parseShift(shiftTime);
-
+  let results: (ShiftCapacity | DefaultCapacity)[] = [];
   // Add original shift time to broken down intervals
-  shiftTimeStrings.push(shiftTime);
+
   let nextDate: string = nextDay(shiftDate);
   for (let unitId in capacities) {
     let currDate: string = shiftDate;
@@ -120,15 +126,20 @@ export const postShiftCapacity = async (
       }
 
       if (model.capacity != capacities[unitId]) {
+        console.log(`typeof(model) is: ${typeof model}`);
         model.capacity = capacities[unitId];
+        console.log(`model.capacity is now: ${model.capacity}`);
         await model.save();
       }
+
+      results.push(model);
 
       if (shiftTimeString.substring(0, 2) == "23") {
         dayCounter += 1;
       }
     }
   }
+  return results;
 };
 
 /**

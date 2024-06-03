@@ -10,5 +10,5 @@ export default interface ShiftHistoryClient {
     dateRequested: string,
     status: string,
     shift: string,
-    createdAt: Date,
+    createdAt: string,
 }

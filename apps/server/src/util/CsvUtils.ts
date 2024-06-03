@@ -5,6 +5,7 @@
 import ScheduleEntryAttributes from "@shared/src/interfaces/ScheduleEntryAttributes";
 import { UploadedFile } from "express-fileupload";
 import moment from "moment";
+import path from "path";
 
 // Converts CSV file to a 2D array
 export const csvToArray = (content: string): string[][] => {
@@ -43,6 +44,17 @@ export const csvToScheduleData = (
  * @returns object indicating if schedule is valid, if schedule isn't valid object also contains error
  */
 export const validateSchedule = (schedule: UploadedFile): any => {
+  const extension = path.extname(schedule.name);
+  if (extension !== ".csv") {
+    return {
+      isValid: false,
+      error: "File type is invalid. Only CSV files can be uploaded",
+    };
+  }
+  if (!schedule || !schedule.data || schedule.data.length === 0) {
+    return { isValid: false, error: "File can't be empty" };
+  }
+
   const content = schedule.data.toString();
 
   const defaultHeaders = [
@@ -62,14 +74,14 @@ export const validateSchedule = (schedule: UploadedFile): any => {
     "Job Code",
     "q",
     "Worked Costs Center",
-    "Facility ID\r",
+    "Facility ID",
   ];
 
-  if (!content) {
-    return { isValid: false, error: "File can't be empty" };
-  }
+  const fileContent = content.trim().split("\n");
 
-  const headers = content.trim().split("\n")[0].split(",");
+  const headers: string[] = fileContent[0]
+    .split(",")
+    .map((x) => x.trim().replace(/\r/g, ""));
 
   // Check if CSV contains headers in correct order
   const isValid =
@@ -80,5 +92,26 @@ export const validateSchedule = (schedule: UploadedFile): any => {
     return { isValid: false, error: "File has incorrect format" };
   }
 
+  const data: string[][] = fileContent
+    .slice(1, fileContent.length)
+    .reduce((array: string[][], line: string) => {
+      array.push(line.split(","));
+      return array;
+    }, []);
+
+  for (let line of data) {
+    if (
+      isNaN(Number(line[1])) ||
+      isNaN(Number(line[5])) ||
+      isNaN(Number(line[14])) ||
+      isNaN(Number(line[15]))
+    ) {
+      return {
+        isValid: false,
+        error:
+          "Make sure Personnum, Shift Date, q, Worked Costs Center are all numeric",
+      };
+    }
+  }
   return { isValid: true };
 };

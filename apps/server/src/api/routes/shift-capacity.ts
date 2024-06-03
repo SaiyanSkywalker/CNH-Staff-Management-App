@@ -13,12 +13,31 @@ const shiftCapacityRouter = Router();
 // Save shift capacity data to db
 shiftCapacityRouter.post("/", async (req, res) => {
   try {
+    if(!req.body || Object.keys(req.body).length === 0) {
+      res.status(400).json({ msg: "Need a body" });
+      return;
+    }
+    
+    if(!req.body.shiftTime || !req.body.capacities || Object.keys(req.body.capacities).length === 0) {
+      res.status(400).json({ msg: "Need a shift time and capacity configured for at least one unit!" });
+      return;
+    }
+    let shiftTimeTypeof = typeof req.body.shiftTime;
+    let capacitiesTypeOf = typeof req.body.capacities;
+
+    if(shiftTimeTypeof !== "string" || capacitiesTypeOf !== "object") {
+      res.status(400).json({ msg: "shiftTime property in request's body should be a string and capacities should be an object of keys of type strings and values of type number" });
+      return;
+    }
+
     let shiftCapacityRequest: ShiftCapacityRequest = req.body;
-    await postShiftCapacity(shiftCapacityRequest);
+    let updatedShifts = await postShiftCapacity(shiftCapacityRequest);
     res
       .status(200)
-      .json({ msg: "Request received successfully and result sent back!" });
+      .json({ msg: "Request received successfully and result sent back!", updatedShifts });
   } catch (ex) {
+    console.log("ex is:");
+    console.dir(ex);
     res.status(500).json({ error: "Error occurred on server!" });
   }
 });
@@ -40,7 +59,8 @@ shiftCapacityRouter.get("/mobile/", async (req, res) => {
     const costCenterId = Number(req.query.costCenterId);
     const date = req.query.date?.toString();
     if (!costCenterId || !date) {
-      throw new Error("costCenterId and date are required");
+      res.status(400).json({ msg: "costCenterId should be a valid integer, and date should be a string in format: 'YYYY-MM-DD'" });
+      return;
     }
     const data = await getShiftCapacity(date, costCenterId);
     res.json(data);

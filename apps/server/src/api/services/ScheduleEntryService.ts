@@ -23,11 +23,16 @@ export const getUnitScheduleData = async (
   costCenterId: number
 ) => {
   try {
+    console.log(`costCenterId in getUnitScheduleData is: ${costCenterId}`);
     const unit = await Unit.findOne({
       where: {
         id: costCenterId,
       },
     });
+
+    if(!unit) {
+      throw error;
+    }
 
     const shifts = await ScheduleEntry.findAll({
       where: {
@@ -37,7 +42,9 @@ export const getUnitScheduleData = async (
     });
     return shifts;
   } catch (error) {
-    console.log(error);
+    console.log("error is:");
+    console.dir(error);
+    return null;
   }
 };
 
@@ -125,6 +132,7 @@ export const getScheduleDataForUser = async (username: string) => {
     return scheduleEntries;
   } catch (error) {
     console.log(error);
+    return null;
   }
 };
 /**

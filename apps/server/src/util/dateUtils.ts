@@ -11,8 +11,6 @@
  * @returns
  */
 export const calculateDuration = (interval: string[]): string => {
-  console.log(interval);
-
   // Parse interval to make start and end times
   const start: Date = new Date();
   const startTokens: number[] = interval[0]
@@ -39,6 +37,8 @@ export const calculateDuration = (interval: string[]): string => {
   const hours = Math.floor(duration / hourInMilliseconds);
   const minutes = Math.floor((duration % hourInMilliseconds) / 60);
   const hourString = `${hours < 10 ? `0${hours}` : hours}`;
-  const minuteString = `${minutes < 10 ? `0${minutes}` : minutes}`;
+  const minuteString = `${
+    minutes < 10 ? `0${minutes}` : String(minutes).slice(0, 2)
+  }`;
   return `${hourString}:${minuteString}`;
 };

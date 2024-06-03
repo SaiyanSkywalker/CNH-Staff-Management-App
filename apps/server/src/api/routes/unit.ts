@@ -4,7 +4,7 @@
  * processing data related to units (cost centers)
  */
 import { Request, Response, Router } from "express";
-import { sequelize } from "../../loaders/dbLoader";
+import Unit from "server/src/models/Unit";
 
 const unitRouter = Router();
 
@@ -13,7 +13,7 @@ const unitRouter = Router();
  */
 unitRouter.get("/", async (req: Request, res: Response) => {
   try {
-    const units = await sequelize.models.Unit.findAll();
+    const units = await Unit.findAll();
     res.json(units);
   } catch (error) {
     res
@@ -28,7 +28,7 @@ unitRouter.get("/", async (req: Request, res: Response) => {
 unitRouter.get("/:id", async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const units = await sequelize.models.Unit.findAll({
+    const units = await Unit.findAll({
       where: { id },
     });
     res.json(units);
